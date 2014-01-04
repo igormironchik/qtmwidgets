@@ -603,4 +603,40 @@ Picker::_q_modelReset()
 	update();
 }
 
+void
+Picker::paintEvent( QPaintEvent * event )
+{
+
+}
+
+void
+Picker::resizeEvent( QResizeEvent * event )
+{
+
+}
+
+void
+Picker::wheelEvent( QWheelEvent * event )
+{
+
+}
+
+void
+Picker::mousePressEvent( QMouseEvent * event )
+{
+
+}
+
+void
+Picker::mouseReleaseEvent( QMouseEvent * event )
+{
+
+}
+
+void
+Picker::mouseMoveEvent( QMouseEvent * event )
+{
+
+}
+
 } /* namespace QtMWidgets */

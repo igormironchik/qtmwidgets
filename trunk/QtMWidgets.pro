@@ -1,8 +1,7 @@
 
 TEMPLATE = subdirs
 
-
-SUBDIRS = QtMWidgets \
+SUBDIRS = src \
           examples
 
-examples.depends = QtMWidgets
+examples.depends = src

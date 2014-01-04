@@ -5,8 +5,8 @@ DESTDIR = ../lib
 DEPENDPATH += . private
 INCLUDEPATH += . ..
 CONFIG += qt staticlib
-QT += core gui
+QT += core gui widgets
 
-HEADERS += 
+HEADERS += picker.hpp
 
-SOURCES += 
+SOURCES += picker.cpp

@@ -70,6 +70,7 @@ class Picker
 	Q_PROPERTY( QVariant currentData READ currentData )
 	Q_PROPERTY( InsertPolicy insertPolicy READ insertPolicy WRITE setInsertPolicy )
 	Q_PROPERTY( int modelColumn READ modelColumn WRITE setModelColumn )
+	Q_PROPERTY( int maxCount READ maxCount WRITE setMaxCount )
 
 signals:
 	/*!
@@ -130,6 +131,22 @@ public:
 		By default, for an empty picker, this property has a value of 0.
 	*/
 	int count() const;
+	/*!
+		\brief the maximum number of items allowed in the picker
+
+		\note If you set the maximum number to be less then the current
+		amount of items in the picker, the extra items will be
+		truncated. This also applies if you have set an external model on
+		the picker.
+
+		By default, this property's value is derived from the highest
+		signed integer available (typically 2147483647).
+	*/
+	int maxCount() const;
+	/*!
+		Set the maximum number of items allowed in the picker.
+	*/
+	void setMaxCount( int max );
 
 	/*!
 		Returns the index of the item containing the given \a text; otherwise
@@ -138,7 +155,8 @@ public:
 		The \a flags specify how the items in the picker are searched.
 	*/
 	inline int findText( const QString & text,
-		Qt::MatchFlags flags = static_cast< Qt::MatchFlags > ( Qt::MatchExactly | Qt::MatchCaseSensitive ) ) const
+		Qt::MatchFlags flags =
+			static_cast< Qt::MatchFlags > ( Qt::MatchExactly | Qt::MatchCaseSensitive ) ) const
 	{
 		return findData( text, Qt::DisplayRole, flags );
 	}
@@ -150,7 +168,8 @@ public:
 		The \a flags specify how the items in the combobox are searched.
 	*/
 	int findData( const QVariant & data, int role = Qt::UserRole,
-		Qt::MatchFlags flags = static_cast< Qt::MatchFlags > ( Qt::MatchExactly | Qt::MatchCaseSensitive ) ) const;
+		Qt::MatchFlags flags =
+			static_cast< Qt::MatchFlags > ( Qt::MatchExactly | Qt::MatchCaseSensitive ) ) const;
 
 	/*!
 		\brief the policy used to determine where user-inserted items should
@@ -335,7 +354,18 @@ public slots:
 	*/
 	void setCurrentText( const QString & text );
 
+private slots:
+	void _q_emitCurrentIndexChanged( const QModelIndex & index );
+	void _q_dataChanged( const QModelIndex &, const QModelIndex & );
+	void _q_updateIndexBeforeChange();
+	void _q_rowsInserted( const QModelIndex & parent, int start, int end );
+	void _q_rowsRemoved( const QModelIndex & parent, int start, int end );
+	void _q_modelDestroyed();
+	void _q_modelReset();
+
 private:
+	friend class PickerPrivate;
+
 	Q_DISABLE_COPY( Picker )
 
 	QScopedPointer< PickerPrivate > d;

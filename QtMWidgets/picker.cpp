@@ -29,7 +29,7 @@
 */
 
 // QtMWidgets include.
-#include <QtMWidgets/picker.hpp>
+#include "picker.hpp"
 
 // Qt include.
 #include <QStandardItemModel>

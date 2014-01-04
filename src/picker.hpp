@@ -363,6 +363,14 @@ private slots:
 	void _q_modelDestroyed();
 	void _q_modelReset();
 
+protected:
+	void paintEvent( QPaintEvent * event );
+	void resizeEvent( QResizeEvent * event );
+	void wheelEvent( QWheelEvent * event );
+	void mousePressEvent( QMouseEvent * event );
+	void mouseReleaseEvent( QMouseEvent * event );
+	void mouseMoveEvent( QMouseEvent * event );
+
 private:
 	friend class PickerPrivate;
 

@@ -34,6 +34,12 @@
 // Qt include.
 #include <QStandardItemModel>
 #include <QEvent>
+#include <QPainter>
+#include <QStyleOption>
+#include <QFontMetrics>
+#include <QLinearGradient>
+#include <QBrush>
+#include <QPen>
 
 #ifndef QT_NO_ACCESSIBILITY
 #include <QAccessible>
@@ -56,11 +62,32 @@ public:
 		,	indexBeforeChange( -1 )
 		,	inserting( false )
 		,	maxCount( INT_MAX )
+		,	minStringLength( 6 )
+		,	stringLength( minStringLength )
+		,	maxStringWidth( 25 )
+		,	itemsCount( 5 )
+		,	itemTopMargin( 7 )
+		,	itemSideMargin( 40 )
+		,	drawItemOffset( 0 )
+		,	stringHeight( 0 )
+		,	leftMouseButtonPressed( false )
 	{}
 
 	void init();
 	void setCurrentIndex( const QModelIndex & mi );
 	QString itemText( const QModelIndex & index ) const;
+	void drawBackground( QPainter * p, const QStyleOption & opt );
+	QSize minimumSizeHint( const QStyleOption & opt );
+	QSize sizeHint( const QStyleOption & opt );
+	void computeStringWidth();
+	void drawItem( QPainter * p, const QStyleOption & opt, int offset,
+		const QModelIndex & index );
+	void normalizeOffset();
+	void makePrevTopItemIndex();
+	void makeNextTopItemIndex();
+	QString makeString( const QString & text, const QRect & r, int flags,
+		const QStyleOption & opt );
+	void drawTick( const QRect & r, QPainter * p );
 
 	Picker * q;
 	QAbstractItemModel * model;
@@ -68,9 +95,20 @@ public:
 	int modelColumn;
 	QPersistentModelIndex currentIndex;
 	QPersistentModelIndex root;
+	QPersistentModelIndex topItemIndex;
+	int drawItemOffset;
 	int indexBeforeChange;
 	bool inserting;
 	int maxCount;
+	int minStringLength;
+	int maxStringWidth;
+	int stringLength;
+	int itemsCount;
+	int itemTopMargin;
+	int itemSideMargin;
+	int stringHeight;
+	QPoint mousePos;
+	bool leftMouseButtonPressed;
 }; // class PickerPrivate
 
 void
@@ -108,6 +146,260 @@ PickerPrivate::itemText( const QModelIndex & index ) const
 {
 	return index.isValid() ? model->data( index, Qt::DisplayRole ).toString() :
 		QString();
+}
+
+void
+PickerPrivate::drawBackground( QPainter * p, const QStyleOption & opt )
+{
+	p->setRenderHint( QPainter::Antialiasing );
+
+	QLinearGradient firstVertLineGradient( QPointF( 0.0, 0.0 ),
+		QPointF( 0.0, 1.0 ) );
+	firstVertLineGradient.setCoordinateMode( QGradient::ObjectBoundingMode );
+	firstVertLineGradient.setColorAt( 0.0, QColor( 60, 65, 70 ) );
+	firstVertLineGradient.setColorAt( 0.15, QColor( 100, 100, 110 ) );
+	firstVertLineGradient.setColorAt( 0.5, QColor( 135, 135, 140 ) );
+	firstVertLineGradient.setColorAt( 0.85, QColor( 100, 100, 110 ) );
+	firstVertLineGradient.setColorAt( 1.0, QColor( 60, 65, 70 ) );
+
+	QLinearGradient secondVertLineGradient( QPointF( 0.0, 0.0 ),
+		QPointF( 0.0, 1.0 ) );
+	secondVertLineGradient.setCoordinateMode( QGradient::ObjectBoundingMode );
+	secondVertLineGradient.setColorAt( 0.0, QColor( 80, 80, 90 ) );
+	secondVertLineGradient.setColorAt( 0.15, QColor( 155, 155, 175 ) );
+	secondVertLineGradient.setColorAt( 0.5, QColor( 215, 215, 235 ) );
+	secondVertLineGradient.setColorAt( 0.85, QColor( 155, 155, 175 ) );
+	secondVertLineGradient.setColorAt( 1.0, QColor( 80, 80, 90 ) );
+
+	QLinearGradient thirdVertLineGradient( QPointF( 0.0, 0.0 ),
+		QPointF( 0.0, 1.0 ) );
+	thirdVertLineGradient.setCoordinateMode( QGradient::ObjectBoundingMode );
+	thirdVertLineGradient.setColorAt( 0.0, QColor( 80, 80, 95 ) );
+	thirdVertLineGradient.setColorAt( 0.15, QColor( 205, 205, 210 ) );
+	thirdVertLineGradient.setColorAt( 0.5, QColor( 205, 205, 225 ) );
+	thirdVertLineGradient.setColorAt( 0.85, QColor( 205, 205, 210 ) );
+	thirdVertLineGradient.setColorAt( 1.0, QColor( 80, 80, 80 ) );
+
+	p->setPen( QPen( QBrush( firstVertLineGradient ), 1.0 ) );
+	p->drawLine( 1, 2, 1, opt.rect.height() - 2 );
+	p->drawLine( opt.rect.width() - 1, 2,
+		opt.rect.width() - 1, opt.rect.height() - 2 );
+
+	p->setPen( QPen( QBrush( secondVertLineGradient ), 1.0 ) );
+	p->drawLine( 2, 1, 2, opt.rect.height() - 1 );
+	p->drawLine( opt.rect.width() - 2, 1,
+		opt.rect.width() - 2, opt.rect.height() - 1 );
+
+	p->setPen( QPen( QBrush( thirdVertLineGradient ), 1.0 ) );
+	p->drawLine( 3, 0, 3, opt.rect.height() );
+	p->drawLine( opt.rect.width() - 3, 0,
+		opt.rect.width() - 3, opt.rect.height() );
+
+	const QRect leftTop( QPoint( 0, 0 ), QSize( 3, 3 ) );
+	const QRect rightTop( QPoint( opt.rect.width() - 3, 0 ), QSize( 3, 3 ) );
+	const QRect leftBottom( QPoint( 0, opt.rect.height() - 3 ), QSize( 3, 3 ) );
+	const QRect rightBottom( QPoint( opt.rect.width() - 3,
+		opt.rect.height() - 3 ), QSize( 3, 3 ) );
+
+	p->setPen( QColor( 50, 50, 65 ) );
+	p->drawArc( leftTop, 270 * 16, 90 * 16 );
+	p->drawArc( rightTop, 180 * 16, 90 * 16 );
+	p->drawArc( leftBottom, 0, 90 * 16 );
+	p->drawArc( rightBottom, 90 * 16, 90 * 16 );
+
+	QLinearGradient backgroundGradient( QPointF( 0.0, 0.0 ),
+		QPointF( 0.0, 1.0 ) );
+	backgroundGradient.setCoordinateMode( QGradient::ObjectBoundingMode );
+	backgroundGradient.setColorAt( 0.0, QColor( 80, 80, 80 ) );
+	backgroundGradient.setColorAt( 0.15, QColor( 215, 215, 220 ) );
+	backgroundGradient.setColorAt( 0.5, QColor( 255, 255, 255 ) );
+	backgroundGradient.setColorAt( 0.85, QColor( 215, 215, 220 ) );
+	backgroundGradient.setColorAt( 1.0, QColor( 80, 80, 80 ) );
+
+	p->setPen( QPen( QBrush( backgroundGradient ), 1.0 ) );
+	p->setBrush( backgroundGradient );
+	p->drawRect( 4, 0, opt.rect.width() - 2 * 4, opt.rect.height() );
+}
+
+QSize
+PickerPrivate::minimumSizeHint( const QStyleOption & opt )
+{
+	stringHeight = opt.fontMetrics.height();
+
+	const int minStringWidth = opt.fontMetrics.averageCharWidth() *
+		( minStringLength + 2 );
+	const int widgetWidth = minStringWidth + 2 * itemSideMargin;
+	const int widgetHeight = ( stringHeight + itemTopMargin ) *
+		itemsCount - itemTopMargin;
+
+	return QSize( widgetWidth, widgetHeight );
+}
+
+QSize
+PickerPrivate::sizeHint( const QStyleOption & opt )
+{
+	computeStringWidth();
+
+	stringHeight = opt.fontMetrics.height();
+
+	const int widgetWidth = maxStringWidth + 2 * itemSideMargin +
+		2 * opt.fontMetrics.averageCharWidth();
+	const int widgetHeight = ( stringHeight + itemTopMargin ) *
+		itemsCount - itemTopMargin;
+
+	return QSize( widgetWidth, widgetHeight );
+}
+
+void
+PickerPrivate::computeStringWidth()
+{
+	maxStringWidth = 25;
+
+	const int rowCount = q->count();
+
+	if( rowCount > 0 )
+	{
+		const QFontMetrics & fm = q->fontMetrics();
+
+		for( int i = 0; i < rowCount; ++i )
+		{
+			const int width = fm.boundingRect( q->itemText( i ) ).width();
+
+			if( width > maxStringWidth )
+				maxStringWidth = width;
+		}
+	}
+}
+
+void
+PickerPrivate::drawItem( QPainter * p, const QStyleOption & opt, int offset,
+	const QModelIndex & index )
+{
+	p->setRenderHint( QPainter::TextAntialiasing );
+
+	if( index.flags() & Qt::ItemIsEnabled )
+	{
+		if( index != currentIndex )
+			p->setPen( opt.palette.color( QPalette::WindowText ) );
+		else
+			p->setPen( opt.palette.color( QPalette::Highlight ) );
+	}
+	else
+		p->setPen( opt.palette.color( QPalette::Mid ) );
+
+	const QRect r( opt.rect.x() + itemSideMargin, offset,
+		opt.rect.width() - itemSideMargin, stringHeight );
+
+	const int flags = Qt::AlignLeft | Qt::TextSingleLine;
+
+	p->drawText( r, flags,
+		makeString( itemText( index ), r, flags, opt ) );
+
+	if( index.flags() & Qt::ItemIsEnabled && index == currentIndex )
+	{
+		const QRect tickRect( opt.rect.x() + itemSideMargin -
+			opt.fontMetrics.averageCharWidth() - 15, offset,
+			opt.fontMetrics.averageCharWidth(),
+			stringHeight - itemTopMargin );
+
+		drawTick( tickRect, p );
+	}
+}
+
+QString
+PickerPrivate::makeString( const QString & text, const QRect & r,
+	int flags, const QStyleOption & opt )
+{
+	const QRect & b = opt.fontMetrics.boundingRect( r, flags, text );
+
+	QString res = text;
+
+	if( b.width() > r.width() )
+	{
+		const int averageCount = r.width() / opt.fontMetrics.averageCharWidth();
+
+		res = text.left( averageCount - 6 );
+		res.append( QLatin1String( "..." ) );
+		res.append( text.right( averageCount - res.length() ) );
+	}
+
+	return res;
+}
+
+void
+PickerPrivate::drawTick( const QRect & r, QPainter * p )
+{
+	p->save();
+
+	QPen pen = p->pen();
+	pen.setWidth( 2 );
+	p->setPen( pen );
+
+	p->setViewport( r );
+	p->setWindow( 0, 0, 6, 7 );
+	p->drawLine( 0, 4, 2, 7 );
+	p->drawLine( 2, 7, 6, 0 );
+
+	p->restore();
+}
+
+void
+PickerPrivate::normalizeOffset()
+{
+	if( q->count() <= itemsCount )
+	{
+		const int freeItemsCount = ( itemsCount - q->count() );
+
+		const int maxOffset = freeItemsCount * stringHeight +
+			( freeItemsCount > 0 ? freeItemsCount - 1 : 0 ) * itemTopMargin;
+
+		if( drawItemOffset < 0 )
+			drawItemOffset = 0;
+		else if( drawItemOffset > maxOffset )
+			drawItemOffset = maxOffset;
+	}
+	else
+	{
+		int fullItemsCount = drawItemOffset /
+			( itemTopMargin + stringHeight );
+
+		drawItemOffset -= ( itemTopMargin + stringHeight ) * fullItemsCount;
+
+		if( fullItemsCount < 0 )
+		{
+			for( int i = fullItemsCount; i < 0; ++i )
+				makeNextTopItemIndex();
+		}
+		else if( fullItemsCount > 0 )
+		{
+			for( int i = 0; i < fullItemsCount; ++i )
+				makePrevTopItemIndex();
+		}
+
+		if( drawItemOffset > 0 )
+		{
+			drawItemOffset -= ( itemTopMargin + stringHeight );
+			makePrevTopItemIndex();
+		}
+	}
+}
+
+void
+PickerPrivate::makePrevTopItemIndex()
+{
+	if( topItemIndex.row() == 0 )
+		topItemIndex = model->index( q->count() - 1, modelColumn, root );
+	else
+		topItemIndex = model->index( topItemIndex.row() - 1, modelColumn, root );
+}
+
+void
+PickerPrivate::makeNextTopItemIndex()
+{
+	if( topItemIndex.row() == q->count() - 1 )
+		topItemIndex = model->index( 0, modelColumn, root );
+	else
+		topItemIndex = model->index( topItemIndex.row() + 1, modelColumn, root );
 }
 
 
@@ -254,6 +546,7 @@ Picker::setModel( QAbstractItemModel * model )
 		{
 			if( d->model->index( pos, d->modelColumn, d->root ).flags() & Qt::ItemIsEnabled )
 			{
+				d->topItemIndex = d->model->index( pos, d->modelColumn, d->root );
 				setCurrentIndex( pos );
 				currentReset = true;
 				break;
@@ -262,7 +555,10 @@ Picker::setModel( QAbstractItemModel * model )
 	}
 
 	if( !currentReset )
+	{
 		setCurrentIndex( -1 );
+		d->topItemIndex = QModelIndex();
+	}
 }
 
 QModelIndex
@@ -466,13 +762,19 @@ Picker::setItemData( int index, const QVariant & value, int role )
 QSize
 Picker::sizeHint() const
 {
-	return QSize();
+	QStyleOption opt;
+	opt.initFrom( this );
+
+	return d->sizeHint( opt );
 }
 
 QSize
 Picker::minimumSizeHint() const
 {
-	return QSize();
+	QStyleOption opt;
+	opt.initFrom( this );
+
+	return d->minimumSizeHint( opt );
 }
 
 void
@@ -556,7 +858,10 @@ Picker::_q_rowsInserted( const QModelIndex & parent, int start, int end )
 	// set current index if picker was previously empty
 	if( start == 0 && ( end - start + 1 ) == count() &&
 		!d->currentIndex.isValid() )
-			setCurrentIndex( 0 );
+	{
+		d->topItemIndex = d->model->index( 0, d->modelColumn, d->root );
+		setCurrentIndex( 0 );
+	}
 	// need to emit changed if model updated index "silently"
 	else if( d->currentIndex.row() != d->indexBeforeChange )
 	{
@@ -579,7 +884,9 @@ Picker::_q_rowsRemoved( const QModelIndex & parent, int start, int end )
 	{
 		if( !d->currentIndex.isValid() && count() )
 		{
-			setCurrentIndex( qMin( count() - 1, qMax( d->indexBeforeChange, 0 ) ) );
+			const int index = qMin( count() - 1, qMax( d->indexBeforeChange, 0 ) );
+			d->topItemIndex = d->model->index( index, d->modelColumn, d->root );
+			setCurrentIndex( index );
 			return;
 		}
 
@@ -606,7 +913,43 @@ Picker::_q_modelReset()
 void
 Picker::paintEvent( QPaintEvent * event )
 {
+	QStyleOption opt;
+	opt.initFrom( this );
 
+	QPainter p( this );
+
+	d->drawBackground( &p, opt );
+
+	if( count() > 0 )
+	{
+		d->normalizeOffset();
+
+		int maxCount = d->itemsCount;
+
+		if( !d->topItemIndex.isValid() )
+		{
+			d->topItemIndex = d->model->index( 0, d->modelColumn, d->root );
+			d->drawItemOffset = 0;
+		}
+
+		if( count() >= d->itemsCount )
+			++maxCount;
+
+		int offset = d->drawItemOffset;
+
+		for( int i = d->topItemIndex.row(), itemsCount = 0, scanedItems = 1;
+			( itemsCount < maxCount ) && ( scanedItems < count() ) ;
+			++i, +scanedItems )
+		{
+			if( i == count() )
+				i = 0;
+
+			d->drawItem( &p, opt, offset,
+				d->model->index( i, d->modelColumn, d->root ) );
+			++itemsCount;
+			offset += d->itemTopMargin + d->stringHeight;
+		}
+	}
 }
 
 void
@@ -624,19 +967,31 @@ Picker::wheelEvent( QWheelEvent * event )
 void
 Picker::mousePressEvent( QMouseEvent * event )
 {
-
+	if( event->button() == Qt::LeftButton )
+	{
+		d->mousePos = event->pos();
+		d->leftMouseButtonPressed = true;
+		event->accept();
+	}
 }
 
 void
 Picker::mouseReleaseEvent( QMouseEvent * event )
 {
-
+	d->leftMouseButtonPressed = false;
+	event->accept();
 }
 
 void
 Picker::mouseMoveEvent( QMouseEvent * event )
 {
-
+	if( d->leftMouseButtonPressed )
+	{
+		d->drawItemOffset += event->pos().y() - d->mousePos.y();
+		d->mousePos = event->pos();
+		event->accept();
+		update();
+	}
 }
 
 } /* namespace QtMWidgets */

@@ -226,6 +226,8 @@ PickerPrivate::minimumSizeHint( const QStyleOption & opt )
 {
 	stringHeight = opt.fontMetrics.height();
 
+	itemSideMargin = opt.fontMetrics.averageCharWidth() * 3;
+
 	const int minStringWidth = opt.fontMetrics.averageCharWidth() *
 		( minStringLength + 2 );
 	const int widgetWidth = minStringWidth + 2 * itemSideMargin;
@@ -241,6 +243,8 @@ PickerPrivate::sizeHint( const QStyleOption & opt )
 	computeStringWidth();
 
 	stringHeight = opt.fontMetrics.height();
+
+	itemSideMargin = opt.fontMetrics.averageCharWidth() * 3;
 
 	const int widgetWidth = maxStringWidth + 2 * itemSideMargin +
 		2 * opt.fontMetrics.averageCharWidth();
@@ -298,9 +302,11 @@ PickerPrivate::drawItem( QPainter * p, const QStyleOption & opt, int offset,
 	if( index.flags() & Qt::ItemIsEnabled && index == currentIndex )
 	{
 		const QRect tickRect( opt.rect.x() + itemSideMargin -
-			opt.fontMetrics.averageCharWidth() - 15, offset,
+				opt.fontMetrics.averageCharWidth() -
+				opt.fontMetrics.averageCharWidth() / 2,
+			offset + opt.fontMetrics.descent(),
 			opt.fontMetrics.averageCharWidth(),
-			stringHeight - itemTopMargin );
+			opt.fontMetrics.ascent() );
 
 		drawTick( tickRect, p );
 	}
@@ -333,6 +339,7 @@ PickerPrivate::drawTick( const QRect & r, QPainter * p )
 
 	QPen pen = p->pen();
 	pen.setWidth( 2 );
+	pen.setCapStyle( Qt::RoundCap );
 	p->setPen( pen );
 
 	p->setViewport( r );
@@ -911,7 +918,7 @@ Picker::_q_modelReset()
 }
 
 void
-Picker::paintEvent( QPaintEvent * event )
+Picker::paintEvent( QPaintEvent * )
 {
 	QStyleOption opt;
 	opt.initFrom( this );
@@ -950,12 +957,6 @@ Picker::paintEvent( QPaintEvent * event )
 			offset += d->itemTopMargin + d->stringHeight;
 		}
 	}
-}
-
-void
-Picker::resizeEvent( QResizeEvent * event )
-{
-
 }
 
 void

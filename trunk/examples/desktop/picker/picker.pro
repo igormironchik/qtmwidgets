@@ -2,7 +2,7 @@
 TEMPLATE = app
 TARGET = picker
 DESTDIR = .
-CONFIG += windows
+CONFIG += console
 QT += core gui widgets
 
 SOURCES += main.cpp

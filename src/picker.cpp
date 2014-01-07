@@ -961,7 +961,21 @@ Picker::resizeEvent( QResizeEvent * event )
 void
 Picker::wheelEvent( QWheelEvent * event )
 {
+	QPoint numPixels = event->pixelDelta();
+	QPoint numDegrees = event->angleDelta();
 
+	if( !numPixels.isNull() )
+	{
+		d->drawItemOffset += numPixels.y();
+		update();
+	}
+	else if( !numDegrees.isNull() )
+	{
+		d->drawItemOffset += numDegrees.y() / 8;
+		update();
+	}
+
+	event->accept();
 }
 
 void

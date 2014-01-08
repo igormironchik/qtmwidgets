@@ -60,15 +60,12 @@ class Picker
 {
 	Q_OBJECT
 
-	Q_ENUMS( InsertPolicy )
-
 	Q_PROPERTY( int count READ count )
 	Q_PROPERTY( int currentIndex READ currentIndex WRITE setCurrentIndex
 		NOTIFY currentIndexChanged )
 	Q_PROPERTY( QString currentText READ currentText WRITE setCurrentText
 		NOTIFY currentTextChanged USER true )
 	Q_PROPERTY( QVariant currentData READ currentData )
-	Q_PROPERTY( InsertPolicy insertPolicy READ insertPolicy WRITE setInsertPolicy )
 	Q_PROPERTY( int modelColumn READ modelColumn WRITE setModelColumn )
 	Q_PROPERTY( int maxCount READ maxCount WRITE setMaxCount )
 
@@ -105,20 +102,6 @@ signals:
 		is passed as \a text.
 	*/
 	void currentTextChanged( const QString & text );
-
-public:
-	/*!
-		This enum specifies what the Picker should do when a new string is
-		entered by the user.
-	*/
-	enum InsertPolicy {
-		//! The string will be inserted as the first item.
-		InsertAtTop = 0,
-		//! The string will be inserted after the last item.
-		InsertAtBottom = 1,
-		//! The string is inserted in the alphabetic order.
-		InsertAlphabetically = 2
-	}; // enum InsertPolicy
 
 public:
 	Picker( QWidget * parent = 0, Qt::WindowFlags f = 0 );
@@ -170,24 +153,6 @@ public:
 	int findData( const QVariant & data, int role = Qt::UserRole,
 		Qt::MatchFlags flags =
 			static_cast< Qt::MatchFlags > ( Qt::MatchExactly | Qt::MatchCaseSensitive ) ) const;
-
-	/*!
-		\brief the policy used to determine where user-inserted items should
-		appear in the picker
-
-		The default value is \l InsertAtBottom, indicating that new items will appear
-		at the bottom of the list of items.
-
-		\sa InsertPolicy
-	*/
-	InsertPolicy insertPolicy() const;
-	/*!
-		Set the policy used to determine where user-inserted items should
-		appear in the picker.
-
-		\sa InsertPolicy
-	*/
-	void setInsertPolicy( InsertPolicy policy );
 
 	/*!
 		Returns the model used by the picker.

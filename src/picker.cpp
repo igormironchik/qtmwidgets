@@ -57,7 +57,6 @@ public:
 	PickerPrivate( Picker * parent )
 		:	q( parent )
 		,	model( 0 )
-		,	insertPolicy( Picker::InsertAtBottom )
 		,	modelColumn( 0 )
 		,	indexBeforeChange( -1 )
 		,	inserting( false )
@@ -67,10 +66,11 @@ public:
 		,	maxStringWidth( 25 )
 		,	itemsCount( 5 )
 		,	itemTopMargin( 7 )
-		,	itemSideMargin( 40 )
+		,	itemSideMargin( 0 )
 		,	drawItemOffset( 0 )
 		,	stringHeight( 0 )
 		,	leftMouseButtonPressed( false )
+		,	mouseWasMoved( false )
 	{}
 
 	void init();
@@ -83,15 +83,16 @@ public:
 	void drawItem( QPainter * p, const QStyleOption & opt, int offset,
 		const QModelIndex & index );
 	void normalizeOffset();
-	void makePrevTopItemIndex();
-	void makeNextTopItemIndex();
+	void makePrevIndex( QPersistentModelIndex & index );
+	void makeNextIndex( QPersistentModelIndex & index );
 	QString makeString( const QString & text, const QRect & r, int flags,
 		const QStyleOption & opt );
 	void drawTick( const QRect & r, QPainter * p );
+	void setCurrentIndex( const QPoint & pos );
+	QModelIndex indexForPos( const QPoint & pos );
 
 	Picker * q;
 	QAbstractItemModel * model;
-	Picker::InsertPolicy insertPolicy;
 	int modelColumn;
 	QPersistentModelIndex currentIndex;
 	QPersistentModelIndex root;
@@ -109,6 +110,7 @@ public:
 	int stringHeight;
 	QPoint mousePos;
 	bool leftMouseButtonPressed;
+	bool mouseWasMoved;
 }; // class PickerPrivate
 
 void
@@ -375,38 +377,77 @@ PickerPrivate::normalizeOffset()
 		if( fullItemsCount < 0 )
 		{
 			for( int i = fullItemsCount; i < 0; ++i )
-				makeNextTopItemIndex();
+				makeNextIndex( topItemIndex );
 		}
 		else if( fullItemsCount > 0 )
 		{
 			for( int i = 0; i < fullItemsCount; ++i )
-				makePrevTopItemIndex();
+				makePrevIndex( topItemIndex );
 		}
 
 		if( drawItemOffset > 0 )
 		{
 			drawItemOffset -= ( itemTopMargin + stringHeight );
-			makePrevTopItemIndex();
+			makePrevIndex( topItemIndex );
 		}
 	}
 }
 
 void
-PickerPrivate::makePrevTopItemIndex()
+PickerPrivate::makePrevIndex( QPersistentModelIndex & index )
 {
-	if( topItemIndex.row() == 0 )
-		topItemIndex = model->index( q->count() - 1, modelColumn, root );
+	if( index.row() == 0 )
+		index = model->index( q->count() - 1, modelColumn, root );
 	else
-		topItemIndex = model->index( topItemIndex.row() - 1, modelColumn, root );
+		index = model->index( index.row() - 1, modelColumn, root );
 }
 
 void
-PickerPrivate::makeNextTopItemIndex()
+PickerPrivate::makeNextIndex( QPersistentModelIndex & index )
 {
-	if( topItemIndex.row() == q->count() - 1 )
-		topItemIndex = model->index( 0, modelColumn, root );
+	if( index.row() == q->count() - 1 )
+		index = model->index( 0, modelColumn, root );
 	else
-		topItemIndex = model->index( topItemIndex.row() + 1, modelColumn, root );
+		index = model->index( index.row() + 1, modelColumn, root );
+}
+
+void
+PickerPrivate::setCurrentIndex( const QPoint & pos )
+{
+	const QModelIndex index = indexForPos( pos );
+
+	if( index.isValid() )
+	{
+		setCurrentIndex( index );
+		emit q->activated( itemText( index ) );
+		emit q->activated( index.row() );
+	}
+}
+
+QModelIndex
+PickerPrivate::indexForPos( const QPoint & pos )
+{
+	int offset = drawItemOffset;
+
+	for( int i = 0; i < itemsCount + 1; ++i )
+	{
+		const QRect r( q->rect().x() + itemSideMargin, offset,
+			q->rect().width() - itemSideMargin, stringHeight );
+
+		if( r.contains( pos ) )
+		{
+			QPersistentModelIndex index = topItemIndex;
+
+			for( int j = 0; j < i; ++j )
+				makeNextIndex( index );
+
+			return index;
+		}
+
+		offset += stringHeight + itemTopMargin;
+	}
+
+	return QModelIndex();
 }
 
 
@@ -474,18 +515,6 @@ Picker::findData( const QVariant & data, int role, Qt::MatchFlags flags ) const
 		return -1;
 
 	return result.first().row();
-}
-
-Picker::InsertPolicy
-Picker::insertPolicy() const
-{
-	return d->insertPolicy;
-}
-
-void
-Picker::setInsertPolicy( InsertPolicy policy )
-{
-	d->insertPolicy = policy;
 }
 
 QAbstractItemModel *
@@ -984,6 +1013,7 @@ Picker::mousePressEvent( QMouseEvent * event )
 {
 	if( event->button() == Qt::LeftButton )
 	{
+		d->mouseWasMoved = false;
 		d->mousePos = event->pos();
 		d->leftMouseButtonPressed = true;
 		event->accept();
@@ -994,12 +1024,18 @@ void
 Picker::mouseReleaseEvent( QMouseEvent * event )
 {
 	d->leftMouseButtonPressed = false;
+
+	if( !d->mouseWasMoved )
+		d->setCurrentIndex( event->pos() );
+
 	event->accept();
 }
 
 void
 Picker::mouseMoveEvent( QMouseEvent * event )
 {
+	d->mouseWasMoved = true;
+
 	if( d->leftMouseButtonPressed )
 	{
 		d->drawItemOffset += event->pos().y() - d->mousePos.y();

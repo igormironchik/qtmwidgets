@@ -71,6 +71,7 @@ public:
 		,	stringHeight( 0 )
 		,	leftMouseButtonPressed( false )
 		,	mouseWasMoved( false )
+		,	wasPainted( false )
 	{}
 
 	void init();
@@ -90,6 +91,10 @@ public:
 	void drawTick( const QRect & r, QPainter * p );
 	void setCurrentIndex( const QPoint & pos );
 	QModelIndex indexForPos( const QPoint & pos );
+	void initDrawOffsetForFirstUse();
+	bool isIndexesVisible( const QModelIndex & topLeft,
+		const QModelIndex & bottomRight );
+	bool isRowsVisible( int start, int end );
 
 	Picker * q;
 	QAbstractItemModel * model;
@@ -111,6 +116,7 @@ public:
 	QPoint mousePos;
 	bool leftMouseButtonPressed;
 	bool mouseWasMoved;
+	bool wasPainted;
 }; // class PickerPrivate
 
 void
@@ -294,7 +300,7 @@ PickerPrivate::drawItem( QPainter * p, const QStyleOption & opt, int offset,
 		p->setPen( opt.palette.color( QPalette::Mid ) );
 
 	const QRect r( opt.rect.x() + itemSideMargin, offset,
-		opt.rect.width() - itemSideMargin, stringHeight );
+		opt.rect.width() - itemSideMargin * 2, stringHeight );
 
 	const int flags = Qt::AlignLeft | Qt::TextSingleLine;
 
@@ -355,7 +361,7 @@ PickerPrivate::drawTick( const QRect & r, QPainter * p )
 void
 PickerPrivate::normalizeOffset()
 {
-	if( q->count() <= itemsCount )
+	if( q->count() < itemsCount )
 	{
 		const int freeItemsCount = ( itemsCount - q->count() );
 
@@ -448,6 +454,50 @@ PickerPrivate::indexForPos( const QPoint & pos )
 	}
 
 	return QModelIndex();
+}
+
+void
+PickerPrivate::initDrawOffsetForFirstUse()
+{
+	if( !wasPainted && q->count() < itemsCount )
+	{
+		const int freeItemsCount = ( itemsCount - q->count() );
+
+		const int maxOffset = freeItemsCount * stringHeight +
+			( freeItemsCount > 0 ? freeItemsCount - 1 : 0 ) * itemTopMargin;
+
+		drawItemOffset = maxOffset / 2;
+
+		wasPainted = true;
+	}
+}
+
+bool
+PickerPrivate::isIndexesVisible( const QModelIndex & topLeft,
+	const QModelIndex & bottomRight )
+{
+	return isRowsVisible( topLeft.row(), bottomRight.row() );
+}
+
+bool
+PickerPrivate::isRowsVisible( int start, int end )
+{
+	int visibleItemsCount = itemsCount;
+
+	if( q->count() > itemsCount )
+		++visibleItemsCount;
+
+	QPersistentModelIndex index = topItemIndex;
+
+	for( int i = 0; i < visibleItemsCount; ++i )
+	{
+		if( index.row() >= start && index.row() <= end )
+			return true;
+
+		makeNextIndex( index );
+	}
+
+	return false;
 }
 
 
@@ -873,6 +923,9 @@ Picker::_q_dataChanged( const QModelIndex & topLeft,
 
 		update();
 	}
+	else if( d->isIndexesVisible( topLeft, bottomRight ) )
+		update();
+
 #ifndef QT_NO_ACCESSIBILITY
 	QAccessibleEvent event( this, QAccessible::NameChanged );
 	QAccessible::updateAccessibility( &event );
@@ -904,14 +957,13 @@ Picker::_q_rowsInserted( const QModelIndex & parent, int start, int end )
 		update();
 		_q_emitCurrentIndexChanged( d->currentIndex );
 	}
+	else if( d->isRowsVisible( start, end ) )
+		update();
 }
 
 void
 Picker::_q_rowsRemoved( const QModelIndex & parent, int start, int end )
 {
-	Q_UNUSED( start )
-	Q_UNUSED( end )
-
 	if( parent != d->root )
 		return;
 
@@ -929,6 +981,8 @@ Picker::_q_rowsRemoved( const QModelIndex & parent, int start, int end )
 		update();
 		_q_emitCurrentIndexChanged( d->currentIndex );
 	}
+	else if( d->isRowsVisible( start, end ) )
+		update();
 }
 
 void
@@ -958,31 +1012,32 @@ Picker::paintEvent( QPaintEvent * )
 
 	if( count() > 0 )
 	{
-		d->normalizeOffset();
-
-		int maxCount = d->itemsCount;
-
 		if( !d->topItemIndex.isValid() )
 		{
 			d->topItemIndex = d->model->index( 0, d->modelColumn, d->root );
 			d->drawItemOffset = 0;
 		}
 
+		d->initDrawOffsetForFirstUse();
+		d->normalizeOffset();
+
+		int maxCount = d->itemsCount;
+
 		if( count() >= d->itemsCount )
 			++maxCount;
 
 		int offset = d->drawItemOffset;
 
-		for( int i = d->topItemIndex.row(), itemsCount = 0, scanedItems = 1;
+		for( int i = d->topItemIndex.row(), itemsCount = 0, scanedItems = 0;
 			( itemsCount < maxCount ) && ( scanedItems < count() ) ;
-			++i, +scanedItems )
+			++i, ++scanedItems, ++itemsCount )
 		{
 			if( i == count() )
 				i = 0;
 
 			d->drawItem( &p, opt, offset,
 				d->model->index( i, d->modelColumn, d->root ) );
-			++itemsCount;
+
 			offset += d->itemTopMargin + d->stringHeight;
 		}
 	}

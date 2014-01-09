@@ -58,20 +58,21 @@ public:
 		:	q( parent )
 		,	model( 0 )
 		,	modelColumn( 0 )
+		,	drawItemOffset( 0 )
 		,	indexBeforeChange( -1 )
 		,	inserting( false )
 		,	maxCount( INT_MAX )
 		,	minStringLength( 6 )
-		,	stringLength( minStringLength )
 		,	maxStringWidth( 25 )
+		,	stringLength( minStringLength )
 		,	itemsCount( 5 )
 		,	itemTopMargin( 7 )
 		,	itemSideMargin( 0 )
-		,	drawItemOffset( 0 )
 		,	stringHeight( 0 )
 		,	leftMouseButtonPressed( false )
 		,	mouseWasMoved( false )
 		,	wasPainted( false )
+		,	mouseMoveDelta( 0 )
 	{}
 
 	void init();
@@ -117,6 +118,7 @@ public:
 	bool leftMouseButtonPressed;
 	bool mouseWasMoved;
 	bool wasPainted;
+	int mouseMoveDelta;
 }; // class PickerPrivate
 
 void
@@ -1069,6 +1071,7 @@ Picker::mousePressEvent( QMouseEvent * event )
 	if( event->button() == Qt::LeftButton )
 	{
 		d->mouseWasMoved = false;
+		d->mouseMoveDelta = 0;
 		d->mousePos = event->pos();
 		d->leftMouseButtonPressed = true;
 		event->accept();
@@ -1080,7 +1083,7 @@ Picker::mouseReleaseEvent( QMouseEvent * event )
 {
 	d->leftMouseButtonPressed = false;
 
-	if( !d->mouseWasMoved )
+	if( !d->mouseWasMoved || d->mouseMoveDelta < 3 )
 		d->setCurrentIndex( event->pos() );
 
 	event->accept();
@@ -1093,7 +1096,9 @@ Picker::mouseMoveEvent( QMouseEvent * event )
 
 	if( d->leftMouseButtonPressed )
 	{
-		d->drawItemOffset += event->pos().y() - d->mousePos.y();
+		const int delta = event->pos().y() - d->mousePos.y();
+		d->mouseMoveDelta += qAbs( delta );
+		d->drawItemOffset += delta;
 		d->mousePos = event->pos();
 		event->accept();
 		update();

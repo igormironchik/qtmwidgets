@@ -166,56 +166,33 @@ PickerPrivate::drawBackground( QPainter * p, const QStyleOption & opt )
 	QLinearGradient firstVertLineGradient( QPointF( 0.0, 0.0 ),
 		QPointF( 0.0, 1.0 ) );
 	firstVertLineGradient.setCoordinateMode( QGradient::ObjectBoundingMode );
-	firstVertLineGradient.setColorAt( 0.0, QColor( 60, 65, 70 ) );
-	firstVertLineGradient.setColorAt( 0.15, QColor( 100, 100, 110 ) );
-	firstVertLineGradient.setColorAt( 0.5, QColor( 135, 135, 140 ) );
-	firstVertLineGradient.setColorAt( 0.85, QColor( 100, 100, 110 ) );
-	firstVertLineGradient.setColorAt( 1.0, QColor( 60, 65, 70 ) );
+	firstVertLineGradient.setColorAt( 0.0, QColor( 50, 50, 60 ) );
+	firstVertLineGradient.setColorAt( 0.5, QColor( 140, 140, 150 ) );
+	firstVertLineGradient.setColorAt( 1.0, QColor( 50, 50, 60 ) );
 
 	QLinearGradient secondVertLineGradient( QPointF( 0.0, 0.0 ),
 		QPointF( 0.0, 1.0 ) );
 	secondVertLineGradient.setCoordinateMode( QGradient::ObjectBoundingMode );
-	secondVertLineGradient.setColorAt( 0.0, QColor( 80, 80, 90 ) );
-	secondVertLineGradient.setColorAt( 0.15, QColor( 155, 155, 175 ) );
-	secondVertLineGradient.setColorAt( 0.5, QColor( 215, 215, 235 ) );
-	secondVertLineGradient.setColorAt( 0.85, QColor( 155, 155, 175 ) );
-	secondVertLineGradient.setColorAt( 1.0, QColor( 80, 80, 90 ) );
+	secondVertLineGradient.setColorAt( 0.0, QColor( 60, 60, 80 ) );
+	secondVertLineGradient.setColorAt( 0.5, QColor( 200, 205, 225 ) );
+	secondVertLineGradient.setColorAt( 1.0, QColor( 60, 60, 80 ) );
 
-	QLinearGradient thirdVertLineGradient( QPointF( 0.0, 0.0 ),
-		QPointF( 0.0, 1.0 ) );
-	thirdVertLineGradient.setCoordinateMode( QGradient::ObjectBoundingMode );
-	thirdVertLineGradient.setColorAt( 0.0, QColor( 80, 80, 95 ) );
-	thirdVertLineGradient.setColorAt( 0.15, QColor( 205, 205, 210 ) );
-	thirdVertLineGradient.setColorAt( 0.5, QColor( 205, 205, 225 ) );
-	thirdVertLineGradient.setColorAt( 0.85, QColor( 205, 205, 210 ) );
-	thirdVertLineGradient.setColorAt( 1.0, QColor( 80, 80, 80 ) );
+	p->setPen( Qt::NoPen );
+	p->setBrush( firstVertLineGradient );
 
-	p->setPen( QPen( QBrush( firstVertLineGradient ), 1.0 ) );
-	p->drawLine( 1, 2, 1, opt.rect.height() - 2 );
-	p->drawLine( opt.rect.width() - 1, 2,
-		opt.rect.width() - 1, opt.rect.height() - 2 );
+	p->drawRect( 0, 2, 1, opt.rect.height() - 4 );
+	p->drawRect( opt.rect.width() - 1, 2,
+		1, opt.rect.height() - 4 );
 
-	p->setPen( QPen( QBrush( secondVertLineGradient ), 1.0 ) );
-	p->drawLine( 2, 1, 2, opt.rect.height() - 1 );
-	p->drawLine( opt.rect.width() - 2, 1,
-		opt.rect.width() - 2, opt.rect.height() - 1 );
+	p->setBrush( secondVertLineGradient );
 
-	p->setPen( QPen( QBrush( thirdVertLineGradient ), 1.0 ) );
-	p->drawLine( 3, 0, 3, opt.rect.height() );
-	p->drawLine( opt.rect.width() - 3, 0,
-		opt.rect.width() - 3, opt.rect.height() );
+	p->drawRect( 1, 1, 1, opt.rect.height() - 2 );
+	p->drawRect( opt.rect.width() - 2, 1,
+		1, opt.rect.height() - 2 );
 
-	const QRect leftTop( QPoint( 0, 0 ), QSize( 3, 3 ) );
-	const QRect rightTop( QPoint( opt.rect.width() - 3, 0 ), QSize( 3, 3 ) );
-	const QRect leftBottom( QPoint( 0, opt.rect.height() - 3 ), QSize( 3, 3 ) );
-	const QRect rightBottom( QPoint( opt.rect.width() - 3,
-		opt.rect.height() - 3 ), QSize( 3, 3 ) );
-
-	p->setPen( QColor( 50, 50, 65 ) );
-	p->drawArc( leftTop, 270 * 16, 90 * 16 );
-	p->drawArc( rightTop, 180 * 16, 90 * 16 );
-	p->drawArc( leftBottom, 0, 90 * 16 );
-	p->drawArc( rightBottom, 90 * 16, 90 * 16 );
+	p->drawRect( 2, 0, 1, opt.rect.height() );
+	p->drawRect( opt.rect.width() - 3, 0,
+		1, opt.rect.height() );
 
 	QLinearGradient backgroundGradient( QPointF( 0.0, 0.0 ),
 		QPointF( 0.0, 1.0 ) );
@@ -226,9 +203,9 @@ PickerPrivate::drawBackground( QPainter * p, const QStyleOption & opt )
 	backgroundGradient.setColorAt( 0.85, QColor( 215, 215, 220 ) );
 	backgroundGradient.setColorAt( 1.0, QColor( 80, 80, 80 ) );
 
-	p->setPen( QPen( QBrush( backgroundGradient ), 1.0 ) );
+	p->setPen( Qt::NoPen );
 	p->setBrush( backgroundGradient );
-	p->drawRect( 4, 0, opt.rect.width() - 2 * 4, opt.rect.height() );
+	p->drawRect( 3, 0, opt.rect.width() - 2 * 3, opt.rect.height() );
 }
 
 QSize

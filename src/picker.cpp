@@ -30,6 +30,7 @@
 
 // QtMWidgets include.
 #include "picker.hpp"
+#include "private/drawing.hpp"
 
 // Qt include.
 #include <QStandardItemModel>
@@ -37,7 +38,6 @@
 #include <QPainter>
 #include <QStyleOption>
 #include <QFontMetrics>
-#include <QLinearGradient>
 #include <QBrush>
 #include <QPen>
 
@@ -78,7 +78,6 @@ public:
 	void init();
 	void setCurrentIndex( const QModelIndex & mi );
 	QString itemText( const QModelIndex & index ) const;
-	void drawBackground( QPainter * p, const QStyleOption & opt );
 	QSize minimumSizeHint( const QStyleOption & opt );
 	QSize sizeHint( const QStyleOption & opt );
 	void computeStringWidth();
@@ -156,56 +155,6 @@ PickerPrivate::itemText( const QModelIndex & index ) const
 {
 	return index.isValid() ? model->data( index, Qt::DisplayRole ).toString() :
 		QString();
-}
-
-void
-PickerPrivate::drawBackground( QPainter * p, const QStyleOption & opt )
-{
-	p->setRenderHint( QPainter::Antialiasing );
-
-	QLinearGradient firstVertLineGradient( QPointF( 0.0, 0.0 ),
-		QPointF( 0.0, 1.0 ) );
-	firstVertLineGradient.setCoordinateMode( QGradient::ObjectBoundingMode );
-	firstVertLineGradient.setColorAt( 0.0, QColor( 50, 50, 60 ) );
-	firstVertLineGradient.setColorAt( 0.5, QColor( 140, 140, 150 ) );
-	firstVertLineGradient.setColorAt( 1.0, QColor( 50, 50, 60 ) );
-
-	QLinearGradient secondVertLineGradient( QPointF( 0.0, 0.0 ),
-		QPointF( 0.0, 1.0 ) );
-	secondVertLineGradient.setCoordinateMode( QGradient::ObjectBoundingMode );
-	secondVertLineGradient.setColorAt( 0.0, QColor( 60, 60, 80 ) );
-	secondVertLineGradient.setColorAt( 0.5, QColor( 200, 205, 225 ) );
-	secondVertLineGradient.setColorAt( 1.0, QColor( 60, 60, 80 ) );
-
-	p->setPen( Qt::NoPen );
-	p->setBrush( firstVertLineGradient );
-
-	p->drawRect( 0, 2, 1, opt.rect.height() - 4 );
-	p->drawRect( opt.rect.width() - 1, 2,
-		1, opt.rect.height() - 4 );
-
-	p->setBrush( secondVertLineGradient );
-
-	p->drawRect( 1, 1, 1, opt.rect.height() - 2 );
-	p->drawRect( opt.rect.width() - 2, 1,
-		1, opt.rect.height() - 2 );
-
-	p->drawRect( 2, 0, 1, opt.rect.height() );
-	p->drawRect( opt.rect.width() - 3, 0,
-		1, opt.rect.height() );
-
-	QLinearGradient backgroundGradient( QPointF( 0.0, 0.0 ),
-		QPointF( 0.0, 1.0 ) );
-	backgroundGradient.setCoordinateMode( QGradient::ObjectBoundingMode );
-	backgroundGradient.setColorAt( 0.0, QColor( 80, 80, 80 ) );
-	backgroundGradient.setColorAt( 0.15, QColor( 215, 215, 220 ) );
-	backgroundGradient.setColorAt( 0.5, QColor( 255, 255, 255 ) );
-	backgroundGradient.setColorAt( 0.85, QColor( 215, 215, 220 ) );
-	backgroundGradient.setColorAt( 1.0, QColor( 80, 80, 80 ) );
-
-	p->setPen( Qt::NoPen );
-	p->setBrush( backgroundGradient );
-	p->drawRect( 3, 0, opt.rect.width() - 2 * 3, opt.rect.height() );
 }
 
 QSize
@@ -987,7 +936,7 @@ Picker::paintEvent( QPaintEvent * )
 
 	QPainter p( this );
 
-	d->drawBackground( &p, opt );
+	drawCylinder( &p, opt.rect );
 
 	if( count() > 0 )
 	{

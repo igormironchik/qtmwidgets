@@ -7,6 +7,10 @@ INCLUDEPATH += . ..
 CONFIG += qt staticlib
 QT += core gui widgets
 
-HEADERS += picker.hpp
+HEADERS += private/drawing.hpp \
+           picker.hpp \
+           timepicker.hpp
 
-SOURCES += picker.cpp
+SOURCES += private/drawing.cpp \
+           picker.cpp \
+           timepicker.cpp

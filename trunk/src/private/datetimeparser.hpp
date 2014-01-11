@@ -28,10 +28,12 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// QtMWidgets include.
-#include "timepicker.hpp"
+#ifndef QTMWIDGETS__DATETIMEPARSER_HPP__INCLUDED
+#define QTMWIDGETS__DATETIMEPARSER_HPP__INCLUDED
 
 
 namespace QtMWidgets {
 
 } /* namespace QtMWidgets */
+
+#endif // QTMWIDGETS__DATETIMEPARSER_HPP__INCLUDED

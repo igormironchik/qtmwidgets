@@ -141,7 +141,7 @@ int
 Section::maxWidth( const QStyleOption & opt ) const
 {
 	int width = opt.fontMetrics.boundingRect( value(
-		QDATETIMEPICKER_DATETIME_MAX ) ).width();
+		DATETIMEPICKER_DATETIME_MAX ) ).width();
 
 	switch( type )
 	{
@@ -257,7 +257,7 @@ Section::value( const QDateTime & dt ) const
 DateTimeParser::DateTimeParser( QVariant::Type t )
 	:	type( t )
 {
-	parseFormat( QLatin1String( "yyyy MMMM dddd hh mm" ) );
+	parseFormat( QLatin1String( "dddd MMMM yyyy hh mm" ) );
 }
 
 DateTimeParser::~DateTimeParser()
@@ -283,6 +283,9 @@ DateTimeParser::parseFormat( const QString & fmt )
 {
 	if( fmt.isEmpty() )
 		return false;
+
+	if( fmt == format )
+		return true;
 
 	const int max = fmt.size();
 
@@ -477,6 +480,7 @@ DateTimeParser::parseFormat( const QString & fmt )
 	}
 
 	sections.swap( newSections );
+	format = fmt;
 
 	return true;
 }

@@ -467,6 +467,12 @@ DateTimeParser::parseFormat( const QString & fmt )
 						return false;
 				}
 			} break;
+
+			case ' ' :
+				break;
+
+			default :
+				return false;
 		}
 	}
 

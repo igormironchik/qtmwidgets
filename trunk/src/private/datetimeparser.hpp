@@ -31,8 +31,100 @@
 #ifndef QTMWIDGETS__DATETIMEPARSER_HPP__INCLUDED
 #define QTMWIDGETS__DATETIMEPARSER_HPP__INCLUDED
 
+// Qt include.
+#include <QString>
+#include <QVariant>
+#include <QDateTime>
+#include <QVector>
+
+QT_BEGIN_NAMESPACE
+class QStyleOption;
+QT_END_NAMESPACE
+
 
 namespace QtMWidgets {
+
+#define QDATETIMEPICKER_TIME_MIN QTime( 0, 0, 0, 0 )
+#define QDATETIMEPICKER_TIME_MAX QTime( 23, 59, 59, 999 )
+#define QDATETIMEPICKER_DATE_MIN QDate( 100, 1, 1 )
+#define QDATETIMEPICKER_DATE_MAX QDate( 7999, 12, 31 )
+#define QDATETIMEPICKER_DATETIME_MIN QDateTime( QDATETIMEPICKER_DATE_MIN, QDATETIMEPICKER_TIME_MIN )
+#define QDATETIMEPICKER_DATETIME_MAX QDateTime( QDATETIMEPICKER_DATE_MAX, QDATETIMEPICKER_TIME_MAX )
+#define QDATETIMEPICKER_DATE_INITIAL QDate( 2000, 1, 1 )
+
+
+//
+// Section
+//
+
+/*!
+	Describes section in DatePicker, TimePicker and DateTimePicker.
+*/
+class Section {
+public:
+	enum Type {
+		NoSection          = 0x00000,
+		AmPmSection        = 0x00001,
+		SecondSection      = 0x00002,
+		MinuteSection      = 0x00004,
+		Hour12Section      = 0x00008,
+		Hour24Section      = 0x00010,
+		DaySection         = 0x00020,
+		DaySectionShort    = 0x00040,
+		DaySectionLong     = 0x00080,
+		MonthSection       = 0x00100,
+		MonthSectionShort  = 0x00200,
+		MonthSectionLong   = 0x00400,
+		YearSection        = 0x00800,
+		YearSection2Digits = 0x01000,
+	}; // enum Type
+
+	Section();
+
+	explicit Section( Type t );
+
+	//! \return Max width of the section.
+	int maxWidth( const QStyleOption & opt ) const;
+
+	//! \return Value of the section for the given \a dt date & time.
+	QString value( const QDateTime & dt ) const;
+
+	//! Type of the section.
+	Type type;
+	//! Is value prepended with zeroes?
+	bool zeroesAdded;
+}; // class Section
+
+
+//
+// DateTimeParser
+//
+
+/*!
+	DateTimeParser is used to parse date & time string format
+	used by DatePicker, TimePicker and DateTimePicker.
+*/
+class DateTimeParser {
+public:
+	explicit DateTimeParser( QVariant::Type t );
+
+	virtual ~DateTimeParser();
+
+	/*!
+		Parse date & time format.
+
+		If format wasn't parsed correctly then new setting
+		will not apply.
+
+		\return Is format parsed correctly.
+	*/
+	bool parseFormat( const QString & fmt );
+
+	//! Defined sections in format.
+	QVector< Section > sections;
+	//! Type of the parser.
+	QVariant::Type type;
+}; // class DateTimeParser
 
 } /* namespace QtMWidgets */
 

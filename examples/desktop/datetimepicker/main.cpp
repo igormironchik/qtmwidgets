@@ -28,28 +28,43 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef QTMWIDGETS__DRAWING_HPP__INCLUDED
-#define QTMWIDGETS__DRAWING_HPP__INCLUDED
-
 // Qt include.
-#include <QtGlobal>
+#include <QApplication>
+#include <QWidget>
+#include <QVBoxLayout>
 
-QT_BEGIN_NAMESPACE
-class QPainter;
-class QRect;
-QT_END_NAMESPACE
+// QtMWidgets include.
+#include <QtMWidgets/DateTimePicker>
 
 
-namespace QtMWidgets {
+class Widget
+	:	public QWidget
+{
+public:
+	Widget()
+	{
+		QVBoxLayout * l = new QVBoxLayout( this );
+		QtMWidgets::DateTimePicker * picker =
+			new QtMWidgets::DateTimePicker( this );
 
-//
-// drawCylinder
-//
+		QFont font = picker->font();
+		font.setBold( true );
+		font.setPointSize( 15 );
 
-//! Draw cylinder with rect \a r.
-void drawCylinder( QPainter * p, const QRect & r,
-	bool roundLeftCorner = true, bool roundRightCorner = true );
+		picker->setFont( font );
 
-} /* namespace QtMWidgets */
+		l->addWidget( picker );
+	}
+};
 
-#endif // QTMWIDGETS__DRAWING_HPP__INCLUDED
+
+int main( int argc, char ** argv )
+{
+	QApplication app( argc, argv );
+
+	Widget w;
+
+	w.show();
+
+	return app.exec();
+}

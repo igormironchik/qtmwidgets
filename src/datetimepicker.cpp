@@ -31,6 +31,7 @@
 // QtMWidgets include.
 #include "datetimepicker.hpp"
 #include "private/datetimeparser.hpp"
+#include "private/drawing.hpp"
 
 // Qt include.
 #include <QEvent>
@@ -38,6 +39,8 @@
 #include <QStyleOption>
 #include <QBrush>
 #include <QPen>
+
+#include <QDebug>
 
 
 namespace QtMWidgets {
@@ -55,6 +58,12 @@ public:
 		:	DateTimeParser( parserType )
 		,	q( parent )
 		,	spec( Qt::LocalTime )
+		,	itemHeight( 0 )
+		,	itemTopMargin( 7 )
+		,	itemsMaxCount( 5 )
+		,	itemSideMargin( 5 )
+		,	widgetHeight( 0 )
+		,	rcurrentItemY( 0 )
 	{
 	}
 
@@ -68,6 +77,12 @@ public:
 	QDateTime maximum;
 	QDateTime value;
 	Qt::TimeSpec spec;
+	int itemHeight;
+	int itemTopMargin;
+	int itemsMaxCount;
+	int itemSideMargin;
+	int widgetHeight;
+	int rcurrentItemY;
 }; // class DateTimePickerPrivate
 
 void
@@ -85,6 +100,13 @@ DateTimePickerPrivate::setRange( const QDateTime & min, const QDateTime & max )
 	{
 		minimum = min;
 		maximum = max;
+
+		if( value < minimum )
+			value = minimum;
+		else if( value > maximum )
+			value = maximum;
+
+		q->updateGeometry();
 		q->update();
 	}
 }
@@ -123,6 +145,9 @@ DateTimePicker::DateTimePicker( QWidget * parent )
 	:	QWidget( parent )
 	,	d( new DateTimePickerPrivate( this, QVariant::DateTime ) )
 {
+	setSizePolicy( QSizePolicy( QSizePolicy::Fixed,
+		QSizePolicy::Fixed ) );
+
 	setMinimumDateTime( QDateTime( DATETIMEPICKER_COMPAT_DATE_MIN,
 		DATETIMEPICKER_TIME_MIN ) );
 	setMaximumDateTime( DATETIMEPICKER_DATETIME_MAX );
@@ -134,6 +159,9 @@ DateTimePicker::DateTimePicker( const QDateTime & dt, QWidget * parent )
 	:	QWidget( parent )
 	,	d( new DateTimePickerPrivate( this, QVariant::DateTime ) )
 {
+	setSizePolicy( QSizePolicy( QSizePolicy::Fixed,
+		QSizePolicy::Fixed ) );
+
 	setMinimumDateTime( QDateTime( DATETIMEPICKER_COMPAT_DATE_MIN,
 		DATETIMEPICKER_TIME_MIN ) );
 	setMaximumDateTime( DATETIMEPICKER_DATETIME_MAX );
@@ -145,6 +173,9 @@ DateTimePicker::DateTimePicker( const QDate & date, QWidget * parent )
 	:	QWidget( parent )
 	,	d( new DateTimePickerPrivate( this, QVariant::Date ) )
 {
+	setSizePolicy( QSizePolicy( QSizePolicy::Fixed,
+		QSizePolicy::Fixed ) );
+
 	setMinimumDateTime( QDateTime( DATETIMEPICKER_COMPAT_DATE_MIN,
 		DATETIMEPICKER_TIME_MIN ) );
 	setMaximumDateTime( DATETIMEPICKER_DATETIME_MAX );
@@ -155,6 +186,9 @@ DateTimePicker::DateTimePicker( const QTime & time, QWidget * parent )
 	:	QWidget( parent )
 	,	d( new DateTimePickerPrivate( this, QVariant::Time ) )
 {
+	setSizePolicy( QSizePolicy( QSizePolicy::Fixed,
+		QSizePolicy::Fixed ) );
+
 	setMinimumDateTime( QDateTime( DATETIMEPICKER_COMPAT_DATE_MIN,
 		DATETIMEPICKER_TIME_MIN ) );
 	setMaximumDateTime( DATETIMEPICKER_DATETIME_MAX );
@@ -166,6 +200,9 @@ DateTimePicker::DateTimePicker( const QVariant & val, QVariant::Type parserType,
 	:	QWidget( parent )
 	,	d( new DateTimePickerPrivate( this, parserType ) )
 {
+	setSizePolicy( QSizePolicy( QSizePolicy::Fixed,
+		QSizePolicy::Fixed ) );
+
 	setMinimumDateTime( QDateTime( DATETIMEPICKER_COMPAT_DATE_MIN,
 		DATETIMEPICKER_TIME_MIN ) );
 	setMaximumDateTime( DATETIMEPICKER_DATETIME_MAX );
@@ -400,7 +437,32 @@ DateTimePicker::setTimeSpec( Qt::TimeSpec spec )
 QSize
 DateTimePicker::sizeHint() const
 {
-	return QSize();
+	QStyleOption opt;
+	opt.initFrom( this );
+
+	d->itemHeight = opt.fontMetrics.boundingRect( QLatin1String( "AM" ) )
+		.height();
+
+	d->widgetHeight = d->itemHeight * d->itemsMaxCount +
+		( d->itemsMaxCount - 1 ) * d->itemTopMargin;
+
+	d->rcurrentItemY = d->widgetHeight / 2 - d->itemHeight / 2;
+
+	int widgetWidth = 0;
+
+	for( int i = 0; i < d->sections.size(); ++i )
+	{
+		d->sections[ i ].sectionWidth = d->sections.at( i ).maxWidth( opt );
+		d->sections[ i ].sectionWidth += d->itemSideMargin * 2 + 6;
+		widgetWidth += d->sections[ i ].sectionWidth;
+
+		d->sections[ i ].fillValues( d->value, d->minimum, d->maximum, opt );
+
+		if( d->sections.at( i ).currentIndex == -1 )
+			d->sections[ i ].currentIndex = 0;
+	}
+
+	return QSize( widgetWidth, d->widgetHeight );
 }
 
 void
@@ -449,9 +511,33 @@ DateTimePicker::mouseReleaseEvent( QMouseEvent * event )
 }
 
 void
-DateTimePicker::paintEvent( QPaintEvent * event )
+DateTimePicker::paintEvent( QPaintEvent * )
 {
+	QStyleOption opt;
+	opt.initFrom( this );
 
+	QPainter p( this );
+
+	int x = 0;
+
+	for( int i = 0; i < d->sections.size(); ++i )
+	{
+		const QRect r( x, 0, d->sections.at( i ).sectionWidth, d->widgetHeight );
+
+		drawCylinder( &p, r, ( i == 0 ), ( i == d->sections.size() - 1 ) );
+
+		p.setPen( opt.palette.color( QPalette::WindowText ) );
+
+		const QRect itemRect( x + 3 + d->itemSideMargin,
+			d->rcurrentItemY,
+			d->sections.at( i ).sectionWidth - 6 - d->itemSideMargin * 2,
+			d->itemHeight );
+
+		p.drawText( itemRect, d->sections.at( i ).values.at(
+			d->sections.at( i ).currentIndex ) );
+
+		x += d->sections.at( i ).sectionWidth;
+	}
 }
 
 } /* namespace QtMWidgets */

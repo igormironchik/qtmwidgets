@@ -44,12 +44,16 @@ namespace QtMWidgets {
 Section::Section()
 	:	type( NoSection )
 	,	zeroesAdded( false )
+	,	sectionWidth( 0 )
+	,	currentIndex( -1 )
 {
 }
 
 Section::Section( Type t )
 	:	type( t )
 	,	zeroesAdded( false )
+	,	sectionWidth( 0 )
+	,	currentIndex( -1 )
 {
 }
 
@@ -148,15 +152,22 @@ Section::maxWidth( const QStyleOption & opt ) const
 		case DaySectionShort :
 			width += opt.fontMetrics.boundingRect( maxShortDay( opt ) +
 				QLatin1Char( ' ' ) ).width();
+		break;
+
 		case DaySectionLong :
 			width += opt.fontMetrics.boundingRect( maxLongDay( opt ) +
 				QLatin1Char( ' ' ) ).width();
+		break;
+
 		case MonthSectionShort :
 			width += opt.fontMetrics.boundingRect( maxShortMonth( opt ) +
 				QLatin1Char( ' ' ) ).width();
+		break;
+
 		case MonthSectionLong :
 			width += opt.fontMetrics.boundingRect( maxLongMonth( opt ) +
 				QLatin1Char( ' ' ) ).width();
+		break;
 	}
 
 	return width;
@@ -187,16 +198,22 @@ Section::value( const QDateTime & dt ) const
 					return QLatin1String( "PM" );
 			else
 				return QLatin1String( "AM" );
+		break;
+
 		case SecondSection :
 		{
 			makeSectionValue( v, dt.time().second(), zeroesAdded );
 			return v;
 		}
+		break;
+
 		case MinuteSection :
 		{
 			makeSectionValue( v, dt.time().minute(), zeroesAdded );
 			return v;
 		}
+		break;
+
 		case Hour12Section :
 		{
 			int hour = dt.time().hour();
@@ -210,42 +227,327 @@ Section::value( const QDateTime & dt ) const
 
 			return v;
 		}
+		break;
+
 		case Hour24Section :
 		{
 			makeSectionValue( v, dt.time().hour(), zeroesAdded );
 			return v;
 		}
+		break;
+
 		case DaySection :
 		{
 			makeSectionValue( v, dt.date().day(), zeroesAdded );
 			return v;
 		}
+		break;
+
 		case DaySectionShort :
 		case DaySectionLong :
-		{
-			makeSectionValue( v, dt.date().day(), zeroesAdded );
 			return v;
-		}
+		break;
+
 		case MonthSection :
 		{
 			makeSectionValue( v, dt.date().month(), zeroesAdded );
 			return v;
 		}
+		break;
+
 		case MonthSectionShort :
 		case MonthSectionLong :
 			return v;
+		break;
+
 		case YearSection :
 		{
 			makeSectionValue( v, dt.date().year(), zeroesAdded );
 			return v;
 		}
+		break;
+
 		case YearSection2Digits :
 		{
 			makeSectionValue( v, dt.date().year(), zeroesAdded );
 			return v.right( 2 );
 		}
+		break;
+
 		default :
 			return v;
+		break;
+	}
+}
+
+void
+Section::fillValues( const QDateTime & current,
+	const QDateTime & min, const QDateTime & max,
+	const QStyleOption & opt )
+{
+	values.clear();
+	currentIndex = -1;
+
+	switch( type )
+	{
+		case AmPmSection :
+		{
+			values.append( QLatin1String( "AM" ) );
+			values.append( QLatin1String( "PM" ) );
+
+			if( current.time().hour() > 12 )
+				currentIndex = 1;
+			else
+				currentIndex = 0;
+		}
+		break;
+
+		case SecondSection :
+		{
+			const int s = current.time().second();
+
+			for( int i = 0; i < 60; ++i )
+			{
+				QString v;
+
+				makeSectionValue( v, i, zeroesAdded );
+
+				if( s == i )
+					currentIndex = values.size();
+
+				values.append( v );
+			}
+		}
+		break;
+
+		case MinuteSection :
+		{
+			const int m = current.time().minute();
+
+			for( int i = 0; i < 60; ++i )
+			{
+				QString v;
+
+				makeSectionValue( v, i, zeroesAdded );
+
+				if( m == i )
+					currentIndex = values.size();
+
+				values.append( v );
+			}
+		}
+		break;
+
+		case Hour12Section :
+		{
+			const int h = ( current.time().hour() > 12 ) ?
+				current.time().hour() - 12 : current.time().hour();
+
+			for( int i = 1; i < 13; ++i )
+			{
+				QString v;
+
+				makeSectionValue( v, i, zeroesAdded );
+
+				if( h == i )
+					currentIndex = values.size();
+
+				values.append( v );
+			}
+		}
+		break;
+
+		case Hour24Section :
+		{
+			const int h = current.time().hour();
+
+			for( int i = 0; i < 24; ++i )
+			{
+				QString v;
+
+				makeSectionValue( v, i, zeroesAdded );
+
+				if( h == i )
+					currentIndex = values.size();
+
+				values.append( v );
+			}
+		}
+		break;
+
+		case DaySection :
+		{
+			const int d = current.date().day();
+
+			for( int i = 1; i <= current.date().daysInMonth(); ++i )
+			{
+				QString v;
+
+				makeSectionValue( v, i, zeroesAdded );
+
+				if( d == i )
+					currentIndex = values.size();
+
+				values.append( v );
+			}
+		}
+		break;
+
+		case DaySectionShort :
+		{
+			const int maxDayLength = maxShortDay( opt ).length();
+
+			const int d = current.date().day();
+
+			QDate date( current.date().year(), current.date().month(), 1 );
+
+			for( int i = 1; i <= current.date().daysInMonth(); ++i )
+			{
+				QString v;
+
+				makeSectionValue( v, i, zeroesAdded );
+
+				if( d == i )
+					currentIndex = values.size();
+
+				if( v.length() == 1 )
+					v.prepend( QLatin1Char( ' ' ) );
+
+				const QString dayName = QDate::shortDayName( date.dayOfWeek() );
+
+				v.prepend( QString( maxDayLength - dayName.length(),
+					QLatin1Char( ' ' ) ) );
+				v.prepend( dayName );
+
+				values.append( v );
+
+				date.addDays( 1 );
+			}
+		}
+		break;
+
+		case DaySectionLong :
+		{
+			const int maxDayLength = maxLongDay( opt ).length();
+
+			const int d = current.date().day();
+
+			QDate date( current.date().year(), current.date().month(), 1 );
+
+			for( int i = 1; i <= current.date().daysInMonth(); ++i )
+			{
+				QString v;
+
+				makeSectionValue( v, i, zeroesAdded );
+
+				if( d == i )
+					currentIndex = values.size();
+
+				if( v.length() == 1 )
+					v.prepend( QLatin1Char( ' ' ) );
+
+				const QString dayName = QDate::longDayName( date.dayOfWeek() );
+
+				v.prepend( QString( maxDayLength - dayName.length(),
+					QLatin1Char( ' ' ) ) );
+				v.prepend( dayName );
+
+				values.append( v );
+
+				date.addDays( 1 );
+			}
+		}
+		break;
+
+		case MonthSection :
+		{
+			const int m = current.date().month();
+
+			for( int i = 1; i < 13; ++i )
+			{
+				QString v;
+
+				makeSectionValue( v, i, zeroesAdded );
+
+				if( m == i )
+					currentIndex = values.size();
+
+				values.append( v );
+			}
+		}
+		break;
+
+		case MonthSectionShort :
+		{
+			const int m = current.date().month();
+
+			for( int i = 1; i < 13; ++i )
+			{
+				if( m == i )
+					currentIndex = values.size();
+
+				values.append( QDate::shortMonthName( i ) );
+			}
+		}
+		break;
+
+		case MonthSectionLong :
+		{
+			const int m = current.date().month();
+
+			for( int i = 1; i < 13; ++i )
+			{
+				if( m == i )
+					currentIndex = values.size();
+
+				values.append( QDate::longMonthName( i ) );
+			}
+		}
+		break;
+
+		case YearSection :
+		{
+			int start = min.date().year();
+			const int finish = max.date().year();
+			const int y = current.date().year();
+
+			while( start <= finish )
+			{
+				QString v;
+
+				makeSectionValue( v, start, zeroesAdded );
+
+				if( start == y )
+					currentIndex = values.size();
+
+				values.append( v );
+
+				++start;
+			}
+		}
+		break;
+
+		case YearSection2Digits :
+		{
+			int start = min.date().year();
+			const int finish = max.date().year();
+			const int y = current.date().year();
+
+			while( start <= finish )
+			{
+				QString v;
+
+				makeSectionValue( v, start, zeroesAdded );
+
+				if( start == y )
+					currentIndex = values.size();
+
+				values.append( v.right( 2 ) );
+
+				++start;
+			}
+		}
+		break;
 	}
 }
 

@@ -46,7 +46,8 @@ namespace QtMWidgets {
 //
 
 void
-drawCylinder( QPainter * p, const QRect & r )
+drawCylinder( QPainter * p, const QRect & r,
+	bool roundLeftCorner, bool roundRightCorner )
 {
 	p->setRenderHint( QPainter::Antialiasing );
 
@@ -67,18 +68,20 @@ drawCylinder( QPainter * p, const QRect & r )
 	p->setPen( Qt::NoPen );
 	p->setBrush( firstVertLineGradient );
 
-	p->drawRect( 0, 2, 1, r.height() - 4 );
-	p->drawRect( r.width() - 1, 2,
-		1, r.height() - 4 );
+	p->drawRect( r.x(), roundLeftCorner ? 2 : 0,
+		1, roundLeftCorner ? r.height() - 4 : r.height() );
+	p->drawRect( r.x() + r.width() - 1, roundRightCorner ? 2 : 0,
+		1, roundRightCorner ? r.height() - 4 : r.height() );
 
 	p->setBrush( secondVertLineGradient );
 
-	p->drawRect( 1, 1, 1, r.height() - 2 );
-	p->drawRect( r.width() - 2, 1,
-		1, r.height() - 2 );
+	p->drawRect( r.x() + 1, roundLeftCorner ? 1 : 0,
+		1, roundLeftCorner ? r.height() - 2 : r.height() );
+	p->drawRect( r.x() + r.width() - 2, roundRightCorner ? 1 : 0,
+		1, roundRightCorner ? r.height() - 2 : r.height() );
 
-	p->drawRect( 2, 0, 1, r.height() );
-	p->drawRect( r.width() - 3, 0,
+	p->drawRect( r.x() + 2, 0, 1, r.height() );
+	p->drawRect( r.x() + r.width() - 3, 0,
 		1, r.height() );
 
 	QLinearGradient backgroundGradient( QPointF( 0.0, 0.0 ),
@@ -92,7 +95,7 @@ drawCylinder( QPainter * p, const QRect & r )
 
 	p->setPen( Qt::NoPen );
 	p->setBrush( backgroundGradient );
-	p->drawRect( 3, 0, r.width() - 2 * 3, r.height() );
+	p->drawRect( r.x() + 3, 0, r.width() - 2 * 3, r.height() );
 }
 
 } /* namespace QtMWidgets */

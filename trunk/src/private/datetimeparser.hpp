@@ -91,10 +91,21 @@ public:
 	//! \return Value of the section for the given \a dt date & time.
 	QString value( const QDateTime & dt ) const;
 
+	//! Fill values.
+	void fillValues( const QDateTime & current,
+		const QDateTime & min, const QDateTime & max,
+		const QStyleOption & opt );
+
 	//! Type of the section.
 	Type type;
 	//! Is value prepended with zeroes?
 	bool zeroesAdded;
+	//! Width of the section.
+	int sectionWidth;
+	//! Values.
+	QVector< QString > values;
+	//! Current index.
+	int currentIndex;
 }; // class Section
 
 

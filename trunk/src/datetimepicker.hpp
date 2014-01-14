@@ -35,6 +35,7 @@
 #include <QWidget>
 #include <QScopedPointer>
 #include <QVariant>
+#include <QDateTime>
 
 
 namespace QtMWidgets {

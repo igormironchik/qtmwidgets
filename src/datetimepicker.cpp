@@ -39,6 +39,7 @@
 #include <QStyleOption>
 #include <QBrush>
 #include <QPen>
+#include <QLinearGradient>
 
 
 namespace QtMWidgets {
@@ -72,6 +73,7 @@ public:
 	void normalizeOffsets();
 	void drawSectionItems( int section, QPainter * p,
 		const QStyleOption & opt );
+	void drawWindow( QPainter * p, const QStyleOption & opt );
 
 	DateTimePicker * q;
 	QDateTime minimum;
@@ -235,6 +237,51 @@ DateTimePickerPrivate::drawSectionItems( int section, QPainter * p,
 		index = nextIndex( index, sections.at( section ).values.size() );
 		y += itemHeight + itemTopMargin;
 	}
+}
+
+void
+DateTimePickerPrivate::drawWindow( QPainter * p, const QStyleOption & opt )
+{
+	const int windowOffset = itemHeight / 3;
+	const int windowHeight = itemHeight + windowOffset * 2;
+	const int windowMiddleHeight = windowHeight / 2;
+
+	const int alpha = 125;
+
+	int yTop = currentItemY - windowOffset;
+	int yBottom = yTop + windowHeight;
+
+	p->setPen( QColor( 80, 90, 100, alpha ) );
+
+	p->drawLine( 0, yTop, opt.rect.width(), yTop );
+	p->drawLine( 0, yBottom, opt.rect.width(), yBottom );
+
+	p->setPen( QColor( 120, 130, 150, alpha ) );
+
+	p->drawLine( 0, yTop + 1, opt.rect.width(), yTop + 1 );
+	p->drawLine( 0, yBottom - 1, opt.rect.width(), yBottom - 1 );
+
+	p->setPen( QColor( 250, 250, 250, alpha ) );
+
+	p->drawLine( 0, yTop + 2, opt.rect.width(), yTop + 2 );
+
+	p->setPen( QColor( 240, 240, 240, alpha ) );
+
+	p->drawLine( 0, yTop + 3, opt.rect.width(), yTop + 3 );
+
+	QLinearGradient g( QPointF( 0.0, 0.0 ), QPointF( 0.0, 1.0 ) );
+	g.setCoordinateMode( QGradient::ObjectBoundingMode );
+	g.setColorAt( 0.0, QColor( 215, 225, 235, alpha ) );
+	g.setColorAt( 1.0, QColor( 170, 180, 210, alpha ) );
+
+	p->setPen( Qt::NoPen );
+	p->setBrush( g );
+
+	p->drawRect( 0, yTop + 4, opt.rect.width(), windowMiddleHeight - 4 );
+
+	p->setBrush( QColor( 165, 170, 200, alpha ) );
+	p->drawRect( 0, yTop + windowMiddleHeight,
+		opt.rect.width(), windowMiddleHeight - 2 );
 }
 
 
@@ -622,6 +669,8 @@ DateTimePicker::paintEvent( QPaintEvent * )
 
 	QPainter p( this );
 
+	p.setRenderHint( QPainter::Antialiasing );
+
 	int x = 0;
 
 	for( int i = 0; i < d->sections.size(); ++i )
@@ -634,6 +683,8 @@ DateTimePicker::paintEvent( QPaintEvent * )
 
 		x += d->sections.at( i ).sectionWidth;
 	}
+
+	d->drawWindow( &p, opt );
 }
 
 } /* namespace QtMWidgets */

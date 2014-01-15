@@ -106,6 +106,8 @@ public:
 	QVector< QString > values;
 	//! Current index.
 	int currentIndex;
+	//! Offset.
+	int offset;
 }; // class Section
 
 

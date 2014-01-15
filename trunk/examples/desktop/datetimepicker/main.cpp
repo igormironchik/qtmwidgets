@@ -48,7 +48,6 @@ public:
 			new QtMWidgets::DateTimePicker( this );
 
 		QFont font = picker->font();
-		font.setBold( true );
 		font.setPointSize( 15 );
 
 		picker->setFont( font );

@@ -40,8 +40,6 @@
 #include <QBrush>
 #include <QPen>
 
-#include <QDebug>
-
 
 namespace QtMWidgets {
 
@@ -63,7 +61,7 @@ public:
 		,	itemsMaxCount( 5 )
 		,	itemSideMargin( 5 )
 		,	widgetHeight( 0 )
-		,	rcurrentItemY( 0 )
+		,	currentItemY( 0 )
 	{
 	}
 
@@ -71,6 +69,9 @@ public:
 	void setRange( const QDateTime & min, const QDateTime & max );
 	void setValue( const QDateTime & dt );
 	void emitSignals();
+	void normalizeOffsets();
+	void drawSectionItems( int section, QPainter * p,
+		const QStyleOption & opt );
 
 	DateTimePicker * q;
 	QDateTime minimum;
@@ -79,10 +80,10 @@ public:
 	Qt::TimeSpec spec;
 	int itemHeight;
 	int itemTopMargin;
-	int itemsMaxCount;
+	int itemsMaxCount; // Must be odd.
 	int itemSideMargin;
 	int widgetHeight;
-	int rcurrentItemY;
+	int currentItemY;
 }; // class DateTimePickerPrivate
 
 void
@@ -133,6 +134,107 @@ DateTimePickerPrivate::emitSignals()
 	emit q->dateTimeChanged( value );
 	emit q->dateChanged( value.date() );
 	emit q->timeChanged( value.time() );
+}
+
+static inline int prevIndex( int current, int size )
+{
+	if( current == 0 )
+		return size - 1;
+	else
+		return current - 1;
+}
+
+static inline int nextIndex( int current, int size )
+{
+	if( current == size - 1 )
+		return 0;
+	else
+		return current + 1;
+}
+
+void
+DateTimePickerPrivate::normalizeOffsets()
+{
+	for( int i = 0; i < sections.size(); ++i )
+	{
+		const int sectionValuesSize = sections.at( i ).values.size();
+		const int totalItemHeight = itemHeight + itemTopMargin;
+
+		while( qAbs( sections.at( i ).offset ) > totalItemHeight / 2 )
+		{
+			if( sections.at( i ).offset > 0 )
+			{
+				sections[ i ].offset -= totalItemHeight;
+				sections[ i ].currentIndex = prevIndex(
+					sections.at( i ).currentIndex, sectionValuesSize );
+			}
+			else
+			{
+				sections[ i ].offset += totalItemHeight;
+				sections[ i ].currentIndex = nextIndex(
+					sections.at( i ).currentIndex, sectionValuesSize );
+			}
+		}
+
+	}
+}
+
+void
+DateTimePickerPrivate::drawSectionItems( int section, QPainter * p,
+	const QStyleOption & opt )
+{
+	int x = 0;
+
+	for( int i = 0; i < section; ++i )
+		x += sections.at( i ).sectionWidth;
+
+	x += 3 + itemSideMargin;
+
+	p->setPen( opt.palette.color( QPalette::WindowText ) );
+
+	const int yOffset = sections.at( section ).offset;
+
+	int makePrevIndexCount = itemsMaxCount / 2;
+
+	if( yOffset > 0 )
+		++makePrevIndexCount;
+
+	int index = sections.at( section ).currentIndex;
+	int y = currentItemY + yOffset;
+
+	for( int i = 0; i < makePrevIndexCount; ++i )
+	{
+		index = prevIndex( index, sections.at( section ).values.size() );
+		y -= ( itemHeight + itemTopMargin );
+	}
+
+	const int iterationsCount = ( yOffset == 0 ) ? itemsMaxCount : itemsMaxCount + 1;
+
+	const int textWidth = sections.at( section ).sectionWidth - 6 -
+		itemSideMargin * 2;
+
+	Section::Type type = sections.at( section ).type;
+
+	for( int i = 0; i < iterationsCount; ++i )
+	{
+		const QRect r( x, y, textWidth, itemHeight );
+
+		const QString text = sections.at( section ).values.at( index );
+
+		if( type == Section::DaySectionShort ||
+			type == Section::DaySectionLong )
+		{
+			QStringList values = text.split( QLatin1Char( ' ' ) );
+
+			p->drawText( r, Qt::AlignLeft | Qt::TextSingleLine, values.at( 0 ) );
+			p->drawText( r, Qt::AlignRight | Qt::TextSingleLine, values.at( 1 ) );
+		}
+		else
+			p->drawText( r, Qt::AlignLeft | Qt::TextSingleLine, text );
+
+		index = nextIndex( index, sections.at( section ).values.size() );
+		y += itemHeight + itemTopMargin;
+	}
 }
 
 
@@ -446,7 +548,7 @@ DateTimePicker::sizeHint() const
 	d->widgetHeight = d->itemHeight * d->itemsMaxCount +
 		( d->itemsMaxCount - 1 ) * d->itemTopMargin;
 
-	d->rcurrentItemY = d->widgetHeight / 2 - d->itemHeight / 2;
+	d->currentItemY = d->widgetHeight / 2 - d->itemHeight / 2;
 
 	int widgetWidth = 0;
 
@@ -513,6 +615,8 @@ DateTimePicker::mouseReleaseEvent( QMouseEvent * event )
 void
 DateTimePicker::paintEvent( QPaintEvent * )
 {
+	d->normalizeOffsets();
+
 	QStyleOption opt;
 	opt.initFrom( this );
 
@@ -526,15 +630,7 @@ DateTimePicker::paintEvent( QPaintEvent * )
 
 		drawCylinder( &p, r, ( i == 0 ), ( i == d->sections.size() - 1 ) );
 
-		p.setPen( opt.palette.color( QPalette::WindowText ) );
-
-		const QRect itemRect( x + 3 + d->itemSideMargin,
-			d->rcurrentItemY,
-			d->sections.at( i ).sectionWidth - 6 - d->itemSideMargin * 2,
-			d->itemHeight );
-
-		p.drawText( itemRect, d->sections.at( i ).values.at(
-			d->sections.at( i ).currentIndex ) );
+		d->drawSectionItems( i, &p, opt );
 
 		x += d->sections.at( i ).sectionWidth;
 	}

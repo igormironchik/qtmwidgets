@@ -46,6 +46,7 @@ Section::Section()
 	,	zeroesAdded( false )
 	,	sectionWidth( 0 )
 	,	currentIndex( -1 )
+	,	offset( 0 )
 {
 }
 
@@ -54,6 +55,7 @@ Section::Section( Type t )
 	,	zeroesAdded( false )
 	,	sectionWidth( 0 )
 	,	currentIndex( -1 )
+	,	offset( 0 )
 {
 }
 
@@ -150,23 +152,25 @@ Section::maxWidth( const QStyleOption & opt ) const
 	switch( type )
 	{
 		case DaySectionShort :
-			width += opt.fontMetrics.boundingRect( maxShortDay( opt ) +
-				QLatin1Char( ' ' ) ).width();
+		{
+			width += opt.fontMetrics.boundingRect( maxShortDay( opt ) ).width();
+			width += opt.fontMetrics.averageCharWidth();
+		}
 		break;
 
 		case DaySectionLong :
-			width += opt.fontMetrics.boundingRect( maxLongDay( opt ) +
-				QLatin1Char( ' ' ) ).width();
+		{
+			width += opt.fontMetrics.boundingRect( maxLongDay( opt ) ).width();
+			width += opt.fontMetrics.averageCharWidth();
+		}
 		break;
 
 		case MonthSectionShort :
-			width += opt.fontMetrics.boundingRect( maxShortMonth( opt ) +
-				QLatin1Char( ' ' ) ).width();
+			width += opt.fontMetrics.boundingRect( maxShortMonth( opt ) ).width();
 		break;
 
 		case MonthSectionLong :
-			width += opt.fontMetrics.boundingRect( maxLongMonth( opt ) +
-				QLatin1Char( ' ' ) ).width();
+			width += opt.fontMetrics.boundingRect( maxLongMonth( opt ) ).width();
 		break;
 	}
 
@@ -237,15 +241,12 @@ Section::value( const QDateTime & dt ) const
 		break;
 
 		case DaySection :
+		case DaySectionShort :
+		case DaySectionLong :
 		{
 			makeSectionValue( v, dt.date().day(), zeroesAdded );
 			return v;
 		}
-		break;
-
-		case DaySectionShort :
-		case DaySectionLong :
-			return v;
 		break;
 
 		case MonthSection :
@@ -285,6 +286,8 @@ Section::fillValues( const QDateTime & current,
 	const QDateTime & min, const QDateTime & max,
 	const QStyleOption & opt )
 {
+	Q_UNUSED( opt )
+
 	values.clear();
 	currentIndex = -1;
 
@@ -395,8 +398,6 @@ Section::fillValues( const QDateTime & current,
 
 		case DaySectionShort :
 		{
-			const int maxDayLength = maxShortDay( opt ).length();
-
 			const int d = current.date().day();
 
 			QDate date( current.date().year(), current.date().month(), 1 );
@@ -410,26 +411,19 @@ Section::fillValues( const QDateTime & current,
 				if( d == i )
 					currentIndex = values.size();
 
-				if( v.length() == 1 )
-					v.prepend( QLatin1Char( ' ' ) );
+				v.prepend( QLatin1Char( ' ' ) );
 
-				const QString dayName = QDate::shortDayName( date.dayOfWeek() );
-
-				v.prepend( QString( maxDayLength - dayName.length(),
-					QLatin1Char( ' ' ) ) );
-				v.prepend( dayName );
+				v.prepend( QDate::shortDayName( date.dayOfWeek() ) );
 
 				values.append( v );
 
-				date.addDays( 1 );
+				date = date.addDays( 1 );
 			}
 		}
 		break;
 
 		case DaySectionLong :
 		{
-			const int maxDayLength = maxLongDay( opt ).length();
-
 			const int d = current.date().day();
 
 			QDate date( current.date().year(), current.date().month(), 1 );
@@ -443,18 +437,13 @@ Section::fillValues( const QDateTime & current,
 				if( d == i )
 					currentIndex = values.size();
 
-				if( v.length() == 1 )
-					v.prepend( QLatin1Char( ' ' ) );
+				v.prepend( QLatin1Char( ' ' ) );
 
-				const QString dayName = QDate::longDayName( date.dayOfWeek() );
-
-				v.prepend( QString( maxDayLength - dayName.length(),
-					QLatin1Char( ' ' ) ) );
-				v.prepend( dayName );
+				v.prepend( QDate::longDayName( date.dayOfWeek() ) );
 
 				values.append( v );
 
-				date.addDays( 1 );
+				date = date.addDays( 1 );
 			}
 		}
 		break;

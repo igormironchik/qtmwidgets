@@ -59,7 +59,7 @@ public:
 		,	q( parent )
 		,	spec( Qt::LocalTime )
 		,	itemHeight( 0 )
-		,	itemTopMargin( 7 )
+		,	itemTopMargin( 0 )
 		,	itemsMaxCount( 5 )
 		,	itemSideMargin( 5 )
 		,	widgetHeight( 0 )
@@ -247,7 +247,7 @@ DateTimePickerPrivate::drawSectionItems( int section, QPainter * p,
 void
 DateTimePickerPrivate::drawWindow( QPainter * p, const QStyleOption & opt )
 {
-	const int windowOffset = itemHeight / 3;
+	const int windowOffset = itemHeight / 4;
 	const int windowHeight = itemHeight + windowOffset * 2;
 	const int windowMiddleHeight = windowHeight / 2;
 
@@ -255,7 +255,7 @@ DateTimePickerPrivate::drawWindow( QPainter * p, const QStyleOption & opt )
 	const int alpha2 = 255;
 
 	int yTop = currentItemY - windowOffset;
-	int yBottom = yTop + windowHeight;
+	int yBottom = yTop + windowMiddleHeight * 2;
 
 	p->setPen( QColor( 130, 130, 140, alpha2 ) );
 
@@ -589,6 +589,8 @@ DateTimePicker::sizeHint() const
 	d->itemHeight = opt.fontMetrics.boundingRect( QLatin1String( "AM" ) )
 		.height();
 
+	d->itemTopMargin = d->itemHeight / 3;
+
 	d->widgetHeight = d->itemHeight * d->itemsMaxCount +
 		( d->itemsMaxCount - 1 ) * d->itemTopMargin;
 
@@ -665,8 +667,6 @@ DateTimePicker::paintEvent( QPaintEvent * )
 	opt.initFrom( this );
 
 	QPainter p( this );
-
-//	p.setRenderHint( QPainter::Antialiasing );
 
 	int x = 0;
 

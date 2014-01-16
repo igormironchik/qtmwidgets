@@ -215,8 +215,6 @@ void
 PickerPrivate::drawItem( QPainter * p, const QStyleOption & opt, int offset,
 	const QModelIndex & index )
 {
-	p->setRenderHint( QPainter::TextAntialiasing );
-
 	if( index.flags() & Qt::ItemIsEnabled )
 	{
 		if( index != currentIndex )
@@ -272,6 +270,8 @@ void
 PickerPrivate::drawTick( const QRect & r, QPainter * p )
 {
 	p->save();
+
+	p->setRenderHint( QPainter::Antialiasing );
 
 	QPen pen = p->pen();
 	pen.setWidth( 2 );

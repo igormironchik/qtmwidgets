@@ -49,8 +49,6 @@ void
 drawCylinder( QPainter * p, const QRect & r,
 	bool roundLeftCorner, bool roundRightCorner )
 {
-	p->setRenderHint( QPainter::Antialiasing );
-
 	QLinearGradient firstVertLineGradient( QPointF( 0.0, 0.0 ),
 		QPointF( 0.0, 1.0 ) );
 	firstVertLineGradient.setCoordinateMode( QGradient::ObjectBoundingMode );

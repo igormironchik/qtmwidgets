@@ -32,6 +32,7 @@
 #include "datetimepicker.hpp"
 #include "private/datetimeparser.hpp"
 #include "private/drawing.hpp"
+#include "private/color.hpp"
 
 // Qt include.
 #include <QEvent>
@@ -228,7 +229,11 @@ DateTimePickerPrivate::drawSectionItems( int section, QPainter * p,
 		{
 			QStringList values = text.split( QLatin1Char( ' ' ) );
 
+			p->setPen(
+				lighterColor( opt.palette.color( QPalette::WindowText ), 75 ) );
 			p->drawText( r, Qt::AlignLeft | Qt::TextSingleLine, values.at( 0 ) );
+
+			p->setPen( opt.palette.color( QPalette::WindowText ) );
 			p->drawText( r, Qt::AlignRight | Qt::TextSingleLine, values.at( 1 ) );
 		}
 		else
@@ -246,42 +251,34 @@ DateTimePickerPrivate::drawWindow( QPainter * p, const QStyleOption & opt )
 	const int windowHeight = itemHeight + windowOffset * 2;
 	const int windowMiddleHeight = windowHeight / 2;
 
-	const int alpha = 125;
+	const int alpha = 150;
+	const int alpha2 = 255;
 
 	int yTop = currentItemY - windowOffset;
 	int yBottom = yTop + windowHeight;
 
-	p->setPen( QColor( 80, 90, 100, alpha ) );
+	p->setPen( QColor( 130, 130, 140, alpha2 ) );
 
 	p->drawLine( 0, yTop, opt.rect.width(), yTop );
 	p->drawLine( 0, yBottom, opt.rect.width(), yBottom );
 
-	p->setPen( QColor( 120, 130, 150, alpha ) );
+	p->setPen( QColor( 240, 240, 250, alpha2 ) );
 
-	p->drawLine( 0, yTop + 1, opt.rect.width(), yTop + 1 );
-	p->drawLine( 0, yBottom - 1, opt.rect.width(), yBottom - 1 );
-
-	p->setPen( QColor( 250, 250, 250, alpha ) );
-
-	p->drawLine( 0, yTop + 2, opt.rect.width(), yTop + 2 );
-
-	p->setPen( QColor( 240, 240, 240, alpha ) );
-
-	p->drawLine( 0, yTop + 3, opt.rect.width(), yTop + 3 );
+	p->drawLine( 0, yTop + 1, opt.rect.width(), yTop + 2 );
 
 	QLinearGradient g( QPointF( 0.0, 0.0 ), QPointF( 0.0, 1.0 ) );
 	g.setCoordinateMode( QGradient::ObjectBoundingMode );
-	g.setColorAt( 0.0, QColor( 215, 225, 235, alpha ) );
-	g.setColorAt( 1.0, QColor( 170, 180, 210, alpha ) );
+	g.setColorAt( 0.0, QColor( 225, 225, 240, alpha ) );
+	g.setColorAt( 1.0, QColor( 180, 190, 220, alpha ) );
 
 	p->setPen( Qt::NoPen );
 	p->setBrush( g );
 
-	p->drawRect( 0, yTop + 4, opt.rect.width(), windowMiddleHeight - 4 );
+	p->drawRect( 0, yTop + 2, opt.rect.width(), windowMiddleHeight - 2 );
 
-	p->setBrush( QColor( 165, 170, 200, alpha ) );
+	p->setBrush( QColor( 165, 175, 205, alpha ) );
 	p->drawRect( 0, yTop + windowMiddleHeight,
-		opt.rect.width(), windowMiddleHeight - 2 );
+		opt.rect.width(), windowMiddleHeight );
 }
 
 
@@ -669,7 +666,7 @@ DateTimePicker::paintEvent( QPaintEvent * )
 
 	QPainter p( this );
 
-	p.setRenderHint( QPainter::Antialiasing );
+//	p.setRenderHint( QPainter::Antialiasing );
 
 	int x = 0;
 

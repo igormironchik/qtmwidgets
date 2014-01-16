@@ -31,6 +31,7 @@
 // QtMWidgets include.
 #include "picker.hpp"
 #include "private/drawing.hpp"
+#include "private/color.hpp"
 
 // Qt include.
 #include <QStandardItemModel>
@@ -160,9 +161,11 @@ PickerPrivate::itemText( const QModelIndex & index ) const
 QSize
 PickerPrivate::minimumSizeHint( const QStyleOption & opt )
 {
-	stringHeight = opt.fontMetrics.height();
+	stringHeight = opt.fontMetrics.boundingRect( QLatin1String( "A" ) ).height();
 
 	itemSideMargin = opt.fontMetrics.averageCharWidth() * 3;
+
+	itemTopMargin = stringHeight / 3;
 
 	const int minStringWidth = opt.fontMetrics.averageCharWidth() *
 		( minStringLength + 2 );
@@ -178,7 +181,9 @@ PickerPrivate::sizeHint( const QStyleOption & opt )
 {
 	computeStringWidth();
 
-	stringHeight = opt.fontMetrics.height();
+	stringHeight = opt.fontMetrics.boundingRect( QLatin1String( "A" ) ).height();
+
+	itemTopMargin = stringHeight / 3;
 
 	itemSideMargin = opt.fontMetrics.averageCharWidth() * 3;
 
@@ -223,7 +228,7 @@ PickerPrivate::drawItem( QPainter * p, const QStyleOption & opt, int offset,
 			p->setPen( opt.palette.color( QPalette::Highlight ) );
 	}
 	else
-		p->setPen( opt.palette.color( QPalette::Mid ) );
+		p->setPen( lighterColor( opt.palette.color( QPalette::WindowText ), 75 ) );
 
 	const QRect r( opt.rect.x() + itemSideMargin, offset,
 		opt.rect.width() - itemSideMargin * 2, stringHeight );
@@ -238,9 +243,9 @@ PickerPrivate::drawItem( QPainter * p, const QStyleOption & opt, int offset,
 		const QRect tickRect( opt.rect.x() + itemSideMargin -
 				opt.fontMetrics.averageCharWidth() -
 				opt.fontMetrics.averageCharWidth() / 2,
-			offset + opt.fontMetrics.descent(),
+			offset,
 			opt.fontMetrics.averageCharWidth(),
-			opt.fontMetrics.ascent() );
+			stringHeight );
 
 		drawTick( tickRect, p );
 	}
@@ -280,8 +285,8 @@ PickerPrivate::drawTick( const QRect & r, QPainter * p )
 
 	p->setViewport( r );
 	p->setWindow( 0, 0, 6, 7 );
-	p->drawLine( 0, 4, 2, 7 );
-	p->drawLine( 2, 7, 6, 0 );
+	p->drawLine( 0, 4, 2, 6 );
+	p->drawLine( 2, 6, 5, 1 );
 
 	p->restore();
 }

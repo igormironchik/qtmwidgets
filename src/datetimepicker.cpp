@@ -916,7 +916,31 @@ DateTimePicker::setTime( const QTime & time )
 void
 DateTimePicker::wheelEvent( QWheelEvent * event )
 {
+	QPoint numDegrees = event->angleDelta();
 
+	if( !numDegrees.isNull() )
+	{
+		d->findMovableSection( event->pos() );
+
+		if( numDegrees.y() > 0 )
+			d->updateOffset( d->itemHeight + d->itemTopMargin );
+		else if( numDegrees.y() < 0 )
+			d->updateOffset( -( d->itemHeight + d->itemTopMargin ) );
+
+		if( numDegrees.y() != 0 )
+		{
+			d->normalizeOffsets();
+			d->clearOffset();
+			d->updateDaysIfNeeded();
+			d->updateCurrentDateTime();
+
+			d->movableSection = -1;
+
+			update();
+		}
+	}
+
+	event->accept();
 }
 
 void
@@ -927,8 +951,9 @@ DateTimePicker::mousePressEvent( QMouseEvent * event )
 		d->mousePos = event->pos();
 		d->leftMouseButtonPressed = true;
 		d->findMovableSection( event->pos() );
-		event->accept();
 	}
+
+	event->accept();
 }
 
 void
@@ -939,9 +964,10 @@ DateTimePicker::mouseMoveEvent( QMouseEvent * event )
 		const int delta = event->pos().y() - d->mousePos.y();
 		d->updateOffset( delta );
 		d->mousePos = event->pos();
-		event->accept();
 		update();
 	}
+
+	event->accept();
 }
 
 void
@@ -959,6 +985,8 @@ DateTimePicker::mouseReleaseEvent( QMouseEvent * event )
 
 		update();
 	}
+
+	event->accept();
 }
 
 void

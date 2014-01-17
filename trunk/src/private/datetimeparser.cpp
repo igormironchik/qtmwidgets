@@ -300,7 +300,7 @@ Section::fillValues( const QDateTime & current,
 			values.append( QLatin1String( "AM" ) );
 			values.append( QLatin1String( "PM" ) );
 
-			if( current.time().hour() > 12 || current.time().hour() == 0 )
+			if( current.time().hour() >= 12 )
 				currentIndex = 1;
 			else
 				currentIndex = 0;

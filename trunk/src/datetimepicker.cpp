@@ -547,9 +547,19 @@ DateTimePickerPrivate::updateCurrentDateTime()
 		day = 1;
 
 	if( amPm == 0 )
-		hour += 1;
+	{
+		if( hour == 11 )
+			hour = 0;
+		else
+			hour += 1;
+	}
 	else if( amPm == 1 )
-		hour += 12 + 1;
+	{
+		if( hour == 11 )
+			hour = 12;
+		else
+			hour += 12 + 1;
+	}
 
 	setValue( QDateTime( QDate( year, month, day ),
 		QTime( hour, minute, second, msecs ), spec ), false );

@@ -2,4 +2,5 @@
 TEMPLATE = subdirs
 
 SUBDIRS = picker \
-          datetimepicker
+          datetimepicker \
+          datepicker

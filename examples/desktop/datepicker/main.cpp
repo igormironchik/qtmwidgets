@@ -28,29 +28,42 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
+// Qt include.
+#include <QApplication>
+#include <QWidget>
+#include <QVBoxLayout>
+
 // QtMWidgets include.
-#include "datepicker.hpp"
-#include "private/datetimeparser.hpp"
+#include <QtMWidgets/DatePicker>
 
 
-namespace QtMWidgets {
-
-//
-// DatePicker
-//
-
-DatePicker::DatePicker( QWidget * parent )
-	:	DateTimePicker( DATETIMEPICKER_DATE_INITIAL, QVariant::Date, parent )
+class Widget
+	:	public QWidget
 {
-}
+public:
+	Widget()
+	{
+		QVBoxLayout * l = new QVBoxLayout( this );
+		QtMWidgets::DatePicker * picker =
+			new QtMWidgets::DatePicker( this );
 
-DatePicker::DatePicker( const QDate & date, QWidget * parent )
-	:	DateTimePicker( date, QVariant::Date, parent )
+		QFont font = picker->font();
+		font.setPointSize( 13 );
+
+		picker->setFont( font );
+
+		l->addWidget( picker );
+	}
+};
+
+
+int main( int argc, char ** argv )
 {
-}
+	QApplication app( argc, argv );
 
-DatePicker::~DatePicker()
-{
-}
+	Widget w;
 
-} /* namespace QtMWidgets */
+	w.show();
+
+	return app.exec();
+}

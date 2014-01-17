@@ -50,12 +50,12 @@ class DateTimePickerPrivate;
 	The DateTimePicker class provides widget for selecting
 	date and time. DateTimePicker shows cylinders with separate
 	components of date and time, i.e. year, month, day, hour, minute,
-	etc. By default format of the DateTimePicker is "yyyy MMMM dddd hh mm",
+	etc. By default format of the DateTimePicker is "dddd MMMM yyyy hh mm",
 	that mean that widgets will show 5 cylinders with year, long month name,
 	long day name with day number, hour and minute. \sa setFormat().
 
 	DateTimePicker allows to select date and time from the given
-	range. By default minimum date and time is January 1, 1900 00:00:00
+	range. By default minimum date and time is September 14, 1752 00:00:00
 	and maximum is December 31, 7999 23:59:59.
 */
 class DateTimePicker
@@ -233,7 +233,7 @@ public:
 	explicit DateTimePicker( const QDate & date, QWidget * parent = 0 );
 	explicit DateTimePicker( const QTime & time, QWidget * parent = 0 );
 
-	~DateTimePicker();
+	virtual ~DateTimePicker();
 
 	/*!
 		\return Date and time.

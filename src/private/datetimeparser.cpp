@@ -284,12 +284,12 @@ Section::value( const QDateTime & dt ) const
 void
 Section::fillValues( const QDateTime & current,
 	const QDateTime & min, const QDateTime & max,
-	const QStyleOption & opt )
+	bool updateIndex )
 {
-	Q_UNUSED( opt )
-
 	values.clear();
-	currentIndex = -1;
+
+	if( updateIndex )
+		currentIndex = -1;
 
 	switch( type )
 	{
@@ -388,7 +388,7 @@ Section::fillValues( const QDateTime & current,
 
 				makeSectionValue( v, i, zeroesAdded );
 
-				if( d == i )
+				if( updateIndex && d == i )
 					currentIndex = values.size();
 
 				values.append( v );
@@ -408,7 +408,7 @@ Section::fillValues( const QDateTime & current,
 
 				makeSectionValue( v, i, zeroesAdded );
 
-				if( d == i )
+				if( updateIndex && d == i )
 					currentIndex = values.size();
 
 				v.prepend( QLatin1Char( ' ' ) );
@@ -434,7 +434,7 @@ Section::fillValues( const QDateTime & current,
 
 				makeSectionValue( v, i, zeroesAdded );
 
-				if( d == i )
+				if( updateIndex && d == i )
 					currentIndex = values.size();
 
 				v.prepend( QLatin1Char( ' ' ) );

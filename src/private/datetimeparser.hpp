@@ -79,6 +79,10 @@ public:
 		MonthSectionLong   = 0x00400,
 		YearSection        = 0x00800,
 		YearSection2Digits = 0x01000,
+
+		DaySectionMask = ( DaySection | DaySectionShort | DaySectionLong ),
+		MonthSectionMask = ( MonthSection | MonthSectionShort | MonthSectionLong ),
+		YearSectionMask = ( YearSection | YearSection2Digits )
 	}; // enum Type
 
 	Section();
@@ -94,7 +98,7 @@ public:
 	//! Fill values.
 	void fillValues( const QDateTime & current,
 		const QDateTime & min, const QDateTime & max,
-		const QStyleOption & opt );
+		bool updateIndex = true );
 
 	//! Type of the section.
 	Type type;

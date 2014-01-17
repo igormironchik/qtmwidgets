@@ -36,6 +36,7 @@
 // Qt include.
 #include <QStandardItemModel>
 #include <QEvent>
+#include <QMouseEvent>
 #include <QPainter>
 #include <QStyleOption>
 #include <QFontMetrics>

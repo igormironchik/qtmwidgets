@@ -36,6 +36,7 @@
 
 // Qt include.
 #include <QEvent>
+#include <QMouseEvent>
 #include <QPainter>
 #include <QStyleOption>
 #include <QBrush>
@@ -57,6 +58,11 @@ public:
 		QVariant::Type parserType )
 		:	DateTimeParser( parserType )
 		,	q( parent )
+		,	minimum( QDateTime( DATETIMEPICKER_COMPAT_DATE_MIN,
+				DATETIMEPICKER_TIME_MIN ) )
+		,	maximum( DATETIMEPICKER_DATETIME_MAX )
+		,	value( QDateTime( DATETIMEPICKER_DATE_INITIAL,
+				DATETIMEPICKER_TIME_MIN ) )
 		,	spec( Qt::LocalTime )
 		,	itemHeight( 0 )
 		,	itemTopMargin( 0 )
@@ -64,17 +70,32 @@ public:
 		,	itemSideMargin( 5 )
 		,	widgetHeight( 0 )
 		,	currentItemY( 0 )
+		,	leftMouseButtonPressed( false )
+		,	movableSection( -1 )
+		,	daysSection( -1 )
+		,	monthSection( -1 )
+		,	yearSection( -1 )
 	{
+		initDaysMonthYearSectionIndex();
+		fillValues();
 	}
 
 	void updateTimeSpec();
 	void setRange( const QDateTime & min, const QDateTime & max );
-	void setValue( const QDateTime & dt );
+	void setValue( const QDateTime & dt, bool updateIndexes = true );
 	void emitSignals();
+	void normalizeOffset( int section );
 	void normalizeOffsets();
 	void drawSectionItems( int section, QPainter * p,
 		const QStyleOption & opt );
 	void drawWindow( QPainter * p, const QStyleOption & opt );
+	void findMovableSection( const QPoint & pos );
+	void updateOffset( int delta );
+	void clearOffset();
+	void updateDaysIfNeeded();
+	void updateCurrentDateTime();
+	void initDaysMonthYearSectionIndex();
+	void fillValues( bool updateIndexes = true );
 
 	DateTimePicker * q;
 	QDateTime minimum;
@@ -87,6 +108,12 @@ public:
 	int itemSideMargin;
 	int widgetHeight;
 	int currentItemY;
+	QPoint mousePos;
+	bool leftMouseButtonPressed;
+	int movableSection;
+	int daysSection;
+	int monthSection;
+	int yearSection;
 }; // class DateTimePickerPrivate
 
 void
@@ -110,13 +137,15 @@ DateTimePickerPrivate::setRange( const QDateTime & min, const QDateTime & max )
 		else if( value > maximum )
 			value = maximum;
 
+		fillValues();
+
 		q->updateGeometry();
 		q->update();
 	}
 }
 
 void
-DateTimePickerPrivate::setValue( const QDateTime & dt )
+DateTimePickerPrivate::setValue( const QDateTime & dt, bool updateIndexes )
 {
 	if( value != dt )
 	{
@@ -126,6 +155,78 @@ DateTimePickerPrivate::setValue( const QDateTime & dt )
 			value = minimum;
 		else if( dt > maximum )
 			value = maximum;
+
+		if( updateIndexes )
+		{
+			for( int i = 0; i < sections.size(); ++i )
+			{
+				switch( sections.at( i ).type )
+				{
+					case Section::AmPmSection :
+					{
+						if( value.time().hour() == 0 ||
+							value.time().hour() > 12 )
+								sections[ i ].currentIndex = 1;
+						else
+							sections[ i ].currentIndex = 0;
+					}
+					break;
+
+					case Section::SecondSection :
+					{
+						sections[ i ].currentIndex = value.time().second();
+					}
+					break;
+
+					case Section::MinuteSection :
+					{
+						sections[ i ].currentIndex = value.time().minute();
+					}
+					break;
+
+					case Section::Hour12Section :
+					{
+						if( value.time().hour() == 0 )
+							sections[ i ].currentIndex = 11;
+						else if( value.time().hour() > 12 )
+							sections[ i ].currentIndex = value.time().hour() - 12 - 1;
+						else
+							sections[ i ].currentIndex = value.time().hour() - 1;
+					}
+					break;
+
+					case Section::Hour24Section :
+					{
+						sections[ i ].currentIndex = value.time().hour();
+					}
+					break;
+
+					case Section::DaySection :
+					case Section::DaySectionShort :
+					case Section::DaySectionLong :
+					{
+						sections[ i ].currentIndex = value.date().day() - 1;
+					}
+					break;
+
+					case Section::MonthSection :
+					case Section::MonthSectionShort :
+					case Section::MonthSectionLong :
+					{
+						sections[ i ].currentIndex = value.date().month() - 1;
+					}
+					break;
+
+					case Section::YearSection :
+					case Section::YearSection2Digits :
+					{
+						sections[ i ].currentIndex = value.date().year() -
+							minimum.date().year();
+					}
+					break;
+				}
+			}
+		}
 
 		emitSignals();
 	}
@@ -156,30 +257,48 @@ static inline int nextIndex( int current, int size )
 }
 
 void
+DateTimePickerPrivate::normalizeOffset( int section )
+{
+	const int sectionValuesSize = sections.at( section ).values.size();
+	const int totalItemHeight = itemHeight + itemTopMargin;
+
+	while( qAbs( sections.at( section ).offset ) > totalItemHeight / 2 )
+	{
+		if( sections.at( section ).offset > 0 )
+		{
+			if( sectionValuesSize < itemsMaxCount &&
+				sections[ section ].currentIndex == 0 )
+			{
+				sections[ section ].offset = 0;
+				break;
+			}
+
+			sections[ section ].offset -= totalItemHeight;
+			sections[ section ].currentIndex = prevIndex(
+				sections.at( section ).currentIndex, sectionValuesSize );
+		}
+		else
+		{
+			if( sectionValuesSize < itemsMaxCount &&
+				sections[ section ].currentIndex ==
+					sections[ section ].values.size() - 1 )
+			{
+				sections[ section ].offset = 0;
+				break;
+			}
+
+			sections[ section ].offset += totalItemHeight;
+			sections[ section ].currentIndex = nextIndex(
+				sections.at( section ).currentIndex, sectionValuesSize );
+		}
+	}
+}
+
+void
 DateTimePickerPrivate::normalizeOffsets()
 {
 	for( int i = 0; i < sections.size(); ++i )
-	{
-		const int sectionValuesSize = sections.at( i ).values.size();
-		const int totalItemHeight = itemHeight + itemTopMargin;
-
-		while( qAbs( sections.at( i ).offset ) > totalItemHeight / 2 )
-		{
-			if( sections.at( i ).offset > 0 )
-			{
-				sections[ i ].offset -= totalItemHeight;
-				sections[ i ].currentIndex = prevIndex(
-					sections.at( i ).currentIndex, sectionValuesSize );
-			}
-			else
-			{
-				sections[ i ].offset += totalItemHeight;
-				sections[ i ].currentIndex = nextIndex(
-					sections.at( i ).currentIndex, sectionValuesSize );
-			}
-		}
-
-	}
+		normalizeOffset( i );
 }
 
 void
@@ -281,6 +400,190 @@ DateTimePickerPrivate::drawWindow( QPainter * p, const QStyleOption & opt )
 		opt.rect.width(), windowMiddleHeight );
 }
 
+void
+DateTimePickerPrivate::findMovableSection( const QPoint & pos )
+{
+	const int x = pos.x();
+
+	int width = 0;
+
+	for( int i = 0; i < sections.size(); ++i )
+	{
+		if( x >= width && x < width + sections.at( i ).sectionWidth )
+		{
+			movableSection = i;
+			return;
+		}
+
+		width += sections.at( i ).sectionWidth;
+	}
+
+	movableSection = -1;
+}
+
+void
+DateTimePickerPrivate::updateOffset( int delta )
+{
+	if( movableSection != -1 )
+		sections[ movableSection ].offset += delta;
+}
+
+void
+DateTimePickerPrivate::clearOffset()
+{
+	if( movableSection != -1 )
+		sections[ movableSection ].offset = 0;
+}
+
+void
+DateTimePickerPrivate::updateDaysIfNeeded()
+{
+	if( movableSection != -1 &&
+		( movableSection == monthSection || movableSection == yearSection ) )
+	{
+		if( daysSection != -1 )
+		{
+			QDateTime dummy = value;
+			QDate date = dummy.date();
+
+			int year = dummy.date().year();
+			int month = dummy.date().month();
+
+			if( monthSection != -1 )
+				month = sections[ monthSection ].currentIndex + 1;
+
+			if( yearSection != -1 )
+				year = minimum.date().year() + sections[ yearSection ].currentIndex;
+
+			date.setDate( year, month, 28 );
+			dummy.setDate( date );
+
+			sections[ daysSection ].fillValues( dummy, minimum, maximum,
+				false );
+
+			if( sections[ daysSection ].currentIndex >
+				sections[ daysSection ].values.size() - 1 )
+			{
+				sections[ daysSection ].currentIndex =
+					sections[ daysSection ].values.size() - 1;
+			}
+		}
+	}
+}
+
+void
+DateTimePickerPrivate::updateCurrentDateTime()
+{
+	int year = value.date().year();
+	int month = value.date().month();
+	int day = -1;
+	int hour = value.time().hour();
+	int minute = value.time().minute();
+	int second = value.time().second();
+	int msecs = value.time().msec();
+	int amPm = -1;
+
+	for( int i = 0; i < sections.size(); ++i )
+	{
+		switch( sections.at( i ).type )
+		{
+			case Section::AmPmSection :
+			{
+				amPm = sections.at( i ).currentIndex;
+			}
+			break;
+
+			case Section::SecondSection :
+			{
+				second = sections.at( i ).currentIndex;
+			}
+			break;
+
+			case Section::MinuteSection :
+			{
+				minute = sections.at( i ).currentIndex;
+			}
+			break;
+
+			case Section::Hour12Section :
+			case Section::Hour24Section :
+			{
+				hour = sections.at( i ).currentIndex;
+			}
+			break;
+
+			case Section::DaySection :
+			case Section::DaySectionShort :
+			case Section::DaySectionLong :
+			{
+				day = sections.at( i ).currentIndex + 1;
+			}
+			break;
+
+			case Section::MonthSection :
+			case Section::MonthSectionShort :
+			case Section::MonthSectionLong :
+			{
+				month = sections.at( i ).currentIndex + 1;
+			}
+			break;
+
+			case Section::YearSection :
+			case Section::YearSection2Digits :
+			{
+				year = minimum.date().year() + sections.at( i ).currentIndex;
+			}
+			break;
+		}
+	}
+
+	if( day == -1 )
+		day = 1;
+
+	if( amPm == 0 )
+		hour += 1;
+	else if( amPm == 1 )
+		hour += 12 + 1;
+
+	setValue( QDateTime( QDate( year, month, day ),
+		QTime( hour, minute, second, msecs ), spec ), false );
+}
+
+void
+DateTimePickerPrivate::initDaysMonthYearSectionIndex()
+{
+	int day = -1;
+	int month = -1;
+	int year = -1;
+
+	for( int i = 0; i < sections.size(); ++i )
+	{
+		if( sections.at( i ).type & Section::DaySectionMask )
+			day = i;
+		else if( sections.at( i ).type & Section::MonthSectionMask )
+			month = i;
+		else if( sections.at( i ).type & Section::YearSectionMask )
+			year = i;
+	}
+
+	daysSection = day;
+	monthSection = month;
+	yearSection = year;
+}
+
+void
+DateTimePickerPrivate::fillValues( bool updateIndexes )
+{
+	for( int i = 0; i < sections.size(); ++i )
+	{
+		sections[ i ].fillValues( value, minimum, maximum,
+			updateIndexes );
+
+		if( sections.at( i ).currentIndex == -1 )
+			sections[ i ].currentIndex = 0;
+	}
+}
+
 
 //
 // DateTimePicker
@@ -293,12 +596,6 @@ DateTimePicker::DateTimePicker( QWidget * parent )
 {
 	setSizePolicy( QSizePolicy( QSizePolicy::Fixed,
 		QSizePolicy::Fixed ) );
-
-	setMinimumDateTime( QDateTime( DATETIMEPICKER_COMPAT_DATE_MIN,
-		DATETIMEPICKER_TIME_MIN ) );
-	setMaximumDateTime( DATETIMEPICKER_DATETIME_MAX );
-	setDateTime( QDateTime( DATETIMEPICKER_DATE_INITIAL,
-		DATETIMEPICKER_TIME_MIN ) );
 }
 
 DateTimePicker::DateTimePicker( const QDateTime & dt, QWidget * parent )
@@ -307,10 +604,6 @@ DateTimePicker::DateTimePicker( const QDateTime & dt, QWidget * parent )
 {
 	setSizePolicy( QSizePolicy( QSizePolicy::Fixed,
 		QSizePolicy::Fixed ) );
-
-	setMinimumDateTime( QDateTime( DATETIMEPICKER_COMPAT_DATE_MIN,
-		DATETIMEPICKER_TIME_MIN ) );
-	setMaximumDateTime( DATETIMEPICKER_DATETIME_MAX );
 
 	setDateTime( dt.isValid() ? dt : DATETIMEPICKER_DATETIME_MIN );
 }
@@ -322,9 +615,6 @@ DateTimePicker::DateTimePicker( const QDate & date, QWidget * parent )
 	setSizePolicy( QSizePolicy( QSizePolicy::Fixed,
 		QSizePolicy::Fixed ) );
 
-	setMinimumDateTime( QDateTime( DATETIMEPICKER_COMPAT_DATE_MIN,
-		DATETIMEPICKER_TIME_MIN ) );
-	setMaximumDateTime( DATETIMEPICKER_DATETIME_MAX );
 	setDate( date.isValid() ? date : DATETIMEPICKER_DATE_MIN );
 }
 
@@ -335,9 +625,6 @@ DateTimePicker::DateTimePicker( const QTime & time, QWidget * parent )
 	setSizePolicy( QSizePolicy( QSizePolicy::Fixed,
 		QSizePolicy::Fixed ) );
 
-	setMinimumDateTime( QDateTime( DATETIMEPICKER_COMPAT_DATE_MIN,
-		DATETIMEPICKER_TIME_MIN ) );
-	setMaximumDateTime( DATETIMEPICKER_DATETIME_MAX );
 	setTime( time.isValid() ? time : DATETIMEPICKER_TIME_MIN );
 }
 
@@ -348,10 +635,6 @@ DateTimePicker::DateTimePicker( const QVariant & val, QVariant::Type parserType,
 {
 	setSizePolicy( QSizePolicy( QSizePolicy::Fixed,
 		QSizePolicy::Fixed ) );
-
-	setMinimumDateTime( QDateTime( DATETIMEPICKER_COMPAT_DATE_MIN,
-		DATETIMEPICKER_TIME_MIN ) );
-	setMaximumDateTime( DATETIMEPICKER_DATETIME_MAX );
 
 	switch( val.type() )
 	{
@@ -559,6 +842,7 @@ DateTimePicker::setFormat( const QString & format )
 {
 	if( d->parseFormat( format ) )
 	{
+		d->initDaysMonthYearSectionIndex();
 		updateGeometry();
 		update();
 	}
@@ -603,11 +887,6 @@ DateTimePicker::sizeHint() const
 		d->sections[ i ].sectionWidth = d->sections.at( i ).maxWidth( opt );
 		d->sections[ i ].sectionWidth += d->itemSideMargin * 2 + 6;
 		widgetWidth += d->sections[ i ].sectionWidth;
-
-		d->sections[ i ].fillValues( d->value, d->minimum, d->maximum, opt );
-
-		if( d->sections.at( i ).currentIndex == -1 )
-			d->sections[ i ].currentIndex = 0;
 	}
 
 	return QSize( widgetWidth, d->widgetHeight );
@@ -643,19 +922,43 @@ DateTimePicker::wheelEvent( QWheelEvent * event )
 void
 DateTimePicker::mousePressEvent( QMouseEvent * event )
 {
-
+	if( event->button() == Qt::LeftButton )
+	{
+		d->mousePos = event->pos();
+		d->leftMouseButtonPressed = true;
+		d->findMovableSection( event->pos() );
+		event->accept();
+	}
 }
 
 void
 DateTimePicker::mouseMoveEvent( QMouseEvent * event )
 {
-
+	if( d->leftMouseButtonPressed )
+	{
+		const int delta = event->pos().y() - d->mousePos.y();
+		d->updateOffset( delta );
+		d->mousePos = event->pos();
+		event->accept();
+		update();
+	}
 }
 
 void
 DateTimePicker::mouseReleaseEvent( QMouseEvent * event )
 {
+	if( d->leftMouseButtonPressed )
+	{
+		d->leftMouseButtonPressed = false;
 
+		d->clearOffset();
+		d->updateDaysIfNeeded();
+		d->updateCurrentDateTime();
+
+		d->movableSection = -1;
+
+		update();
+	}
 }
 
 void

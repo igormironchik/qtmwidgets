@@ -149,6 +149,8 @@ Section::maxWidth( const QStyleOption & opt ) const
 	int width = opt.fontMetrics.boundingRect( value(
 		DATETIMEPICKER_DATETIME_MAX ) ).width();
 
+	width += opt.fontMetrics.averageCharWidth() / 3;
+
 	switch( type )
 	{
 		case DaySectionShort :
@@ -298,7 +300,7 @@ Section::fillValues( const QDateTime & current,
 			values.append( QLatin1String( "AM" ) );
 			values.append( QLatin1String( "PM" ) );
 
-			if( current.time().hour() > 12 )
+			if( current.time().hour() > 12 || current.time().hour() == 0 )
 				currentIndex = 1;
 			else
 				currentIndex = 0;
@@ -343,8 +345,15 @@ Section::fillValues( const QDateTime & current,
 
 		case Hour12Section :
 		{
-			const int h = ( current.time().hour() > 12 ) ?
-				current.time().hour() - 12 : current.time().hour();
+			int h = 0;
+			int currentHour = current.time().hour();
+
+			if( currentHour == 0 )
+				h = 12;
+			else if( currentHour > 12 )
+				h = currentHour - 12;
+			else
+				h = currentHour;
 
 			for( int i = 1; i < 13; ++i )
 			{

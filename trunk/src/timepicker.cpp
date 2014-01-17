@@ -30,8 +30,27 @@
 
 // QtMWidgets include.
 #include "timepicker.hpp"
+#include "private/datetimeparser.hpp"
 
 
 namespace QtMWidgets {
+
+//
+// TimePicker
+//
+
+TimePicker::TimePicker( QWidget * parent )
+	:	DateTimePicker( DATETIMEPICKER_TIME_MIN, QVariant::Time, parent )
+{
+}
+
+TimePicker::TimePicker( const QTime & time, QWidget * parent )
+	:	DateTimePicker( time, QVariant::Time, parent )
+{
+}
+
+TimePicker::~TimePicker()
+{
+}
 
 } /* namespace QtMWidgets */

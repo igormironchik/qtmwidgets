@@ -28,44 +28,44 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef QTMWIDGETS__TIMEPICKER_HPP__INCLUDED
-#define QTMWIDGETS__TIMEPICKER_HPP__INCLUDED
+// Qt include.
+#include <QApplication>
+#include <QWidget>
+#include <QVBoxLayout>
 
 // QtMWidgets include.
-#include "datetimepicker.hpp"
+#include <QtMWidgets/TimePicker>
 
 
-namespace QtMWidgets {
-
-//
-// TimePicker
-//
-
-/*!
-	The TimePicker class provides widget for selecting
-	time. TimePicker shows cylinders with separate
-	components of time, i.e. hour, minute.
-	By default format of the TimePicker is "hh mm",
-	that mean that widgets will show 2 cylinders with hours
-	and minutes. \sa setFormat().
-
-	TimePicker allows to select time from the given
-	range. By default minimum time is 00:00:00
-	and maximum is 23:59:59.
-*/
-class TimePicker
-	:	public DateTimePicker
+class Widget
+	:	public QWidget
 {
-	Q_OBJECT
-	Q_PROPERTY( QTime time READ time WRITE setTime USER true )
-
 public:
-	explicit TimePicker( QWidget * parent = 0 );
-	explicit TimePicker( const QTime & time, QWidget * parent = 0 );
+	Widget()
+	{
+		QVBoxLayout * l = new QVBoxLayout( this );
+		QtMWidgets::TimePicker * picker =
+			new QtMWidgets::TimePicker( this );
 
-	~TimePicker();
-}; // class TimePicker
+		QFont font = picker->font();
+		font.setPointSize( 13 );
 
-} /* namespace QtMWidgets */
+		picker->setFont( font );
 
-#endif // QTMWIDGETS__TIMEPICKER_HPP__INCLUDED
+		picker->setFormat( QLatin1String( "hh mm a" ) );
+
+		l->addWidget( picker );
+	}
+};
+
+
+int main( int argc, char ** argv )
+{
+	QApplication app( argc, argv );
+
+	Widget w;
+
+	w.show();
+
+	return app.exec();
+}

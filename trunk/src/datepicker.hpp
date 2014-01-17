@@ -49,7 +49,7 @@ namespace QtMWidgets {
 	that mean that widgets will show 3 cylinders with year, long month name
 	and long day name with day number. \sa setFormat().
 
-	DateTimePicker allows to select date from the given
+	DatePicker allows to select date from the given
 	range. By default minimum date is September 14, 1752
 	and maximum is December 31, 7999.
 */
@@ -64,7 +64,7 @@ public:
 	explicit DatePicker( const QDate & date, QWidget * parent = 0 );
 
 	~DatePicker();
-};
+}; // class DatePicker
 
 } /* namespace QtMWidgets */
 

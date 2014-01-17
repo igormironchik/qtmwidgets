@@ -321,6 +321,9 @@ DateTimePickerPrivate::drawSectionItems( int section, QPainter * p,
 	if( yOffset > 0 )
 		++makePrevIndexCount;
 
+	if( sections.at( section ).values.size() < itemsMaxCount )
+		makePrevIndexCount = sections.at( section ).currentIndex;
+
 	int index = sections.at( section ).currentIndex;
 	int y = currentItemY + yOffset;
 
@@ -330,7 +333,10 @@ DateTimePickerPrivate::drawSectionItems( int section, QPainter * p,
 		y -= ( itemHeight + itemTopMargin );
 	}
 
-	const int iterationsCount = ( yOffset == 0 ) ? itemsMaxCount : itemsMaxCount + 1;
+	int iterationsCount = ( yOffset == 0 ) ? itemsMaxCount : itemsMaxCount + 1;
+
+	if( sections.at( section ).values.size() < itemsMaxCount )
+		iterationsCount = sections.at( section ).values.size();
 
 	const int textWidth = sections.at( section ).sectionWidth - 6 -
 		itemSideMargin * 2;
@@ -843,6 +849,7 @@ DateTimePicker::setFormat( const QString & format )
 	if( d->parseFormat( format ) )
 	{
 		d->initDaysMonthYearSectionIndex();
+		d->fillValues();
 		updateGeometry();
 		update();
 	}

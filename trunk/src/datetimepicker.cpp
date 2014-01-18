@@ -156,7 +156,7 @@ DateTimePickerPrivate::setValue( const QDateTime & dt, bool updateIndexes )
 		else if( dt > maximum )
 			value = maximum;
 
-		if( updateIndexes )
+		if( updateIndexes || value != dt )
 		{
 			for( int i = 0; i < sections.size(); ++i )
 			{

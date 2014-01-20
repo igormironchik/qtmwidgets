@@ -623,7 +623,10 @@ DateTimeParser::parseFormat( const QString & fmt )
 						newSections.append( s );
 					}
 					else
+					{
+						qWarning( "DateTimeParser: redefinition of the hours section." );
 						return false;
+					}
 				}
 			} break;
 
@@ -644,7 +647,10 @@ DateTimeParser::parseFormat( const QString & fmt )
 						newSections.append( s );
 					}
 					else
+					{
+						qWarning( "DateTimeParser: redefinition of the minutes section" );
 						return false;
+					}
 				}
 			} break;
 
@@ -665,7 +671,10 @@ DateTimeParser::parseFormat( const QString & fmt )
 						newSections.append( s );
 					}
 					else
+					{
+						qWarning( "DateTimeParser: redefinition of the seconds section." );
 						return false;
+					}
 				}
 			} break;
 
@@ -684,7 +693,10 @@ DateTimeParser::parseFormat( const QString & fmt )
 						newSections.append( s );
 					}
 					else
+					{
+						qWarning( "DateTimeParser: redefinition of the AM/PM section." );
 						return false;
+					}
 				}
 			} break;
 
@@ -708,10 +720,16 @@ DateTimeParser::parseFormat( const QString & fmt )
 							newSections.append( s );
 						}
 						else
+						{
+							qWarning( "DateTimeParser: redefinition of the years section." );
 							return false;
+						}
 					}
 					else
+					{
+						qWarning( "DateTimeParser: wrong value of the years section." );
 						return false;
+					}
 				}
 			} break;
 
@@ -739,7 +757,10 @@ DateTimeParser::parseFormat( const QString & fmt )
 						newSections.append( s );
 					}
 					else
+					{
+						qWarning( "DateTimeParser: redefinition of the monthes section." );
 						return false;
+					}
 				}
 			} break;
 
@@ -767,7 +788,10 @@ DateTimeParser::parseFormat( const QString & fmt )
 						newSections.append( s );
 					}
 					else
+					{
+						qWarning( "DateTimeParser: redefinition of the days section." );
 						return false;
+					}
 				}
 			} break;
 
@@ -775,7 +799,10 @@ DateTimeParser::parseFormat( const QString & fmt )
 				break;
 
 			default :
+			{
+				qWarning( "DateTimeParser: prohibited character in the format string." );
 				return false;
+			}
 		}
 	}
 

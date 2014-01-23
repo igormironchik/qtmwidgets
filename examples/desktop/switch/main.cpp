@@ -28,70 +28,43 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
+// Qt include.
+#include <QApplication>
+#include <QWidget>
+#include <QVBoxLayout>
+
 // QtMWidgets include.
-#include "color.hpp"
+#include <QtMWidgets/Switch>
 
 
-namespace QtMWidgets {
-
-//
-// lighterColor
-//
-
-QColor
-lighterColor( const QColor & c, int b )
+class Widget
+	:	public QWidget
 {
-	if( b <= 0 )
-		return c;
-
-	int h = 0;
-	int s = 0;
-	int v = 0;
-	int a = 0;
-
-	QColor hsv = c.toHsv();
-	hsv.getHsv( &h, &s, &v, &a );
-
-	v += b;
-
-	if( v > 255 )
+public:
+	Widget()
 	{
-		s -= v - 255;
+		QVBoxLayout * l = new QVBoxLayout( this );
+		QtMWidgets::Switch * s = new QtMWidgets::Switch( this );
 
-		if( s < 0 ) s = 0;
+		QFont f = s->font();
+		f.setBold( true );
+		s->setFont( f );
 
-		v = 255;
+		s->setOnText( QLatin1String( "ON" ) );
+		s->setOffText( QLatin1String( "OFF" ) );
+
+		l->addWidget( s );
 	}
-
-	hsv.setHsv( h, s, v, a );
-
-	return hsv.convertTo( c.spec() );
-}
+};
 
 
-//
-// darkerColor
-//
-
-QColor
-darkerColor( const QColor & c, int b )
+int main( int argc, char ** argv )
 {
-	if( b <= 0 )
-		return c;
+	QApplication app( argc, argv );
 
-	int h = 0;
-	int s = 0;
-	int v = 0;
-	int a = 0;
+	Widget w;
 
-	QColor hsv = c.toHsv();
-	hsv.getHsv( &h, &s, &v, &a );
+	w.show();
 
-	v -= b;
-
-	hsv.setHsv( h, s, v, a );
-
-	return hsv.convertTo( c.spec() );
+	return app.exec();
 }
-
-} /* namespace QtMWidgets */

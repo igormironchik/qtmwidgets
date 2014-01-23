@@ -60,14 +60,78 @@ class Picker
 {
 	Q_OBJECT
 
+	/*!
+		\property count
+
+		\brief the number of items in the picker
+
+		By default, for an empty picker, this property has a value of 0.
+	*/
 	Q_PROPERTY( int count READ count )
+	/*!
+		\property currentIndex
+
+		\brief the index of the current item in the picker.
+
+		The current index can change when inserting or removing items.
+
+		By default, for an empty picker or a picker in which no current
+		item is set, this property has a value of -1.
+	*/
 	Q_PROPERTY( int currentIndex READ currentIndex WRITE setCurrentIndex
 		NOTIFY currentIndexChanged )
+	/*!
+		\property currentText
+
+		\brief the current text
+
+		The current text is the value of the current item or
+		an empty string if the picker is empty or no current item is set.
+
+		The setter setCurrentText() if there is a matching text in the list,
+		currentIndex is set to the corresponding index.
+	*/
 	Q_PROPERTY( QString currentText READ currentText WRITE setCurrentText
 		NOTIFY currentTextChanged USER true )
+	/*!
+		\property currentData
+
+		\brief the data for the current item
+
+		By default, for an empty picker or a picker in which no current
+		item is set, this property contains an invalid QVariant.
+	*/
 	Q_PROPERTY( QVariant currentData READ currentData )
+	/*!
+		\property modelColumn
+
+		\brief the column in the model that is visible.
+
+		By default, this property has a value of 0.
+	*/
 	Q_PROPERTY( int modelColumn READ modelColumn WRITE setModelColumn )
+	/*!
+		\property maxCount
+
+		\brief the maximum number of items allowed in the picker
+
+		\note If you set the maximum number to be less then the current
+		amount of items in the picker, the extra items will be
+		truncated. This also applies if you have set an external model on
+		the picker.
+
+		By default, this property's value is derived from the highest
+		signed integer available (typically 2147483647).
+	*/
 	Q_PROPERTY( int maxCount READ maxCount WRITE setMaxCount )
+	/*!
+		\property highlightColor
+
+		\brief color used to highlight the current item
+
+		By default this color is QPalette::Highlight.
+	*/
+	Q_PROPERTY( QColor highlightColor READ highlightColor WRITE setHighlightColor )
 
 signals:
 	/*!
@@ -109,21 +173,15 @@ public:
 	~Picker();
 
 	/*!
-		\brief the number of items in the picker
+		\return The number of items in the picker.
 
-		By default, for an empty picker, this property has a value of 0.
+		\sa count
 	*/
 	int count() const;
 	/*!
-		\brief the maximum number of items allowed in the picker
+		\return The maximum number of items allowed in the picker.
 
-		\note If you set the maximum number to be less then the current
-		amount of items in the picker, the extra items will be
-		truncated. This also applies if you have set an external model on
-		the picker.
-
-		By default, this property's value is derived from the highest
-		signed integer available (typically 2147483647).
+		\sa maxCount
 	*/
 	int maxCount() const;
 	/*!
@@ -167,7 +225,7 @@ public:
 	void setModel( QAbstractItemModel * model );
 
 	/*!
-		Returns the root model item index for the items in the picker.
+		\return The root model item index for the items in the picker.
 
 		\sa setRootModelIndex()
 	*/
@@ -180,9 +238,9 @@ public:
 	void setRootModelIndex( const QModelIndex & index );
 
 	/*!
-		\brief the column in the model that is visible.
+		\return The column in the model that is visible.
 
-		By default, this property has a value of 0.
+		\sa modelColumn
 	*/
 	int modelColumn() const;
 	/*!
@@ -191,29 +249,21 @@ public:
 	void setModelColumn( int visibleColumn );
 
 	/*!
-		\brief the index of the current item in the picker.
+		\return The index of the current item in the picker.
 
-		The current index can change when inserting or removing items.
-
-		By default, for an empty picker or a picker in which no current
-		item is set, this property has a value of -1.
+		\sa currentIndex
 	*/
 	int currentIndex() const;
 	/*!
-		\brief the current text
+		\return The current text.
 
-		The current text is the value of the current item or
-		an empty string if the picker is empty or no current item is set.
-
-		The setter setCurrentText() if there is a matching text in the list,
-		currentIndex is set to the corresponding index.
+		\sa currentText
 	*/
 	QString currentText() const;
 	/*!
-		\brief the data for the current item
+		\return The data for the current item.
 
-		By default, for an empty picker or a picker in which no current
-		item is set, this property contains an invalid QVariant.
+		\sa currentData
 	*/
 	QVariant currentData( int role = Qt::UserRole ) const;
 
@@ -293,6 +343,15 @@ public:
 	*/
 	void setItemData( int index, const QVariant & value,
 		int role = Qt::UserRole );
+
+	/*!
+		\return Color used to highlight the current item.
+
+		\sa highlightColor
+	*/
+	QColor highlightColor() const;
+	//! Set color used to highlight the current item.
+	void setHighlightColor( const QColor & c );
 
 	QSize sizeHint() const;
 	QSize minimumSizeHint() const;

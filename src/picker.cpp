@@ -120,6 +120,7 @@ public:
 	bool mouseWasMoved;
 	bool wasPainted;
 	int mouseMoveDelta;
+	QColor highlightColor;
 }; // class PickerPrivate
 
 void
@@ -129,6 +130,11 @@ PickerPrivate::init()
 		QSizePolicy::Fixed ) );
 
 	q->setModel( new QStandardItemModel( 0, 1, q ) );
+
+	QStyleOption opt;
+	opt.initFrom( q );
+
+	highlightColor = opt.palette.color( QPalette::Highlight );
 }
 
 void
@@ -226,7 +232,7 @@ PickerPrivate::drawItem( QPainter * p, const QStyleOption & opt, int offset,
 		if( index != currentIndex )
 			p->setPen( opt.palette.color( QPalette::WindowText ) );
 		else
-			p->setPen( opt.palette.color( QPalette::Highlight ) );
+			p->setPen( highlightColor );
 	}
 	else
 		p->setPen( lighterColor( opt.palette.color( QPalette::WindowText ), 75 ) );
@@ -777,6 +783,23 @@ Picker::setItemData( int index, const QVariant & value, int role )
 
 	if( item.isValid() )
 		d->model->setData( item, value, role );
+}
+
+QColor
+Picker::highlightColor() const
+{
+	return d->highlightColor;
+}
+
+void
+Picker::setHighlightColor( const QColor & c )
+{
+	if( d->highlightColor != c )
+	{
+		d->highlightColor = c;
+
+		update();
+	}
 }
 
 QSize

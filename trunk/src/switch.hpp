@@ -117,6 +117,14 @@ class Switch
 		I.e. this property is empty.
 	*/
 	Q_PROPERTY( QString offText READ offText WRITE setOffText )
+	/*!
+		\property onColor
+
+		\brief color used to highlight checked state of the button.
+
+		By default onColor is QPalette::Highlight.
+	*/
+	Q_PROPERTY( QColor onColor READ onColor WRITE setOnColor )
 
 signals:
 	/*!
@@ -173,6 +181,11 @@ public:
 	QString offText() const;
 	//! Set text that will be displayed in unchecked state.
 	void setOffText( const QString & text );
+
+	//! \return Color to highlight checked state.
+	QColor onColor() const;
+	//! Set color to highlight checked state.
+	void setOnColor( const QColor & c );
 
 	QSize sizeHint() const;
 

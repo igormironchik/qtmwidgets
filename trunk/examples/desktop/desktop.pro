@@ -4,4 +4,5 @@ TEMPLATE = subdirs
 SUBDIRS = picker \
           datetimepicker \
           datepicker \
-          timepicker
+          timepicker \
+          switch

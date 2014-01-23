@@ -156,7 +156,7 @@ void
 SwitchPrivate::drawText( QPainter * p, const QStyleOption & opt,
 	const QColor & on, const QColor & off )
 {
-	const QRect r( radius, radius / 2, opt.rect.width() - radius * 2, radius );
+	const QRect r( radius, 0, opt.rect.width() - radius * 2, radius * 2 );
 
 	switch( state )
 	{
@@ -166,7 +166,9 @@ SwitchPrivate::drawText( QPainter * p, const QStyleOption & opt,
 			if( !onText.isEmpty() )
 			{
 				p->setPen( on );
-				p->drawText( r, Qt::AlignLeft | Qt::TextSingleLine, onText );
+				p->drawText( r,
+					Qt::AlignLeft | Qt::TextSingleLine | Qt::AlignVCenter,
+					onText );
 			}
 		}
 		break;
@@ -177,7 +179,9 @@ SwitchPrivate::drawText( QPainter * p, const QStyleOption & opt,
 			if( !offText.isEmpty() )
 			{
 				p->setPen( off );
-				p->drawText( r, Qt::AlignRight | Qt::TextSingleLine, offText );
+				p->drawText( r,
+					Qt::AlignRight | Qt::TextSingleLine | Qt::AlignVCenter,
+					offText );
 			}
 		}
 		break;

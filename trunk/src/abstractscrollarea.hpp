@@ -174,8 +174,10 @@ protected:
 	//! Set viewport margins.
 	void setViewportMargins( const QMargins & margins );
 
-	//! Scroll contents.
-	void scrollContentsBy( int dx, int dy );
+	/*!
+		Scroll contents. Should be reimplemented in a subclass.
+	*/
+	virtual void scrollContentsBy( int dx, int dy ) = 0;
 
 	//! \return Size of the scrolled area.
 	const QSize & scrolledAreaSize() const;

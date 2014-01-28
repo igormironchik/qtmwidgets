@@ -80,6 +80,7 @@ public:
 	void calcIndicator( int scrolledSize, int scrolledPos,
 		int viewportSize, int & indicatorSize,
 		int & indicatorPos );
+	void scrollContentsBy( int dx, int dy );
 
 	virtual ~AbstractScrollAreaPrivate()
 	{
@@ -231,6 +232,22 @@ AbstractScrollAreaPrivate::calcIndicator( int scrolledSize, int scrolledPos,
 		indicatorSize = totalIndicatorSize;
 		indicatorPos = 0;
 	}
+}
+
+void
+AbstractScrollAreaPrivate::scrollContentsBy( int dx, int dy )
+{
+	topLeftCorner += QPoint( dx, dy );
+
+	normalizePosition();
+
+	calcIndicators();
+
+	if( dx != 0 ) paintHorizontalScrollIndicator = true;
+
+	if( dy != 0 ) paintVerticalScrollIndicator = true;
+
+	q->update();
 }
 
 
@@ -394,22 +411,6 @@ AbstractScrollArea::setViewportMargins( const QMargins & margins )
 		margins.right(), margins.bottom() );
 }
 
-void
-AbstractScrollArea::scrollContentsBy( int dx, int dy )
-{
-	d->topLeftCorner += QPoint( dx, dy );
-
-	d->normalizePosition();
-
-	d->calcIndicators();
-
-	if( dx != 0 ) d->paintHorizontalScrollIndicator = true;
-
-	if( dy != 0 ) d->paintVerticalScrollIndicator = true;
-
-	update();
-}
-
 const QSize &
 AbstractScrollArea::scrolledAreaSize() const
 {
@@ -518,6 +519,8 @@ AbstractScrollArea::mouseMoveEvent( QMouseEvent * e )
 
 		d->mousePos = e->pos();
 
+		d->scrollContentsBy( dx, dy );
+
 		scrollContentsBy( dx, dy );
 	}
 
@@ -533,16 +536,28 @@ AbstractScrollArea::wheelEvent( QWheelEvent * e )
 	if( !numPixels.isNull() )
 	{
 		if( e->modifiers() == Qt::ShiftModifier )
+		{
+			d->scrollContentsBy( numPixels.x(), 0 );
 			scrollContentsBy( numPixels.x(), 0 );
+		}
 		else
+		{
+			d->scrollContentsBy( 0, numPixels.y() );
 			scrollContentsBy( 0, numPixels.y() );
+		}
 	}
 	else if( !numDegrees.isNull() )
 	{
 		if( e->modifiers() == Qt::ShiftModifier )
+		{
+			d->scrollContentsBy( numDegrees.x() / 8, 0 );
 			scrollContentsBy( numDegrees.x() / 8, 0 );
+		}
 		else
+		{
+			d->scrollContentsBy( 0, numDegrees.y() / 8 );
 			scrollContentsBy( 0, numDegrees.y() / 8 );
+		}
 	}
 
 	e->accept();

@@ -34,12 +34,49 @@
 // QtMWidgets include.
 #include "../abstractscrollarea.hpp"
 
+// Qt include.
+#include <QWidget>
+
 QT_BEGIN_NAMESPACE
 class QStyleOption;
 QT_END_NAMESPACE
 
 
 namespace QtMWidgets {
+
+//
+// ScrollIndicator
+//
+
+class ScrollIndicator
+	:	public QWidget
+{
+public:
+	ScrollIndicator( const QColor & c, Qt::Orientation o, QWidget * parent );
+
+	QSize minimumSizeHint() const;
+	QSize sizeHint() const;
+
+protected:
+	void paintEvent( QPaintEvent * );
+
+private:
+	void drawIndicator( QPainter * p );
+
+protected:
+	friend class AbstractScrollAreaPrivate;
+	friend class AbstractScrollArea;
+
+	AbstractScrollArea::ScrollIndicatorPolicy policy;
+	int minimumSize;
+	int size;
+	QPoint pos;
+	int width;
+	Qt::Orientation orientation;
+	bool needPaint;
+	QColor color;
+}; // class ScrollIndicator
+
 
 //
 // AbstractScrollAreaPrivate
@@ -56,30 +93,19 @@ public:
 		,	bottom( 0 )
 		,	right( 0 )
 		,	left( 0 )
-		,	verticalScrollIndicatorPolicy(
-				AbstractScrollArea::ScrollIndicatorAsNeeded )
-		,	horizontalScrollIndicatorPolicy(
-				AbstractScrollArea::ScrollIndicatorAsNeeded )
-		,	paintVerticalScrollIndicator( false )
-		,	paintHorizontalScrollIndicator( false )
 		,	leftMouseButtonPressed( false )
-		,	hIndicatorSize( 0 )
-		,	hIndicatorPos( 0 )
-		,	vIndicatorSize( 0 )
-		,	vIndicatorPos( 0 )
-		,	indicatorWidth( 3 )
+		,	horIndicator( 0 )
+		,	vertIndicator( 0 )
 	{
 	}
 
 	void init();
 	void layoutChildren( const QStyleOption & opt );
 	void normalizePosition();
-	void drawHorizontalScrollIndicator( QPainter * p );
-	void drawVerticalScrollIndicator( QPainter * p );
 	void calcIndicators();
-	void calcIndicator( int scrolledSize, int scrolledPos,
-		int viewportSize, int & indicatorSize,
-		int & indicatorPos );
+	void calcIndicator( Qt::Orientation orient,
+		int minSize, int width, bool & needPaint,
+		int & indicatorSize, QPoint & indicatorPos );
 	void scrollContentsBy( int dx, int dy );
 
 	virtual ~AbstractScrollAreaPrivate()
@@ -95,17 +121,10 @@ public:
 	int bottom;
 	int right;
 	int left;
-	AbstractScrollArea::ScrollIndicatorPolicy verticalScrollIndicatorPolicy;
-	AbstractScrollArea::ScrollIndicatorPolicy horizontalScrollIndicatorPolicy;
-	bool paintVerticalScrollIndicator;
-	bool paintHorizontalScrollIndicator;
 	bool leftMouseButtonPressed;
 	QPoint mousePos;
-	int hIndicatorSize;
-	int hIndicatorPos;
-	int vIndicatorSize;
-	int vIndicatorPos;
-	int indicatorWidth;
+	ScrollIndicator * horIndicator;
+	ScrollIndicator * vertIndicator;
 }; // class AbstractScrollAreaPrivate
 
 } /* namespace QtMWidgets */

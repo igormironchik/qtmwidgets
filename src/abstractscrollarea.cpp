@@ -43,6 +43,69 @@
 namespace QtMWidgets {
 
 //
+// ScrollIndicator
+//
+
+ScrollIndicator::ScrollIndicator( const QColor & c, Qt::Orientation o,
+	QWidget * parent )
+	:	QWidget( parent )
+	,	policy( AbstractScrollArea::ScrollIndicatorAsNeeded )
+	,	minimumSize( 10 )
+	,	size( minimumSize )
+	,	width( 3 )
+	,	orientation( o )
+	,	needPaint( false )
+	,	color( c )
+{
+}
+
+QSize
+ScrollIndicator::minimumSizeHint() const
+{
+	if( orientation == Qt::Horizontal )
+		return QSize( minimumSize, width );
+	else
+		return QSize( width, minimumSize );
+}
+
+QSize
+ScrollIndicator::sizeHint() const
+{
+	if( orientation == Qt::Horizontal )
+		return QSize( size, width );
+	else
+		return QSize( width, size );
+}
+
+void
+ScrollIndicator::paintEvent( QPaintEvent * )
+{
+	QPainter p( this );
+
+	switch( policy )
+	{
+		case AbstractScrollArea::ScrollIndicatorAsNeeded :
+			if( !needPaint )
+				break;
+		case AbstractScrollArea::ScrollIndicatorAlwaysOn :
+			drawIndicator( &p );
+		break;
+	}
+}
+
+void
+ScrollIndicator::drawIndicator( QPainter * p )
+{
+	p->setPen( QPen( color, width, Qt::SolidLine, Qt::RoundCap ) );
+
+	if( orientation == Qt::Horizontal )
+		p->drawLine( 0, 1, size, 1 );
+	else
+		p->drawLine( 1, 0, 1, size );
+}
+
+
+//
 // AbstractScrollAreaPrivate
 //
 
@@ -52,13 +115,16 @@ AbstractScrollAreaPrivate::init()
 	QStyleOption opt;
 	opt.initFrom( q );
 
-	indicatorColor = opt.palette.color( QPalette::Highlight );
+	const QColor ic = opt.palette.color( QPalette::Highlight );
 
 	viewport = new QWidget( q );
 	viewport->setObjectName( QLatin1String( "qt_scrollarea_viewport" ) );
 	viewport->setBackgroundRole( QPalette::Base );
 	viewport->setAutoFillBackground( true );
 	viewport->setFocusProxy( q );
+
+	horIndicator = new ScrollIndicator( ic, Qt::Horizontal, viewport );
+	vertIndicator = new ScrollIndicator( ic, Qt::Vertical, viewport );
 
 	q->setFocusPolicy( Qt::WheelFocus );
 	q->setFrameStyle( QFrame::StyledPanel | QFrame::Sunken );
@@ -113,79 +179,124 @@ AbstractScrollAreaPrivate::normalizePosition()
 }
 
 void
-AbstractScrollAreaPrivate::drawHorizontalScrollIndicator( QPainter * p )
-{
-	p->setPen( QPen( indicatorColor, indicatorWidth,
-		Qt::SolidLine, Qt::RoundCap ) );
-
-	const int x = indicatorWidth + hIndicatorPos;
-	const int y = viewport->height() - indicatorWidth;
-
-	p->drawLine( x, y, x + hIndicatorSize, y );
-}
-
-void
-AbstractScrollAreaPrivate::drawVerticalScrollIndicator( QPainter * p )
-{
-	p->setPen( QPen( indicatorColor, indicatorWidth,
-		Qt::SolidLine, Qt::RoundCap ) );
-
-	const int x = viewport->width() - indicatorWidth;
-	const int y = indicatorWidth + vIndicatorPos;
-
-	p->drawLine( x, y, x, y + vIndicatorSize );
-}
-
-void
 AbstractScrollAreaPrivate::calcIndicators()
 {
 	if( scrolledAreaSize.isValid() && scrolledAreaSize.width() != 0
 		&& scrolledAreaSize.height() != 0 )
 	{
-		calcIndicator( scrolledAreaSize.width(), topLeftCorner.x(),
-			viewport->width(), hIndicatorSize, hIndicatorPos );
+		calcIndicator( Qt::Horizontal, horIndicator->minimumSize,
+			horIndicator->width, horIndicator->needPaint,
+			horIndicator->size, horIndicator->pos );
 
-		calcIndicator( scrolledAreaSize.height(), topLeftCorner.y(),
-			viewport->height(), vIndicatorSize, vIndicatorPos );
+		horIndicator->move( horIndicator->pos );
+
+		calcIndicator( Qt::Vertical, vertIndicator->minimumSize,
+			vertIndicator->width, vertIndicator->needPaint,
+			vertIndicator->size, vertIndicator->pos );
+
+		vertIndicator->move( vertIndicator->pos );
 	}
 }
 
 void
-AbstractScrollAreaPrivate::calcIndicator( int scrolledSize, int scrolledPos,
-	int viewportSize, int & indicatorSize, int & indicatorPos )
+AbstractScrollAreaPrivate::calcIndicator( Qt::Orientation orient,
+	int minSize, int width, bool & needPaint,
+	int & indicatorSize, QPoint & indicatorPos )
 {
-	const int totalIndicatorSize = viewportSize - 4 * indicatorWidth;
-	const double ratio = (double) viewportSize / (double) scrolledSize;
+	int viewportSize = 0;
+	int scrolledSize = 0;
+	int x = 0;
+	int y = 0;
+	double posRatio = 0.0;
+	int totalIndicatorSize = 0;
+	double ratio = 0.0;
 
-	if( ratio < 1.0 )
+	switch( orient )
 	{
-		indicatorSize = (double) totalIndicatorSize * ratio;
+		case Qt::Horizontal :
+		{
+			viewportSize = viewport->width();
+			scrolledSize = scrolledAreaSize.width();
+			x = 2 * width;
+			y = viewport->height() - x
+				+ ( horIndicator->parent() == viewport ? 0 : topLeftCorner.y() );
+			posRatio = (double) topLeftCorner.x() / (double) scrolledSize;
+			totalIndicatorSize = viewportSize - 4 * width;
+			ratio = (double) viewportSize / (double) scrolledSize;
 
-		const double posRatio = (double) scrolledPos / (double) scrolledSize;
+			if( ratio < 1.0 )
+			{
+				indicatorSize = (double) totalIndicatorSize * ratio;
 
-		indicatorPos = (double) totalIndicatorSize * posRatio;
-	}
-	else
-	{
-		indicatorSize = totalIndicatorSize;
-		indicatorPos = 0;
+				if( indicatorSize < minSize )
+				{
+					posRatio *= ( (double) indicatorSize / (double) minSize );
+					indicatorSize = minSize;
+				}
+
+				x += ( totalIndicatorSize + scrolledSize ) * posRatio;
+			}
+			else
+			{
+				needPaint = false;
+				indicatorSize = totalIndicatorSize;
+			}
+
+			indicatorPos = QPoint( x, y );
+		}
+		break;
+
+		case Qt::Vertical :
+		{
+			viewportSize = viewport->height();
+			scrolledSize = scrolledAreaSize.height();
+			y = 2 * width;
+			x = viewport->width() - y
+				+ ( vertIndicator->parent() == viewport ? 0 : topLeftCorner.x() );
+			posRatio = (double) topLeftCorner.y() / (double) scrolledSize;
+			totalIndicatorSize = viewportSize - 4 * width;
+			ratio = (double) viewportSize / (double) scrolledSize;
+
+			if( ratio < 1.0 )
+			{
+				indicatorSize = (double) totalIndicatorSize * ratio;
+
+				if( indicatorSize < minSize )
+				{
+					posRatio *= ( (double) indicatorSize / (double) minSize );
+					indicatorSize = minSize;
+				}
+
+				y += ( totalIndicatorSize + scrolledSize ) * posRatio;
+			}
+			else
+			{
+				needPaint = false;
+				indicatorSize = totalIndicatorSize;
+			}
+
+			indicatorPos = QPoint( x, y );
+		}
+		break;
 	}
 }
 
 void
 AbstractScrollAreaPrivate::scrollContentsBy( int dx, int dy )
 {
-	topLeftCorner += QPoint( dx, dy );
+	topLeftCorner -= QPoint( dx, dy );
 
 	normalizePosition();
 
 	calcIndicators();
 
-	if( dx != 0 ) paintHorizontalScrollIndicator = true;
+	if( dx != 0 ) horIndicator->needPaint = true;
 
-	if( dy != 0 ) paintVerticalScrollIndicator = true;
+	if( dy != 0 ) vertIndicator->needPaint = true;
 
 	q->update();
+	horIndicator->update();
+	vertIndicator->update();
 }
 
 
@@ -231,6 +342,8 @@ AbstractScrollArea::setViewport( QWidget * widget )
 		d->viewport = widget;
 		d->viewport->setParent( this );
 		d->viewport->setFocusProxy( this );
+		d->horIndicator->setParent( d->viewport );
+		d->vertIndicator->setParent( d->viewport );
 
 		QStyleOption opt;
 		opt.initFrom( this );
@@ -253,47 +366,48 @@ AbstractScrollArea::setupViewport( QWidget * )
 QColor
 AbstractScrollArea::indicatorColor() const
 {
-	return d->indicatorColor;
+	return d->horIndicator->color;
 }
 
 void
 AbstractScrollArea::setIndicatorColor( const QColor & c )
 {
-	if( d->indicatorColor != c )
+	if( d->horIndicator->color != c )
 	{
-		d->indicatorColor = c;
+		d->horIndicator->color = c;
+		d->vertIndicator->color = c;
 	}
 }
 
 AbstractScrollArea::ScrollIndicatorPolicy
 AbstractScrollArea::verticalScrollIndicatorPolicy() const
 {
-	return d->verticalScrollIndicatorPolicy;
+	return d->vertIndicator->policy;
 }
 
 void
 AbstractScrollArea::setVerticalScrollIndicatorPolicy(
 	ScrollIndicatorPolicy policy )
 {
-	d->verticalScrollIndicatorPolicy = policy;
+	d->vertIndicator->policy = policy;
 
-	update();
+	d->vertIndicator->update();
 }
 
 
 AbstractScrollArea::ScrollIndicatorPolicy
 AbstractScrollArea::horizontalScrollIndicatorPolicy() const
 {
-	return d->horizontalScrollIndicatorPolicy;
+	return d->horIndicator->policy;
 }
 
 void
 AbstractScrollArea::setHorizontalScrollIndicatorPolicy(
 	AbstractScrollArea::ScrollIndicatorPolicy policy )
 {
-	d->horizontalScrollIndicatorPolicy = policy;
+	d->horIndicator->policy = policy;
 
-	update();
+	d->horIndicator->update();
 }
 
 QSize
@@ -340,6 +454,12 @@ AbstractScrollArea::setViewportMargins( int left, int top,
 	QStyleOption opt;
 	opt.initFrom( this );
 	d->layoutChildren( opt );
+	d->normalizePosition();
+	d->calcIndicators();
+
+	update();
+	d->horIndicator->update();
+	d->vertIndicator->update();
 }
 
 void
@@ -365,6 +485,8 @@ AbstractScrollArea::setScrolledAreaSize( const QSize & s )
 	d->calcIndicators();
 
 	update();
+	d->horIndicator->update();
+	d->vertIndicator->update();
 }
 
 const QPoint &
@@ -390,43 +512,12 @@ AbstractScrollArea::resizeEvent( QResizeEvent * e )
 	opt.initFrom( this );
 
 	d->layoutChildren( opt );
-
 	d->normalizePosition();
-
 	d->calcIndicators();
 
 	update();
 
 	e->accept();
-}
-
-void
-AbstractScrollArea::paintEvent( QPaintEvent * e )
-{
-	QFrame::paintEvent( e );
-
-	QPainter p( this );
-	p.setViewport( d->viewport->rect() );
-
-	switch( d->horizontalScrollIndicatorPolicy )
-	{
-		case ScrollIndicatorAsNeeded :
-			if( !d->paintHorizontalScrollIndicator )
-				break;
-		case ScrollIndicatorAlwaysOn :
-			d->drawHorizontalScrollIndicator( &p );
-		break;
-	}
-
-	switch( d->verticalScrollIndicatorPolicy )
-	{
-		case ScrollIndicatorAsNeeded :
-			if( !d->paintVerticalScrollIndicator )
-				break;
-		case ScrollIndicatorAlwaysOn :
-			d->drawVerticalScrollIndicator( &p );
-		break;
-	}
 }
 
 void
@@ -445,10 +536,12 @@ void
 AbstractScrollArea::mouseReleaseEvent( QMouseEvent * e )
 {
 	d->leftMouseButtonPressed = false;
-	d->paintHorizontalScrollIndicator = false;
-	d->paintVerticalScrollIndicator = false;
+	d->horIndicator->needPaint = false;
+	d->vertIndicator->needPaint = false;
 
 	update();
+	d->horIndicator->update();
+	d->vertIndicator->update();
 
 	e->accept();
 }
@@ -458,6 +551,8 @@ AbstractScrollArea::mouseMoveEvent( QMouseEvent * e )
 {
 	if( d->leftMouseButtonPressed )
 	{
+		d->horIndicator->needPaint = true;
+		d->vertIndicator->needPaint = true;
 		const int dy = e->pos().y() - d->mousePos.y();
 		const int dx = e->pos().x() - d->mousePos.x();
 
@@ -481,8 +576,8 @@ AbstractScrollArea::wheelEvent( QWheelEvent * e )
 	{
 		if( e->modifiers() == Qt::ShiftModifier )
 		{
-			d->scrollContentsBy( numPixels.x(), 0 );
-			scrollContentsBy( numPixels.x(), 0 );
+			d->scrollContentsBy( numPixels.y(), 0 );
+			scrollContentsBy( numPixels.y(), 0 );
 		}
 		else
 		{
@@ -494,8 +589,8 @@ AbstractScrollArea::wheelEvent( QWheelEvent * e )
 	{
 		if( e->modifiers() == Qt::ShiftModifier )
 		{
-			d->scrollContentsBy( numDegrees.x() / 8, 0 );
-			scrollContentsBy( numDegrees.x() / 8, 0 );
+			d->scrollContentsBy( numDegrees.y() / 8, 0 );
+			scrollContentsBy( numDegrees.y() / 8, 0 );
 		}
 		else
 		{

@@ -148,6 +148,7 @@ ScrollArea::takeWidget()
 {
 	ScrollAreaPrivate * d = d_func();
 	QWidget * w = d->widget;
+	w->removeEventFilter( this );
 	d->widget = 0;
 	if( w )
 		w->setParent( 0 );

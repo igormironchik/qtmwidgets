@@ -189,12 +189,14 @@ AbstractScrollAreaPrivate::calcIndicators()
 			horIndicator->size, horIndicator->pos );
 
 		horIndicator->move( horIndicator->pos );
+		horIndicator->resize( horIndicator->size, horIndicator->width );
 
 		calcIndicator( Qt::Vertical, vertIndicator->minimumSize,
 			vertIndicator->width, vertIndicator->needPaint,
 			vertIndicator->size, vertIndicator->pos );
 
 		vertIndicator->move( vertIndicator->pos );
+		vertIndicator->resize( vertIndicator->width, vertIndicator->size );
 	}
 }
 
@@ -234,7 +236,9 @@ AbstractScrollAreaPrivate::calcIndicator( Qt::Orientation orient,
 					indicatorSize = minSize;
 				}
 
-				x += ( totalIndicatorSize + scrolledSize ) * posRatio;
+				x += ( totalIndicatorSize
+					+ ( horIndicator->parent() == viewport ? 0 : scrolledSize ) )
+					* posRatio;
 			}
 			else
 			{
@@ -267,7 +271,9 @@ AbstractScrollAreaPrivate::calcIndicator( Qt::Orientation orient,
 					indicatorSize = minSize;
 				}
 
-				y += ( totalIndicatorSize + scrolledSize ) * posRatio;
+				y += ( totalIndicatorSize
+					+ ( vertIndicator->parent() == viewport ? 0 : scrolledSize ) )
+					* posRatio;
 			}
 			else
 			{
@@ -290,9 +296,8 @@ AbstractScrollAreaPrivate::scrollContentsBy( int dx, int dy )
 
 	calcIndicators();
 
-	if( dx != 0 ) horIndicator->needPaint = true;
-
-	if( dy != 0 ) vertIndicator->needPaint = true;
+	horIndicator->needPaint = true;
+	vertIndicator->needPaint = true;
 
 	q->update();
 	horIndicator->update();
@@ -551,8 +556,6 @@ AbstractScrollArea::mouseMoveEvent( QMouseEvent * e )
 {
 	if( d->leftMouseButtonPressed )
 	{
-		d->horIndicator->needPaint = true;
-		d->vertIndicator->needPaint = true;
 		const int dy = e->pos().y() - d->mousePos.y();
 		const int dx = e->pos().x() - d->mousePos.x();
 
@@ -600,6 +603,11 @@ AbstractScrollArea::wheelEvent( QWheelEvent * e )
 	}
 
 	e->accept();
+
+	d->horIndicator->needPaint = false;
+	d->vertIndicator->needPaint = false;
+	d->horIndicator->update();
+	d->vertIndicator->update();
 }
 
 } /* namespace QtMWidgets */

@@ -190,7 +190,6 @@ protected:
 	void setTopLeftPointShownArea( const QPoint & p );
 
 	virtual void resizeEvent( QResizeEvent * e );
-	virtual void paintEvent( QPaintEvent * e );
 	virtual void mousePressEvent( QMouseEvent * e );
 	virtual void mouseReleaseEvent( QMouseEvent * e );
 	virtual void mouseMoveEvent( QMouseEvent * e );

@@ -28,51 +28,48 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef QTMWIDGETS__PRIVATE__SCROLLAREA_P_HPP__INCLUDED
-#define QTMWIDGETS__PRIVATE__SCROLLAREA_P_HPP__INCLUDED
+// Qt include.
+#include <QApplication>
+#include <QWidget>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QImage>
 
 // QtMWidgets include.
-#include "abstractscrollarea_p.hpp"
-#include "../scrollarea.hpp"
-
-// Qt include.
-#include <QPointer>
-#include <QWidget>
+#include <QtMWidgets/ScrollArea>
 
 
-namespace QtMWidgets {
-
-//
-// ScrollAreaPrivate
-//
-
-class ScrollAreaPrivate
-	:	public AbstractScrollAreaPrivate
+class Widget
+	:	public QWidget
 {
 public:
-	explicit ScrollAreaPrivate( ScrollArea * parent )
-		:	AbstractScrollAreaPrivate( parent )
-		,	resizable( false )
-		,	alignment( 0 )
+	Widget()
 	{
+		QVBoxLayout * l = new QVBoxLayout( this );
+		QtMWidgets::ScrollArea * scrollArea =
+			new QtMWidgets::ScrollArea( this );
+
+		QLabel * imageLabel = new QLabel;
+		QImage image( ":/flower.jpg" );
+		imageLabel->setPixmap( QPixmap::fromImage( image ) );
+
+		scrollArea->setBackgroundRole( QPalette::Dark );
+		scrollArea->setWidget( imageLabel );
+
+		l->addWidget( scrollArea );
+
+		resize( 640, 480 );
 	}
+};
 
-	virtual ~ScrollAreaPrivate()
-	{
-	}
 
-	void updateScrolledSize();
-	void updateWidgetPosition();
-	void paintEvent( QPaintEvent * e );
+int main( int argc, char ** argv )
+{
+	QApplication app( argc, argv );
 
-	inline ScrollArea * q_func() { return static_cast< ScrollArea* >( q ); }
-	inline const ScrollArea * q_func() const { return static_cast< const ScrollArea* >( q ); }
+	Widget w;
 
-	QPointer< QWidget > widget;
-	bool resizable;
-	Qt::Alignment alignment;
-}; // class ScrollAreaPrivate
+	w.show();
 
-} /* namespace QtMWidgets */
-
-#endif // QTMWIDGETS__PRIVATE__SCROLLAREA_P_HPP__INCLUDED
+	return app.exec();
+}

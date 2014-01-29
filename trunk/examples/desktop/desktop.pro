@@ -5,4 +5,5 @@ SUBDIRS = picker \
           datetimepicker \
           datepicker \
           timepicker \
-          switch
+          switch \
+          scrollarea

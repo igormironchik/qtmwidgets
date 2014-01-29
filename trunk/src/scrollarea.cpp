@@ -38,6 +38,7 @@
 #include <QStyle>
 #include <QLayout>
 #include <QVariant>
+#include <QPainter>
 
 
 namespace QtMWidgets {
@@ -137,6 +138,8 @@ ScrollArea::setWidget( QWidget * widget )
 	if( !widget->testAttribute( Qt::WA_Resized ) )
 		widget->resize( widget->sizeHint() );
 	d->widget = widget;
+	d->horIndicator->setParent( d->widget );
+	d->vertIndicator->setParent( d->widget );
 	d->widget->setAutoFillBackground( true );
 	widget->installEventFilter( this );
 	d->updateScrolledSize();
@@ -149,6 +152,8 @@ ScrollArea::takeWidget()
 	ScrollAreaPrivate * d = d_func();
 	QWidget * w = d->widget;
 	w->removeEventFilter( this );
+	d->horIndicator->setParent( d->viewport );
+	d->vertIndicator->setParent( d->viewport );
 	d->widget = 0;
 	if( w )
 		w->setParent( 0 );
@@ -313,8 +318,10 @@ ScrollArea::eventFilter( QObject * o, QEvent * e )
 }
 
 void
-ScrollArea::resizeEvent( QResizeEvent * )
+ScrollArea::resizeEvent( QResizeEvent * e )
 {
+	AbstractScrollArea::resizeEvent( e );
+
 	ScrollAreaPrivate * d = d_func();
 	d->updateScrolledSize();
 }

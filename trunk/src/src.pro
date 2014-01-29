@@ -16,7 +16,10 @@ HEADERS += private/drawing.hpp \
            datetimepicker.hpp \
            switch.hpp \
            scrollarea.hpp \
-           abstractscrollarea.hpp
+           abstractscrollarea.hpp \
+           private/abstractscrollarea_p.hpp \
+           private/scrollarea_p.hpp \
+           private/layoutengine.hpp
 
 SOURCES += private/drawing.cpp \
            private/datetimeparser.cpp \
@@ -27,4 +30,5 @@ SOURCES += private/drawing.cpp \
            datetimepicker.cpp \
            switch.cpp \
            scrollarea.cpp \
-           abstractscrollarea.cpp
+           abstractscrollarea.cpp \
+           private/layoutengine.cpp

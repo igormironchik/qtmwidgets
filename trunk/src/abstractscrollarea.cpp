@@ -30,6 +30,7 @@
 
 // QtMWidgets include.
 #include "abstractscrollarea.hpp"
+#include "private/abstractscrollarea_p.hpp"
 
 // Qt include.
 #include <QStyleOption>
@@ -44,69 +45,6 @@ namespace QtMWidgets {
 //
 // AbstractScrollAreaPrivate
 //
-
-class AbstractScrollAreaPrivate {
-public:
-	explicit AbstractScrollAreaPrivate( AbstractScrollArea * parent )
-		:	q( parent )
-		,	viewport( 0 )
-		,	scrolledAreaSize( 0, 0 )
-		,	topLeftCorner( 0, 0 )
-		,	top( 0 )
-		,	bottom( 0 )
-		,	right( 0 )
-		,	left( 0 )
-		,	verticalScrollIndicatorPolicy(
-				AbstractScrollArea::ScrollIndicatorAsNeeded )
-		,	horizontalScrollIndicatorPolicy(
-				AbstractScrollArea::ScrollIndicatorAsNeeded )
-		,	paintVerticalScrollIndicator( false )
-		,	paintHorizontalScrollIndicator( false )
-		,	leftMouseButtonPressed( false )
-		,	hIndicatorSize( 0 )
-		,	hIndicatorPos( 0 )
-		,	vIndicatorSize( 0 )
-		,	vIndicatorPos( 0 )
-		,	indicatorWidth( 3 )
-	{
-	}
-
-	void init();
-	void layoutChildren( const QStyleOption & opt );
-	void normalizePosition();
-	void drawHorizontalScrollIndicator( QPainter * p );
-	void drawVerticalScrollIndicator( QPainter * p );
-	void calcIndicators();
-	void calcIndicator( int scrolledSize, int scrolledPos,
-		int viewportSize, int & indicatorSize,
-		int & indicatorPos );
-	void scrollContentsBy( int dx, int dy );
-
-	virtual ~AbstractScrollAreaPrivate()
-	{
-	}
-
-	AbstractScrollArea * q;
-	QColor indicatorColor;
-	QWidget * viewport;
-	QSize scrolledAreaSize;
-	QPoint topLeftCorner;
-	int top;
-	int bottom;
-	int right;
-	int left;
-	AbstractScrollArea::ScrollIndicatorPolicy verticalScrollIndicatorPolicy;
-	AbstractScrollArea::ScrollIndicatorPolicy horizontalScrollIndicatorPolicy;
-	bool paintVerticalScrollIndicator;
-	bool paintHorizontalScrollIndicator;
-	bool leftMouseButtonPressed;
-	QPoint mousePos;
-	int hIndicatorSize;
-	int hIndicatorPos;
-	int vIndicatorSize;
-	int vIndicatorPos;
-	int indicatorWidth;
-}; // class AbstractScrollAreaPrivate
 
 void
 AbstractScrollAreaPrivate::init()
@@ -423,6 +361,10 @@ AbstractScrollArea::setScrolledAreaSize( const QSize & s )
 	d->scrolledAreaSize = s;
 
 	d->normalizePosition();
+
+	d->calcIndicators();
+
+	update();
 }
 
 const QPoint &
@@ -433,10 +375,12 @@ AbstractScrollArea::topLeftPointShownArea() const
 
 void
 AbstractScrollArea::setTopLeftPointShownArea( const QPoint & p )
-{
-	d->topLeftCorner = p;
+{	
+	const int dx = p.x() - d->topLeftCorner.x();
+	const int dy = p.y() - d->topLeftCorner.y();
 
-	d->normalizePosition();
+	d->scrollContentsBy( dx, dy );
+	scrollContentsBy( dx, dy );
 }
 
 void

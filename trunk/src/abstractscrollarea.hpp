@@ -196,12 +196,13 @@ protected:
 	virtual void mouseMoveEvent( QMouseEvent * e );
 	virtual void wheelEvent( QWheelEvent * e );
 
-private:
-	Q_DISABLE_COPY( AbstractScrollArea )
-
+protected:
 	QScopedPointer< AbstractScrollAreaPrivate > d;
 
 	friend class AbstractScrollAreaPrivate;
+
+private:
+	Q_DISABLE_COPY( AbstractScrollArea )
 }; // class AbstractScrollArea
 
 } /* namespace QtMWidgets */

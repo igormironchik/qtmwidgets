@@ -174,6 +174,9 @@ Section::maxWidth( const QStyleOption & opt ) const
 		case MonthSectionLong :
 			width += opt.fontMetrics.boundingRect( maxLongMonth( opt ) ).width();
 		break;
+
+		default:
+			break;
 	}
 
 	return width;
@@ -546,6 +549,9 @@ Section::fillValues( const QDateTime & current,
 			}
 		}
 		break;
+
+		default:
+			break;
 	}
 }
 

@@ -57,6 +57,8 @@ ScrollIndicator::ScrollIndicator( const QColor & c, Qt::Orientation o,
 	,	orientation( o )
 	,	needPaint( false )
 	,	color( c )
+	,	animate( false )
+	,	alpha( 255 )
 {
 }
 
@@ -86,7 +88,7 @@ ScrollIndicator::paintEvent( QPaintEvent * )
 	switch( policy )
 	{
 		case AbstractScrollArea::ScrollIndicatorAsNeeded :
-			if( !needPaint )
+			if( !needPaint && !animate )
 				break;
 		case AbstractScrollArea::ScrollIndicatorAlwaysOn :
 			drawIndicator( &p, color );
@@ -97,7 +99,11 @@ ScrollIndicator::paintEvent( QPaintEvent * )
 void
 ScrollIndicator::drawIndicator( QPainter * p, const QColor & c )
 {
-	p->setPen( QPen( c, width, Qt::SolidLine, Qt::RoundCap ) );
+	QColor paintColor = c;
+
+	if( animate ) paintColor.setAlpha( alpha );
+
+	p->setPen( QPen( paintColor, width, Qt::SolidLine, Qt::RoundCap ) );
 
 	const int middle = width / 2;
 
@@ -311,6 +317,28 @@ AbstractScrollAreaPrivate::scrollContentsBy( int dx, int dy )
 	calcIndicators();
 
 	q->update();
+	horIndicator->update();
+	vertIndicator->update();
+}
+
+void
+AbstractScrollAreaPrivate::animateScrollIndicators()
+{
+	animationTimer->stop();
+	horIndicator->animate = true;
+	vertIndicator->animate = true;
+	horIndicator->alpha = horIndicator->color.alpha();
+	vertIndicator->alpha = vertIndicator->color.alpha();
+	animationTimer->start( animationTimeout );
+	horIndicator->update();
+	vertIndicator->update();
+}
+
+void
+AbstractScrollAreaPrivate::stopScrollIndicatorsAnimation()
+{
+	horIndicator->animate = false;
+	vertIndicator->animate = false;
 	horIndicator->update();
 	vertIndicator->update();
 }
@@ -543,6 +571,7 @@ AbstractScrollArea::mousePressEvent( QMouseEvent * e )
 	{
 		d->mousePos = e->pos();
 		d->leftMouseButtonPressed = true;
+		d->stopScrollIndicatorsAnimation();
 	}
 
 	e->accept();
@@ -556,8 +585,8 @@ AbstractScrollArea::mouseReleaseEvent( QMouseEvent * e )
 	d->vertIndicator->needPaint = false;
 
 	update();
-	d->horIndicator->update();
-	d->vertIndicator->update();
+
+	d->animateScrollIndicators();
 
 	e->accept();
 }
@@ -617,14 +646,22 @@ AbstractScrollArea::wheelEvent( QWheelEvent * e )
 
 	d->horIndicator->needPaint = false;
 	d->vertIndicator->needPaint = false;
-	d->horIndicator->update();
-	d->vertIndicator->update();
+	d->animateScrollIndicators();
 }
 
 void
 AbstractScrollArea::_q_animateScrollIndicators()
 {
+	d->horIndicator->alpha -= d->animationAlphaDelta;
+	d->vertIndicator->alpha -= d->animationAlphaDelta;
 
+	if( d->horIndicator->alpha <= 0 )
+		d->stopScrollIndicatorsAnimation();
+	else
+		d->animationTimer->start( d->animationTimeout );
+
+	d->horIndicator->update();
+	d->vertIndicator->update();
 }
 
 } /* namespace QtMWidgets */

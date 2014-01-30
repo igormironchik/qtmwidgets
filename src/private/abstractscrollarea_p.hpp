@@ -76,6 +76,8 @@ protected:
 	Qt::Orientation orientation;
 	bool needPaint;
 	QColor color;
+	bool animate;
+	int alpha;
 }; // class ScrollIndicator
 
 
@@ -98,6 +100,8 @@ public:
 		,	horIndicator( 0 )
 		,	vertIndicator( 0 )
 		,	animationTimer( 0 )
+		,	animationTimeout( 100 )
+		,	animationAlphaDelta( 25 )
 	{
 	}
 
@@ -109,6 +113,8 @@ public:
 		int minSize, int width, bool & needPaint,
 		int & indicatorSize, QPoint & indicatorPos );
 	void scrollContentsBy( int dx, int dy );
+	void animateScrollIndicators();
+	void stopScrollIndicatorsAnimation();
 
 	virtual ~AbstractScrollAreaPrivate()
 	{
@@ -128,6 +134,8 @@ public:
 	ScrollIndicator * horIndicator;
 	ScrollIndicator * vertIndicator;
 	QTimer * animationTimer;
+	int animationTimeout;
+	int animationAlphaDelta;
 }; // class AbstractScrollAreaPrivate
 
 } /* namespace QtMWidgets */

@@ -38,6 +38,7 @@
 #include <QMouseEvent>
 #include <QResizeEvent>
 #include <QWheelEvent>
+#include <QTimer>
 
 
 namespace QtMWidgets {
@@ -88,20 +89,22 @@ ScrollIndicator::paintEvent( QPaintEvent * )
 			if( !needPaint )
 				break;
 		case AbstractScrollArea::ScrollIndicatorAlwaysOn :
-			drawIndicator( &p );
+			drawIndicator( &p, color );
 		break;
 	}
 }
 
 void
-ScrollIndicator::drawIndicator( QPainter * p )
+ScrollIndicator::drawIndicator( QPainter * p, const QColor & c )
 {
-	p->setPen( QPen( color, width, Qt::SolidLine, Qt::RoundCap ) );
+	p->setPen( QPen( c, width, Qt::SolidLine, Qt::RoundCap ) );
+
+	const int middle = width / 2;
 
 	if( orientation == Qt::Horizontal )
-		p->drawLine( 0, 1, size, 1 );
+		p->drawLine( 0, middle, size, middle );
 	else
-		p->drawLine( 1, 0, 1, size );
+		p->drawLine( middle, 0, middle, size );
 }
 
 
@@ -125,6 +128,11 @@ AbstractScrollAreaPrivate::init()
 
 	horIndicator = new ScrollIndicator( ic, Qt::Horizontal, viewport );
 	vertIndicator = new ScrollIndicator( ic, Qt::Vertical, viewport );
+
+	animationTimer = new QTimer( q );
+
+	QObject::connect( animationTimer, SIGNAL( timeout() ),
+		q, SLOT( _q_animateScrollIndicators() ) );
 
 	q->setFocusPolicy( Qt::WheelFocus );
 	q->setFrameStyle( QFrame::StyledPanel | QFrame::Sunken );
@@ -212,6 +220,7 @@ AbstractScrollAreaPrivate::calcIndicator( Qt::Orientation orient,
 	double posRatio = 0.0;
 	int totalIndicatorSize = 0;
 	double ratio = 0.0;
+	double deltaRatio = 0.0;
 
 	switch( orient )
 	{
@@ -225,6 +234,7 @@ AbstractScrollAreaPrivate::calcIndicator( Qt::Orientation orient,
 			posRatio = (double) topLeftCorner.x() / (double) scrolledSize;
 			totalIndicatorSize = viewportSize - 4 * width;
 			ratio = (double) viewportSize / (double) scrolledSize;
+			deltaRatio = posRatio;
 
 			if( ratio < 1.0 )
 			{
@@ -232,12 +242,12 @@ AbstractScrollAreaPrivate::calcIndicator( Qt::Orientation orient,
 
 				if( indicatorSize < minSize )
 				{
-					posRatio *= ( (double) indicatorSize / (double) minSize );
+					deltaRatio *= ( (double) indicatorSize / (double) minSize );
 					indicatorSize = minSize;
 				}
 
-				x += ( totalIndicatorSize
-					+ ( horIndicator->parent() == viewport ? 0 : scrolledSize ) )
+				x += totalIndicatorSize * deltaRatio
+					+ ( horIndicator->parent() == viewport ? 0 : scrolledSize )
 					* posRatio;
 			}
 			else
@@ -260,6 +270,7 @@ AbstractScrollAreaPrivate::calcIndicator( Qt::Orientation orient,
 			posRatio = (double) topLeftCorner.y() / (double) scrolledSize;
 			totalIndicatorSize = viewportSize - 4 * width;
 			ratio = (double) viewportSize / (double) scrolledSize;
+			deltaRatio = posRatio;
 
 			if( ratio < 1.0 )
 			{
@@ -267,12 +278,12 @@ AbstractScrollAreaPrivate::calcIndicator( Qt::Orientation orient,
 
 				if( indicatorSize < minSize )
 				{
-					posRatio *= ( (double) indicatorSize / (double) minSize );
+					deltaRatio *= ( (double) indicatorSize / (double) minSize );
 					indicatorSize = minSize;
 				}
 
-				y += ( totalIndicatorSize
-					+ ( vertIndicator->parent() == viewport ? 0 : scrolledSize ) )
+				y += totalIndicatorSize * deltaRatio
+					+ ( vertIndicator->parent() == viewport ? 0 : scrolledSize )
 					* posRatio;
 			}
 			else
@@ -608,6 +619,12 @@ AbstractScrollArea::wheelEvent( QWheelEvent * e )
 	d->vertIndicator->needPaint = false;
 	d->horIndicator->update();
 	d->vertIndicator->update();
+}
+
+void
+AbstractScrollArea::_q_animateScrollIndicators()
+{
+
 }
 
 } /* namespace QtMWidgets */

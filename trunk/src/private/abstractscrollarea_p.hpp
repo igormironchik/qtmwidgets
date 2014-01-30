@@ -39,6 +39,7 @@
 
 QT_BEGIN_NAMESPACE
 class QStyleOption;
+class QTimer;
 QT_END_NAMESPACE
 
 
@@ -61,7 +62,7 @@ protected:
 	void paintEvent( QPaintEvent * );
 
 private:
-	void drawIndicator( QPainter * p );
+	void drawIndicator( QPainter * p, const QColor & c );
 
 protected:
 	friend class AbstractScrollAreaPrivate;
@@ -96,6 +97,7 @@ public:
 		,	leftMouseButtonPressed( false )
 		,	horIndicator( 0 )
 		,	vertIndicator( 0 )
+		,	animationTimer( 0 )
 	{
 	}
 
@@ -125,6 +127,7 @@ public:
 	QPoint mousePos;
 	ScrollIndicator * horIndicator;
 	ScrollIndicator * vertIndicator;
+	QTimer * animationTimer;
 }; // class AbstractScrollAreaPrivate
 
 } /* namespace QtMWidgets */

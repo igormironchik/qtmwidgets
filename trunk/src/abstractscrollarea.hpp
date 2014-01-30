@@ -200,6 +200,9 @@ protected:
 
 	friend class AbstractScrollAreaPrivate;
 
+private slots:
+	void _q_animateScrollIndicators();
+
 private:
 	Q_DISABLE_COPY( AbstractScrollArea )
 }; // class AbstractScrollArea

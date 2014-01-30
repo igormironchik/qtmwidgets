@@ -229,10 +229,10 @@ AbstractScrollAreaPrivate::calcIndicator( Qt::Orientation orient,
 			viewportSize = viewport->width();
 			scrolledSize = scrolledAreaSize.width();
 			x = 2 * width;
-			y = viewport->height() - x
-				+ ( horIndicator->parent() == viewport ? 0 : topLeftCorner.y() );
+			y = qMin( viewport->height(), scrolledAreaSize.height() ) - x;
+			y += ( horIndicator->parent() == viewport ? 0 : topLeftCorner.y() );
 			posRatio = (double) topLeftCorner.x() / (double) scrolledSize;
-			totalIndicatorSize = viewportSize - 4 * width;
+			totalIndicatorSize = qMin( viewportSize, scrolledSize ) - 4 * width;
 			ratio = (double) viewportSize / (double) scrolledSize;
 			deltaRatio = posRatio;
 
@@ -265,10 +265,10 @@ AbstractScrollAreaPrivate::calcIndicator( Qt::Orientation orient,
 			viewportSize = viewport->height();
 			scrolledSize = scrolledAreaSize.height();
 			y = 2 * width;
-			x = viewport->width() - y
-				+ ( vertIndicator->parent() == viewport ? 0 : topLeftCorner.x() );
+			x = qMin( viewport->width(), scrolledAreaSize.width() ) - y;
+			x += ( vertIndicator->parent() == viewport ? 0 : topLeftCorner.x() );
 			posRatio = (double) topLeftCorner.y() / (double) scrolledSize;
-			totalIndicatorSize = viewportSize - 4 * width;
+			totalIndicatorSize = qMin( viewportSize, scrolledSize ) - 4 * width;
 			ratio = (double) viewportSize / (double) scrolledSize;
 			deltaRatio = posRatio;
 
@@ -305,10 +305,10 @@ AbstractScrollAreaPrivate::scrollContentsBy( int dx, int dy )
 
 	normalizePosition();
 
-	calcIndicators();
-
 	horIndicator->needPaint = true;
 	vertIndicator->needPaint = true;
+
+	calcIndicators();
 
 	q->update();
 	horIndicator->update();

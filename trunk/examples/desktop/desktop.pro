@@ -6,4 +6,5 @@ SUBDIRS = picker \
           datepicker \
           timepicker \
           switch \
-          scrollarea
+          scrollarea \
+          tableview

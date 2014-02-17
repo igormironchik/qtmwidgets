@@ -19,7 +19,9 @@ HEADERS += private/drawing.hpp \
            abstractscrollarea.hpp \
            private/abstractscrollarea_p.hpp \
            private/scrollarea_p.hpp \
-           private/layoutengine.hpp
+           private/layoutengine.hpp \
+           tableview.hpp \
+           private/tableview_p.hpp
 
 SOURCES += private/drawing.cpp \
            private/datetimeparser.cpp \
@@ -31,4 +33,5 @@ SOURCES += private/drawing.cpp \
            switch.cpp \
            scrollarea.cpp \
            abstractscrollarea.cpp \
-           private/layoutengine.cpp
+           private/layoutengine.cpp \
+           tableview.cpp

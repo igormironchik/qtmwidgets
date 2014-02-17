@@ -78,6 +78,7 @@ protected:
 	QColor color;
 	bool animate;
 	int alpha;
+	bool shown;
 }; // class ScrollIndicator
 
 

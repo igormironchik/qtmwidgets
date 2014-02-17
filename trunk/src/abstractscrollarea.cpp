@@ -59,6 +59,7 @@ ScrollIndicator::ScrollIndicator( const QColor & c, Qt::Orientation o,
 	,	color( c )
 	,	animate( false )
 	,	alpha( 255 )
+	,	shown( false )
 {
 }
 
@@ -89,7 +90,10 @@ ScrollIndicator::paintEvent( QPaintEvent * )
 	{
 		case AbstractScrollArea::ScrollIndicatorAsNeeded :
 			if( !needPaint && !animate )
+			{
+				shown = false;
 				break;
+			}
 		case AbstractScrollArea::ScrollIndicatorAlwaysOn :
 			drawIndicator( &p, color );
 		break;
@@ -99,18 +103,24 @@ ScrollIndicator::paintEvent( QPaintEvent * )
 void
 ScrollIndicator::drawIndicator( QPainter * p, const QColor & c )
 {
-	QColor paintColor = c;
+	if( policy != AbstractScrollArea::ScrollIndicatorAlwaysOff )
+	{
+		shown = true;
 
-	if( animate ) paintColor.setAlpha( alpha );
+		QColor paintColor = c;
 
-	p->setPen( QPen( paintColor, width, Qt::SolidLine, Qt::RoundCap ) );
+		if( animate && policy != AbstractScrollArea::ScrollIndicatorAlwaysOn )
+			paintColor.setAlpha( alpha );
 
-	const int middle = width / 2;
+		p->setPen( QPen( paintColor, width, Qt::SolidLine, Qt::RoundCap ) );
 
-	if( orientation == Qt::Horizontal )
-		p->drawLine( 0, middle, size, middle );
-	else
-		p->drawLine( middle, 0, middle, size );
+		const int middle = width / 2;
+
+		if( orientation == Qt::Horizontal )
+			p->drawLine( 0, middle, size, middle );
+		else
+			p->drawLine( middle, 0, middle, size );
+	}
 }
 
 
@@ -311,8 +321,17 @@ AbstractScrollAreaPrivate::scrollContentsBy( int dx, int dy )
 
 	normalizePosition();
 
-	horIndicator->needPaint = true;
-	vertIndicator->needPaint = true;
+	if( dx != 0 )
+	{
+		horIndicator->shown = true;
+		horIndicator->needPaint = true;
+	}
+
+	if( dy != 0 )
+	{
+		vertIndicator->shown = true;
+		vertIndicator->needPaint = true;
+	}
 
 	calcIndicators();
 
@@ -325,20 +344,33 @@ void
 AbstractScrollAreaPrivate::animateScrollIndicators()
 {
 	animationTimer->stop();
-	horIndicator->animate = true;
-	vertIndicator->animate = true;
 	horIndicator->alpha = horIndicator->color.alpha();
 	vertIndicator->alpha = vertIndicator->color.alpha();
 	animationTimer->start( animationTimeout );
-	horIndicator->update();
-	vertIndicator->update();
+
+	if( horIndicator->shown )
+	{
+		horIndicator->animate = true;
+		horIndicator->update();
+	}
+
+	if( vertIndicator->shown )
+	{
+		vertIndicator->animate = true;
+		vertIndicator->update();
+	}
 }
 
 void
 AbstractScrollAreaPrivate::stopScrollIndicatorsAnimation()
 {
+	animationTimer->stop();
+	horIndicator->needPaint = false;
+	vertIndicator->needPaint = false;
 	horIndicator->animate = false;
 	vertIndicator->animate = false;
+	horIndicator->shown = false;
+	vertIndicator->shown = false;
 	horIndicator->update();
 	vertIndicator->update();
 }
@@ -584,9 +616,12 @@ AbstractScrollArea::mouseReleaseEvent( QMouseEvent * e )
 	d->horIndicator->needPaint = false;
 	d->vertIndicator->needPaint = false;
 
-	update();
-
-	d->animateScrollIndicators();
+	if( ( d->horIndicator->shown || d->vertIndicator->shown ) &&
+		( d->horIndicator->policy == ScrollIndicatorAsNeeded ||
+			d->vertIndicator->policy == ScrollIndicatorAsNeeded ) )
+				d->animateScrollIndicators();
+	else
+		update();
 
 	e->accept();
 }
@@ -614,6 +649,8 @@ AbstractScrollArea::wheelEvent( QWheelEvent * e )
 {
 	QPoint numPixels = e->pixelDelta();
 	QPoint numDegrees = e->angleDelta();
+
+	d->stopScrollIndicatorsAnimation();
 
 	if( !numPixels.isNull() )
 	{
@@ -644,9 +681,9 @@ AbstractScrollArea::wheelEvent( QWheelEvent * e )
 
 	e->accept();
 
-	d->horIndicator->needPaint = false;
-	d->vertIndicator->needPaint = false;
-	d->animateScrollIndicators();
+	if( d->horIndicator->policy == ScrollIndicatorAsNeeded ||
+		d->vertIndicator->policy == ScrollIndicatorAsNeeded )
+			d->animateScrollIndicators();
 }
 
 void
@@ -657,11 +694,14 @@ AbstractScrollArea::_q_animateScrollIndicators()
 
 	if( d->horIndicator->alpha <= 0 )
 		d->stopScrollIndicatorsAnimation();
-	else
+	else if( d->horIndicator->shown || d->vertIndicator->shown )
 		d->animationTimer->start( d->animationTimeout );
 
-	d->horIndicator->update();
-	d->vertIndicator->update();
+	if( d->horIndicator->shown )
+		d->horIndicator->update();
+
+	if( d->vertIndicator->shown )
+		d->vertIndicator->update();
 }
 
 } /* namespace QtMWidgets */

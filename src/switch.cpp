@@ -35,8 +35,6 @@
 // Qt include.
 #include <QStyleOption>
 #include <QPainter>
-#include <QBitmap>
-#include <QRegion>
 #include <QLinearGradient>
 #include <QMouseEvent>
 
@@ -64,7 +62,6 @@ public:
 	void setState( Switch::State st );
 	void init();
 	void emitSignals();
-	void initPaintRegion( const QRect & r );
 	void drawText( QPainter * p, const QStyleOption & opt,
 		const QColor & on, const QColor & off );
 	void drawSlider( QPainter * p, const QStyleOption & opt,
@@ -78,7 +75,6 @@ public:
 	QColor onColor;
 	int radius;
 	int textWidth;
-	QRegion paintRegion;
 	int offset;
 	bool leftMouseButtonPressed;
 	QPoint mousePos;
@@ -137,22 +133,6 @@ SwitchPrivate::emitSignals()
 }
 
 void
-SwitchPrivate::initPaintRegion( const QRect & r )
-{
-	QBitmap mask( r.width(), r.height() );
-	mask.clear();
-
-	QPainter p( &mask );
-	p.setRenderHint( QPainter::Antialiasing );
-	p.setPen( Qt::color1 );
-	p.setBrush( Qt::color1 );
-	p.drawRoundedRect( -1, -1, r.width() + 2,
-		radius * 2 + 2, radius + 1, radius + 1 );
-
-	paintRegion = QRegion( mask );
-}
-
-void
 SwitchPrivate::drawText( QPainter * p, const QStyleOption & opt,
 	const QColor & on, const QColor & off )
 {
@@ -194,7 +174,7 @@ SwitchPrivate::drawSlider( QPainter * p, const QStyleOption & opt,
 {
 	Q_UNUSED( opt )
 
-	p->setPen( QPen( borderColor, 2 ) );
+	p->setPen( borderColor );
 	p->setBrush( lightColor );
 	p->drawRoundedRect( offset + 1, 1, radius * 2 - 2, radius * 2 - 2,
 		radius, radius );
@@ -348,7 +328,6 @@ Switch::sizeHint() const
 	const QRect r( 0, 0,
 		d->textWidth + d->radius * 3 + d->radius / 2, d->radius * 2 );
 
-	d->initPaintRegion( r );
 	d->initOffset( r );
 
 	return QSize( r.width(), r.height() );
@@ -365,7 +344,6 @@ Switch::paintEvent( QPaintEvent * )
 
 	QPainter p( this );
 	p.setRenderHint( QPainter::Antialiasing );
-	p.setClipRegion( d->paintRegion );
 
 	switch( d->state )
 	{
@@ -393,8 +371,11 @@ Switch::paintEvent( QPaintEvent * )
 
 	p.setPen( borderColor );
 
-	p.drawRoundedRect( 0, 0, opt.rect.width(),
-		d->radius * 2, d->radius, d->radius );
+	QPainterPath rect;
+	rect.addRoundedRect( 0, 0, opt.rect.width(), d->radius * 2,
+		d->radius, d->radius );
+
+	p.drawPath( rect );
 
 	d->drawText( &p, opt, lightColor, borderColor );
 
@@ -404,9 +385,12 @@ Switch::paintEvent( QPaintEvent * )
 	p.setPen( Qt::NoPen );
 	p.setBrush( lightAlphaColor );
 
-	p.drawRoundedRect( d->radius / 4, d->radius,
+	QPainterPath glow;
+	glow.addRoundedRect( d->radius / 4, d->radius,
 		opt.rect.width() - d->radius / 2, d->radius * 2,
 		d->radius / 2, d->radius / 2 );
+
+	p.drawPath( rect.intersected( glow ) );
 
 	d->drawSlider( &p, opt, lightColor, borderColor );
 }

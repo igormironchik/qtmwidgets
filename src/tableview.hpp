@@ -40,7 +40,7 @@
 
 QT_BEGIN_NAMESPACE
 class QLabel;
-class QLayout;
+class QHBoxLayout;
 QT_END_NAMESPACE
 
 
@@ -64,11 +64,14 @@ class TableViewCellPrivate;
 
 	\note If you want to have eccessory widget expanded to whole
 	cell then you should change text label's size policy to
-	QSizePolicy::Fixed. For example:
+	QSizePolicy::Fixed, and maybe you will want to set layout
+	spacing to 0. For example:
 
 	\code
-	TableViewCell::textLabel()->setSizePolicy( QSizePolicy::Fixed,
+	TableViewCell * cell = new TableViewCell();
+	cell->textLabel()->setSizePolicy( QSizePolicy::Fixed,
 		QSizePolicy::Fixed );
+	cell->layout()->setSpacing( 0 );
 	\endcode
 */
 class TableViewCell
@@ -81,7 +84,7 @@ public:
 	virtual ~TableViewCell();
 
 	//! \return Layout of the cell.
-	QLayout * layout() const;
+	QHBoxLayout * layout() const;
 
 	//! \return Label with image.
 	QLabel * imageLabel() const;

@@ -145,7 +145,7 @@ TableViewCell::~TableViewCell()
 {
 }
 
-QLayout *
+QHBoxLayout *
 TableViewCell::layout() const
 {
 	return d->layout;

@@ -62,6 +62,7 @@ public:
 			new QtMWidgets::TableViewCell( ringerAndAlerts );
 		volume->textLabel()->setSizePolicy( QSizePolicy::Fixed,
 			QSizePolicy::Fixed );
+		volume->layout()->setSpacing( 0 );
 		QSlider * volumeSlider = new QSlider( Qt::Horizontal,
 			volume );
 		volumeSlider->setSizePolicy( QSizePolicy::Expanding,

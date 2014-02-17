@@ -139,7 +139,9 @@ ScrollArea::setWidget( QWidget * widget )
 		widget->resize( widget->sizeHint() );
 	d->widget = widget;
 	d->horIndicator->setParent( d->widget );
+	d->horIndicator->raise();
 	d->vertIndicator->setParent( d->widget );
+	d->vertIndicator->raise();
 	d->widget->setAutoFillBackground( true );
 	widget->installEventFilter( this );
 	d->updateScrolledSize();

@@ -325,12 +325,14 @@ AbstractScrollAreaPrivate::scrollContentsBy( int dx, int dy )
 	{
 		horIndicator->shown = true;
 		horIndicator->needPaint = true;
+		horIndicator->raise();
 	}
 
 	if( dy != 0 )
 	{
 		vertIndicator->shown = true;
 		vertIndicator->needPaint = true;
+		vertIndicator->raise();
 	}
 
 	calcIndicators();

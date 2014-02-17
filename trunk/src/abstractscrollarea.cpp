@@ -89,7 +89,7 @@ ScrollIndicator::paintEvent( QPaintEvent * )
 	switch( policy )
 	{
 		case AbstractScrollArea::ScrollIndicatorAsNeeded :
-			if( !needPaint && !animate )
+			if( !needPaint )
 			{
 				shown = false;
 				break;

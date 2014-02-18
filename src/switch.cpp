@@ -302,6 +302,9 @@ Switch::setOnColor( const QColor & c )
 			case NotAcceptedUncheck :
 				update();
 			break;
+
+			default:
+				break;
 		}
 	}
 }

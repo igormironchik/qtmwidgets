@@ -97,6 +97,9 @@ ScrollIndicator::paintEvent( QPaintEvent * )
 		case AbstractScrollArea::ScrollIndicatorAlwaysOn :
 			drawIndicator( &p, color );
 		break;
+
+		default:
+			break;
 	}
 }
 

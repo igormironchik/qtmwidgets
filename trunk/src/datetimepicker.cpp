@@ -224,6 +224,9 @@ DateTimePickerPrivate::setValue( const QDateTime & dt, bool updateIndexes )
 							minimum.date().year();
 					}
 					break;
+
+					default:
+						break;
 				}
 			}
 		}
@@ -540,6 +543,9 @@ DateTimePickerPrivate::updateCurrentDateTime()
 				year = minimum.date().year() + sections.at( i ).currentIndex;
 			}
 			break;
+
+			default:
+				break;
 		}
 	}
 

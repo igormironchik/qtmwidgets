@@ -7,6 +7,9 @@ INCLUDEPATH += . ..
 CONFIG += qt staticlib
 QT += core gui widgets
 
+OBJECTS_DIR = ./.obj
+MOC_DIR = ./.moc
+
 HEADERS += private/drawing.hpp \
            private/datetimeparser.hpp \
            private/color.hpp \
@@ -21,7 +24,8 @@ HEADERS += private/drawing.hpp \
            private/scrollarea_p.hpp \
            private/layoutengine.hpp \
            tableview.hpp \
-           private/tableview_p.hpp
+           private/tableview_p.hpp \
+           private/fingergeometry.hpp
 
 SOURCES += private/drawing.cpp \
            private/datetimeparser.cpp \
@@ -34,4 +38,5 @@ SOURCES += private/drawing.cpp \
            scrollarea.cpp \
            abstractscrollarea.cpp \
            private/layoutengine.cpp \
-           tableview.cpp
+           tableview.cpp \
+           private/fingergeometry.cpp

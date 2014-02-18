@@ -618,15 +618,13 @@ void
 AbstractScrollArea::mouseReleaseEvent( QMouseEvent * e )
 {
 	d->leftMouseButtonPressed = false;
-	d->horIndicator->needPaint = false;
-	d->vertIndicator->needPaint = false;
 
 	if( ( d->horIndicator->shown || d->vertIndicator->shown ) &&
 		( d->horIndicator->policy == ScrollIndicatorAsNeeded ||
 			d->vertIndicator->policy == ScrollIndicatorAsNeeded ) )
 				d->animateScrollIndicators();
 	else
-		update();
+		d->stopScrollIndicatorsAnimation();
 
 	e->accept();
 }

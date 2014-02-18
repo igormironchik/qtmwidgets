@@ -74,6 +74,7 @@ public:
 	MinimumSizeLabel * detailedTextLabel;
 	QWidget * accessoryWidget;
 	QHBoxLayout * layout;
+	QVBoxLayout * textLayout;
 }; // class TableViewCellPrivate
 
 class RowsSeparator;

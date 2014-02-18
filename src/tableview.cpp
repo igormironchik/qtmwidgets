@@ -31,6 +31,7 @@
 // QtMWidgets include.
 #include "tableview.hpp"
 #include "private/tableview_p.hpp"
+#include "private/fingergeometry.hpp"
 
 // Qt include.
 #include <QVBoxLayout>
@@ -39,9 +40,6 @@
 
 
 namespace QtMWidgets {
-
-static const int minimumCellHeight = 44;
-
 
 //
 // MinimumSizeLabel
@@ -66,8 +64,8 @@ public:
 		{
 			const QSize labelSizeHint = QLabel::sizeHint();
 
-			return QSize( qMax( labelSizeHint.width(), minimumCellHeight ),
-				qMax( labelSizeHint.height(), minimumCellHeight ) );
+			return QSize( qMax( labelSizeHint.width(), FingerGeometry::width() ),
+				qMax( labelSizeHint.height(), FingerGeometry::height() ) );
 		}
 	}
 
@@ -85,20 +83,21 @@ public:
 void
 TableViewCellPrivate::init()
 {
-	q->setMinimumHeight( minimumCellHeight );
-	q->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Fixed );
+	q->setMinimumHeight( FingerGeometry::height() );
+	q->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Expanding );
 	q->setBackgroundRole( QPalette::Base );
 
 	layout = new QHBoxLayout( q );
 	layout->setContentsMargins( 3, 3, 3, 3 );
 
 	imageLabel = new MinimumSizeLabel( q );
+	imageLabel->setSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed );
 	imageLabel->setBackgroundRole( QPalette::Base );
 	layout->addWidget( imageLabel );
 
-	QVBoxLayout * vl = new QVBoxLayout();
-	vl->setSpacing( 0 );
-	vl->setContentsMargins( 0, 0, 0, 0 );
+	textLayout = new QVBoxLayout();
+	textLayout->setSpacing( 0 );
+	textLayout->setContentsMargins( 0, 0, 0, 0 );
 
 	textLabel = new MinimumSizeLabel( q );
 	textLabel->setWordWrap( true );
@@ -107,15 +106,17 @@ TableViewCellPrivate::init()
 
 	detailedTextLabel = new MinimumSizeLabel( q );
 	detailedTextLabel->setWordWrap( true );
+	detailedTextLabel->setSizePolicy( QSizePolicy::Fixed,
+		QSizePolicy::Fixed );
 	detailedTextLabel->setBackgroundRole( QPalette::Base );
 	QFont f = detailedTextLabel->font();
 	f.setPointSize( qMax( f.pointSize() - 5, 5 ) );
 	detailedTextLabel->setFont( f );
 
-	vl->addWidget( textLabel );
-	vl->addWidget( detailedTextLabel );
+	textLayout->addWidget( textLabel );
+	textLayout->addWidget( detailedTextLabel );
 
-	layout->addLayout( vl );
+	layout->addLayout( textLayout );
 
 	accessoryWidget = new QWidget( q );
 	accessoryWidget->setBackgroundRole( QPalette::Base );
@@ -194,15 +195,19 @@ TableViewCell::setAccessoryWidget( QWidget * accessory )
 QSize
 TableViewCell::minimumSizeHint() const
 {
-	int width = qMax( d->imageLabel->sizeHint().width(),
-		minimumCellHeight );
+	int width = d->imageLabel->sizeHint().width();
 	int height = qMax( d->imageLabel->sizeHint().height(),
-		minimumCellHeight );
+		FingerGeometry::height() );
 
 	const int textWidth = qMax( d->textLabel->sizeHint().width(),
-		d->detailedTextLabel->sizeHint().width() );
+		d->detailedTextLabel->sizeHint().width() ) +
+		d->textLayout->contentsMargins().left() +
+		d->textLayout->contentsMargins().right();
 	const int textHeight = d->textLabel->sizeHint().height() +
-		d->detailedTextLabel->sizeHint().height();
+		d->detailedTextLabel->sizeHint().height() +
+		d->textLayout->contentsMargins().top() +
+		d->textLayout->contentsMargins().bottom() +
+		d->textLayout->spacing();
 
 	width += textWidth;
 	height = qMax( height, textHeight );
@@ -212,6 +217,11 @@ TableViewCell::minimumSizeHint() const
 
 	width += accessoryWidth;
 	height = qMax( height, accessoryHeight );
+
+	width += d->layout->contentsMargins().left() +
+		d->layout->contentsMargins().right();
+	height += d->layout->contentsMargins().bottom() +
+		d->layout->contentsMargins().top();
 
 	return QSize( width, height );
 }
@@ -230,7 +240,7 @@ TableViewCell::sizeHint() const
 void
 TableViewSectionPrivate::init()
 {
-	q->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Fixed );
+	q->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Expanding );
 	q->setBackgroundRole( QPalette::Base );
 	q->setAutoFillBackground( true );
 
@@ -243,7 +253,7 @@ TableViewSectionPrivate::init()
 	header->setBackgroundRole( QPalette::Midlight );
 	header->setAutoFillBackground( true );
 	header->setMargin( 11 );
-	header->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Fixed );
+	header->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Expanding );
 	layout->addWidget( header );
 
 	footer = new MinimumSizeLabel( q );
@@ -251,7 +261,7 @@ TableViewSectionPrivate::init()
 	footer->setBackgroundRole( QPalette::Midlight );
 	footer->setAutoFillBackground( true );
 	footer->setMargin( 11 );
-	footer->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Fixed );
+	footer->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Expanding );
 	layout->addWidget( footer );
 }
 

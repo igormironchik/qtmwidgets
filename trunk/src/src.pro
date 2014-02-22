@@ -25,7 +25,8 @@ HEADERS += private/drawing.hpp \
            private/layoutengine.hpp \
            tableview.hpp \
            private/tableview_p.hpp \
-           private/fingergeometry.hpp
+           private/fingergeometry.hpp \
+           textlabel.hpp
 
 SOURCES += private/drawing.cpp \
            private/datetimeparser.cpp \
@@ -39,4 +40,5 @@ SOURCES += private/drawing.cpp \
            abstractscrollarea.cpp \
            private/layoutengine.cpp \
            tableview.cpp \
-           private/fingergeometry.cpp
+           private/fingergeometry.cpp \
+           textlabel.cpp

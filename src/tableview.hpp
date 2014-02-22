@@ -46,6 +46,8 @@ QT_END_NAMESPACE
 
 namespace QtMWidgets {
 
+class TextLabel;
+
 //
 // TableViewCell
 //
@@ -89,9 +91,9 @@ public:
 	//! \return Label with image.
 	QLabel * imageLabel() const;
 	//! \return Label with text.
-	QLabel * textLabel() const;
+	TextLabel * textLabel() const;
 	//! \return Label with detailed text.
-	QLabel * detailedTextLabel() const;
+	TextLabel * detailedTextLabel() const;
 
 	//! \return Accessory widget.
 	QWidget * accessoryWidget() const;
@@ -133,9 +135,9 @@ public:
 	~TableViewSection();
 
 	//! \return Header.
-	QLabel * header() const;
+	TextLabel * header() const;
 	//! \return Footer.
-	QLabel * footer() const;
+	TextLabel * footer() const;
 
 	/*!
 		Add new cell to the bottom.

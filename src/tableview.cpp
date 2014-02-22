@@ -30,6 +30,7 @@
 
 // QtMWidgets include.
 #include "tableview.hpp"
+#include "textlabel.hpp"
 #include "private/tableview_p.hpp"
 #include "private/fingergeometry.hpp"
 
@@ -58,7 +59,7 @@ public:
 
 	QSize minimumSizeHint() const
 	{
-		if( text().isEmpty() && !pixmap() )
+		if( text().isEmpty() && !pixmap() && !movie() && !picture() )
 			return QSize( 0, 0 );
 		else
 		{
@@ -99,15 +100,18 @@ TableViewCellPrivate::init()
 	textLayout->setSpacing( 0 );
 	textLayout->setContentsMargins( 0, 0, 0, 0 );
 
-	textLabel = new MinimumSizeLabel( q );
-	textLabel->setWordWrap( true );
-	textLabel->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
+	textLabel = new TextLabel( q );
+	QSizePolicy textLabelSizePolicy( QSizePolicy::Expanding,
+		QSizePolicy::Expanding );
+	textLabelSizePolicy.setHeightForWidth( true );
+	textLabel->setSizePolicy( textLabelSizePolicy );
 	textLabel->setBackgroundRole( QPalette::Base );
 
-	detailedTextLabel = new MinimumSizeLabel( q );
-	detailedTextLabel->setWordWrap( true );
-	detailedTextLabel->setSizePolicy( QSizePolicy::Fixed,
+	detailedTextLabel = new TextLabel( q );
+	QSizePolicy detailedTextSizePolicy( QSizePolicy::Fixed,
 		QSizePolicy::Fixed );
+	detailedTextSizePolicy.setHeightForWidth( true );
+	detailedTextLabel->setSizePolicy( detailedTextSizePolicy );
 	detailedTextLabel->setBackgroundRole( QPalette::Base );
 	QFont f = detailedTextLabel->font();
 	f.setPointSize( qMax( f.pointSize() - 5, 5 ) );
@@ -158,13 +162,13 @@ TableViewCell::imageLabel() const
 	return d->imageLabel;
 }
 
-QLabel *
+TextLabel *
 TableViewCell::textLabel() const
 {
 	return d->textLabel;
 }
 
-QLabel *
+TextLabel *
 TableViewCell::detailedTextLabel() const
 {
 	return d->detailedTextLabel;
@@ -239,8 +243,8 @@ TableViewCell::sizeHint() const
 
 void
 TableViewSectionPrivate::init()
-{
-	q->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Expanding );
+{	
+	q->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Fixed );
 	q->setBackgroundRole( QPalette::Base );
 	q->setAutoFillBackground( true );
 
@@ -248,20 +252,21 @@ TableViewSectionPrivate::init()
 	layout->setSpacing( 0 );
 	layout->setContentsMargins( 0, 0, 0, 0 );
 
-	header = new MinimumSizeLabel( q );
-	header->setWordWrap( true );
+	QSizePolicy sp( QSizePolicy::Minimum, QSizePolicy::Fixed );
+	sp.setHeightForWidth( true );
+
+	header = new TextLabel( q );
 	header->setBackgroundRole( QPalette::Midlight );
 	header->setAutoFillBackground( true );
 	header->setMargin( 11 );
-	header->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Expanding );
+	header->setSizePolicy( sp );
 	layout->addWidget( header );
 
-	footer = new MinimumSizeLabel( q );
-	footer->setWordWrap( true );
+	footer = new TextLabel( q );
 	footer->setBackgroundRole( QPalette::Midlight );
 	footer->setAutoFillBackground( true );
 	footer->setMargin( 11 );
-	footer->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Expanding );
+	footer->setSizePolicy( sp );
 	layout->addWidget( footer );
 }
 
@@ -311,13 +316,13 @@ TableViewSection::~TableViewSection()
 {
 }
 
-QLabel *
+TextLabel *
 TableViewSection::header() const
 {
 	return d->header;
 }
 
-QLabel *
+TextLabel *
 TableViewSection::footer() const
 {
 	return d->footer;

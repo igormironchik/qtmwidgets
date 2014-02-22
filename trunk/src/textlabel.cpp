@@ -48,6 +48,7 @@ class TextLabelPrivate {
 public:
 	TextLabelPrivate( TextLabel * parent )
 		:	q( parent )
+		,	margin( 0 )
 	{
 	}
 
@@ -55,6 +56,7 @@ public:
 
 	TextLabel * q;
 	QStaticText staticText;
+	int margin;
 }; // class TextLabelPrivate
 
 void
@@ -70,7 +72,9 @@ TextLabelPrivate::init()
 
 	staticText.setTextWidth( q->fontMetrics().averageCharWidth() * 10 );
 
-	q->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred );
+	QSizePolicy sp( QSizePolicy::Preferred, QSizePolicy::Preferred );
+	sp.setHeightForWidth( true );
+	q->setSizePolicy( sp );
 }
 
 
@@ -135,22 +139,64 @@ TextLabel::setTextOption( const QTextOption & textOption )
 }
 
 int
+TextLabel::margin() const
+{
+	return d->margin;
+}
+
+void
+TextLabel::setMargin( int margin )
+{
+	if( d->margin == margin )
+		return;
+
+	d->margin = margin;
+
+	const QMargins margins = contentsMargins();
+
+	d->staticText.setTextWidth( width() - margins.left() -
+		margins.right() - 2 * frameWidth() - 2 * d->margin );
+
+	update();
+}
+
+int
 TextLabel::heightForWidth( int w ) const
 {
+	if( text().isEmpty() )
+		return 0;
+
 	QStaticText st = d->staticText;
 	st.setTextWidth( w );
-	return st.size().height() + 2 * frameWidth();
+
+	const QMargins margins = contentsMargins();
+
+	return st.size().height() + 2 * frameWidth() + margins.top() +
+		margins.bottom() + 2 * d->margin;
 }
 
 QSize
 TextLabel::minimumSizeHint() const
 {
+	if( text().isEmpty() )
+		return QSize( 2 * frameWidth(), 2 * frameWidth() );
+
 	QStaticText st = d->staticText;
-	st.setTextWidth( fontMetrics().averageCharWidth() * 10 );
+
+	if( width() > 0 )
+		st.setTextWidth( width() );
+	else
+		st.setTextWidth( fontMetrics().averageCharWidth() * 10 );
+
 	const QSizeF size = st.size();
 	const int frame = 2 * frameWidth();
 
-	return QSize( size.width() + frame, size.height() + frame );
+	const QMargins margins = contentsMargins();
+
+	return QSize( size.width() + frame + margins.left() + margins.right() +
+		2 * d->margin,
+		size.height() + frame + margins.top() + margins.bottom() +
+		2 * d->margin );
 }
 
 QSize
@@ -176,18 +222,23 @@ TextLabel::paintEvent( QPaintEvent * e )
 	switch( vAlign )
 	{
 		case Qt::AlignBottom :
-			topLeft = QPoint( topLeft.x(),
-				cr.bottomLeft().y() - qRound( d->staticText.size().height() ) );
+			topLeft = QPoint( topLeft.x() + d->margin,
+				cr.bottomLeft().y() - qRound( d->staticText.size().height() ) -
+				d->margin );
 		break;
 
 		case Qt::AlignVCenter :
-			topLeft = QPoint( topLeft.x(),
+			topLeft = QPoint( topLeft.x() + d->margin,
 				topLeft.y() + cr.height() / 2 -
 					qRound( d->staticText.size().height() ) / 2 );
 		break;
 
 		default :
-			break;
+		{
+			if( d->margin != 0 )
+				topLeft += QPoint( d->margin, d->margin );
+		}
+		break;
 	}
 
 	p.drawStaticText( topLeft, d->staticText );
@@ -196,7 +247,11 @@ TextLabel::paintEvent( QPaintEvent * e )
 void
 TextLabel::resizeEvent( QResizeEvent * e )
 {
-	d->staticText.setTextWidth( e->size().width() - 2 * frameWidth() );
+	const QMargins margins = contentsMargins();
+
+	d->staticText.setTextWidth( e->size().width() - 2 * frameWidth() -
+		margins.left() - margins.right() - 2 * d->margin );
+
 	e->accept();
 }
 

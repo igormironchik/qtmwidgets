@@ -44,6 +44,7 @@
 namespace QtMWidgets {
 
 class MinimumSizeLabel;
+class TextLabel;
 
 
 //
@@ -70,8 +71,8 @@ public:
 
 	TableViewCell * q;
 	MinimumSizeLabel * imageLabel;
-	MinimumSizeLabel * textLabel;
-	MinimumSizeLabel * detailedTextLabel;
+	TextLabel * textLabel;
+	TextLabel * detailedTextLabel;
 	QWidget * accessoryWidget;
 	QHBoxLayout * layout;
 	QVBoxLayout * textLayout;
@@ -100,8 +101,8 @@ public:
 	void init();
 
 	TableViewSection * q;
-	MinimumSizeLabel * header;
-	MinimumSizeLabel * footer;
+	TextLabel * header;
+	TextLabel * footer;
 	QList< TableViewCell* > cells;
 	QVBoxLayout * layout;
 	QList< RowsSeparator* > separators;

@@ -92,6 +92,16 @@ class TextLabel
 		The default word wrap mode is QTextOption::WordWrap.
 	*/
 	Q_PROPERTY( QTextOption textOption READ textOption WRITE setTextOption )
+	/*!
+		\property margin
+		\brief the width of the margin
+
+		The margin is the distance between the innermost pixel of the
+		frame and the outermost pixel of contents.
+
+		The default margin is 0.
+	*/
+	Q_PROPERTY( int margin READ margin WRITE setMargin )
 
 public:
 	/*!
@@ -126,6 +136,11 @@ public:
 	QTextOption textOption() const;
 	//! Set text option.
 	void setTextOption( const QTextOption & textOption );
+
+	//! \return Margin.
+	int margin() const;
+	//! Set margin.
+	void setMargin( int margin );
 
 	int	heightForWidth( int w ) const;
 	QSize minimumSizeHint() const;

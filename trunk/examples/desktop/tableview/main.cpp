@@ -32,12 +32,12 @@
 #include <QApplication>
 #include <QWidget>
 #include <QVBoxLayout>
-#include <QLabel>
 #include <QSlider>
 
 // QtMWidgets include.
 #include <QtMWidgets/TableView>
 #include <QtMWidgets/Switch>
+#include <QtMWidgets/TextLabel>
 
 
 class Widget

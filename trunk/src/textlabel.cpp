@@ -164,7 +164,7 @@ int
 TextLabel::heightForWidth( int w ) const
 {
 	if( text().isEmpty() )
-		return 0;
+		return 2 * frameWidth();
 
 	QStaticText st = d->staticText;
 	st.setTextWidth( w );

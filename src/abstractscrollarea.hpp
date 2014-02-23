@@ -162,8 +162,8 @@ public:
 	//! Set horizontal scroll indicator policy.
 	void setHorizontalScrollIndicatorPolicy( ScrollIndicatorPolicy policy );
 
-	QSize minimumSizeHint() const;
-	QSize sizeHint() const;
+	virtual QSize minimumSizeHint() const;
+	virtual QSize sizeHint() const;
 
 protected:
 	explicit AbstractScrollArea( AbstractScrollAreaPrivate * dd,

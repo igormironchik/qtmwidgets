@@ -63,7 +63,7 @@ public:
 	explicit TimePicker( QWidget * parent = 0 );
 	explicit TimePicker( const QTime & time, QWidget * parent = 0 );
 
-	~TimePicker();
+	virtual ~TimePicker();
 }; // class TimePicker
 
 } /* namespace QtMWidgets */

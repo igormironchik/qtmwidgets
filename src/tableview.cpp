@@ -85,8 +85,9 @@ void
 TableViewCellPrivate::init()
 {
 	q->setMinimumHeight( FingerGeometry::height() );
-	q->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Expanding );
+	q->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Fixed );
 	q->setBackgroundRole( QPalette::Base );
+	q->setAutoFillBackground( true );
 
 	layout = new QHBoxLayout( q );
 	layout->setContentsMargins( 3, 3, 3, 3 );
@@ -114,7 +115,7 @@ TableViewCellPrivate::init()
 	detailedTextLabel->setSizePolicy( detailedTextSizePolicy );
 	detailedTextLabel->setBackgroundRole( QPalette::Base );
 	QFont f = detailedTextLabel->font();
-	f.setPointSize( qMax( f.pointSize() - 5, 5 ) );
+	f.setPointSize( qMax( f.pointSize() - 1, 5 ) );
 	detailedTextLabel->setFont( f );
 
 	textLayout->addWidget( textLabel );
@@ -263,6 +264,9 @@ TableViewSectionPrivate::init()
 	layout->addWidget( header );
 
 	footer = new TextLabel( q );
+	QFont font = footer->font();
+	font.setPointSize( qMax( font.pointSize() - 1, 5 ) );
+	footer->setFont( font );
 	footer->setBackgroundRole( QPalette::Midlight );
 	footer->setAutoFillBackground( true );
 	footer->setMargin( 11 );
@@ -421,11 +425,15 @@ TableViewPrivate::init()
 	TableView * q = q_func();
 
 	widget = new QWidget( q->viewport() );
+	QSizePolicy sp = QSizePolicy( QSizePolicy::Minimum,
+		QSizePolicy::Minimum );
+	sp.setHeightForWidth( true );
+	widget->setSizePolicy( sp );
 	layout = new QVBoxLayout( widget );
 	layout->setSpacing( 0 );
 	layout->setContentsMargins( 6, 6, 6, 6 );
 
-	QSpacerItem * spacer = new QSpacerItem( 10, 10, QSizePolicy::Minimum,
+	QSpacerItem * spacer = new QSpacerItem( 0, 0, QSizePolicy::Minimum,
 		QSizePolicy::Expanding );
 	layout->addItem( spacer );
 

@@ -164,7 +164,7 @@ public:
 	Switch( QWidget * parent = 0 );
 	explicit Switch( State st, QWidget * parent = 0 );
 
-	~Switch();
+	virtual ~Switch();
 
 	//! \return State of the button.
 	State state() const;
@@ -187,7 +187,7 @@ public:
 	//! Set color to highlight checked state.
 	void setOnColor( const QColor & c );
 
-	QSize sizeHint() const;
+	virtual QSize sizeHint() const;
 
 public slots:
 	/*!
@@ -196,10 +196,10 @@ public slots:
 	void setState( State st );
 
 protected:
-	void paintEvent( QPaintEvent * event );
-	void mousePressEvent( QMouseEvent * event );
-	void mouseReleaseEvent( QMouseEvent * event );
-	void mouseMoveEvent( QMouseEvent * event );
+	virtual void paintEvent( QPaintEvent * event );
+	virtual void mousePressEvent( QMouseEvent * event );
+	virtual void mouseReleaseEvent( QMouseEvent * event );
+	virtual void mouseMoveEvent( QMouseEvent * event );
 
 private:
 	friend class SwitchPrivate;

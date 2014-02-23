@@ -132,7 +132,7 @@ class TableViewSection
 
 public:
 	TableViewSection( QWidget * parent = 0 );
-	~TableViewSection();
+	virtual ~TableViewSection();
 
 	//! \return Header.
 	TextLabel * header() const;
@@ -200,7 +200,7 @@ class TableView
 
 public:
 	TableView( QWidget * parent = 0 );
-	~TableView();
+	virtual ~TableView();
 
 	/*!
 		Add new section to the bottom.

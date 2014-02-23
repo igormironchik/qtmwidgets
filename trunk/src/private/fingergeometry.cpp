@@ -33,7 +33,7 @@
 
 // Qt include.
 #include <QApplication>
-#include <QDesktopWidget>
+#include <QScreen>
 
 
 namespace QtMWidgets {
@@ -48,8 +48,11 @@ static const qreal fingerSize = 0.0393700787 * 10;
 int
 FingerGeometry::width()
 {
-	static const qreal w =
-		(qreal) QApplication::desktop()->logicalDpiX() * fingerSize;
+	static const int w =
+		qRound(
+			(qreal) qMax( QApplication::primaryScreen()->logicalDotsPerInchX(),
+				QApplication::primaryScreen()->physicalDotsPerInchX() ) *
+			fingerSize );
 
 	return w;
 }
@@ -57,8 +60,11 @@ FingerGeometry::width()
 int
 FingerGeometry::height()
 {
-	static const qreal h =
-		(qreal) QApplication::desktop()->logicalDpiY() * fingerSize;
+	static const int h =
+		qRound(
+			(qreal) qMax( QApplication::primaryScreen()->logicalDotsPerInchY(),
+				QApplication::primaryScreen()->physicalDotsPerInchY() ) *
+			fingerSize );
 
 	return h;
 }

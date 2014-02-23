@@ -170,7 +170,7 @@ signals:
 public:
 	Picker( QWidget * parent = 0, Qt::WindowFlags f = 0 );
 
-	~Picker();
+	virtual ~Picker();
 
 	/*!
 		\return The number of items in the picker.
@@ -353,8 +353,8 @@ public:
 	//! Set color used to highlight the current item.
 	void setHighlightColor( const QColor & c );
 
-	QSize sizeHint() const;
-	QSize minimumSizeHint() const;
+	virtual QSize sizeHint() const;
+	virtual QSize minimumSizeHint() const;
 
 public slots:
 	/*!
@@ -388,11 +388,11 @@ private slots:
 	void _q_modelReset();
 
 protected:
-	void paintEvent( QPaintEvent * event );
-	void wheelEvent( QWheelEvent * event );
-	void mousePressEvent( QMouseEvent * event );
-	void mouseReleaseEvent( QMouseEvent * event );
-	void mouseMoveEvent( QMouseEvent * event );
+	virtual void paintEvent( QPaintEvent * event );
+	virtual void wheelEvent( QWheelEvent * event );
+	virtual void mousePressEvent( QMouseEvent * event );
+	virtual void mouseReleaseEvent( QMouseEvent * event );
+	virtual void mouseMoveEvent( QMouseEvent * event );
 
 private:
 	friend class PickerPrivate;

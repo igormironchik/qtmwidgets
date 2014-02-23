@@ -467,7 +467,7 @@ public:
 	*/
 	void setTimeSpec( Qt::TimeSpec spec );
 
-	QSize sizeHint() const;
+	virtual QSize sizeHint() const;
 
 public slots:
 	/*!
@@ -490,11 +490,11 @@ public slots:
 	void setTime( const QTime & time );
 
 protected:
-	void wheelEvent( QWheelEvent * event );
-	void mousePressEvent( QMouseEvent * event );
-	void mouseMoveEvent( QMouseEvent * event );
-	void mouseReleaseEvent( QMouseEvent * event );
-	void paintEvent( QPaintEvent * event );
+	virtual void wheelEvent( QWheelEvent * event );
+	virtual void mousePressEvent( QMouseEvent * event );
+	virtual void mouseMoveEvent( QMouseEvent * event );
+	virtual void mouseReleaseEvent( QMouseEvent * event );
+	virtual void paintEvent( QPaintEvent * event );
 
 	DateTimePicker( const QVariant & val, QVariant::Type parserType,
 		QWidget * parent = 0 );

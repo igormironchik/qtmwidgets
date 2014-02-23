@@ -63,7 +63,7 @@ public:
 	explicit DatePicker( QWidget * parent = 0 );
 	explicit DatePicker( const QDate & date, QWidget * parent = 0 );
 
-	~DatePicker();
+	virtual ~DatePicker();
 }; // class DatePicker
 
 } /* namespace QtMWidgets */

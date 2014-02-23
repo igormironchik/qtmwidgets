@@ -120,7 +120,7 @@ public:
 	explicit TextLabel( const QString & text,
 		QWidget * parent = 0, Qt::WindowFlags f = 0 );
 
-	~TextLabel();
+	virtual ~TextLabel();
 
 	//! \return Text.
 	QString text() const;
@@ -142,13 +142,14 @@ public:
 	//! Set margin.
 	void setMargin( int margin );
 
-	int	heightForWidth( int w ) const;
-	QSize minimumSizeHint() const;
-	QSize sizeHint() const;
+	virtual bool hasHeightForWidth() const;
+	virtual int	heightForWidth( int w ) const;
+	virtual QSize minimumSizeHint() const;
+	virtual QSize sizeHint() const;
 
 protected:
-	void paintEvent( QPaintEvent * e );
-	void resizeEvent( QResizeEvent * e );
+	virtual void paintEvent( QPaintEvent * e );
+	virtual void resizeEvent( QResizeEvent * e );
 
 private:
 	Q_DISABLE_COPY( TextLabel )

@@ -160,6 +160,12 @@ TextLabel::setMargin( int margin )
 	update();
 }
 
+bool
+TextLabel::hasHeightForWidth() const
+{
+	return true;
+}
+
 int
 TextLabel::heightForWidth( int w ) const
 {

@@ -26,7 +26,8 @@ HEADERS += private/drawing.hpp \
            tableview.hpp \
            private/tableview_p.hpp \
            private/fingergeometry.hpp \
-           textlabel.hpp
+           textlabel.hpp \
+           slider.hpp
 
 SOURCES += private/drawing.cpp \
            private/datetimeparser.cpp \
@@ -41,4 +42,5 @@ SOURCES += private/drawing.cpp \
            private/layoutengine.cpp \
            tableview.cpp \
            private/fingergeometry.cpp \
-           textlabel.cpp
+           textlabel.cpp \
+           slider.cpp

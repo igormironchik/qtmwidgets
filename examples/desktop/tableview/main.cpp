@@ -32,12 +32,12 @@
 #include <QApplication>
 #include <QWidget>
 #include <QVBoxLayout>
-#include <QSlider>
 
 // QtMWidgets include.
 #include <QtMWidgets/TableView>
 #include <QtMWidgets/Switch>
 #include <QtMWidgets/TextLabel>
+#include <QtMWidgets/Slider>
 
 
 class Widget
@@ -63,8 +63,8 @@ public:
 		volume->textLabel()->setSizePolicy( QSizePolicy::Fixed,
 			QSizePolicy::Fixed );
 		volume->layout()->setSpacing( 0 );
-		QSlider * volumeSlider = new QSlider( Qt::Horizontal,
-			volume );
+		QtMWidgets::Slider * volumeSlider = new QtMWidgets::Slider(
+			Qt::Horizontal, volume );
 		volumeSlider->setSizePolicy( QSizePolicy::Expanding,
 			QSizePolicy::Fixed );
 		volume->setAccessoryWidget( volumeSlider );

@@ -65,8 +65,6 @@ public:
 	void emitSignals();
 	void drawText( QPainter * p, const QStyleOption & opt,
 		const QColor & on, const QColor & off );
-	inline void drawSlider( QPainter * p, const QStyleOption & opt,
-		const QColor & lightColor, const QColor & borderColor );
 	void initOffset( const QRect & r );
 
 	Switch * q;
@@ -167,16 +165,6 @@ SwitchPrivate::drawText( QPainter * p, const QStyleOption & opt,
 		}
 		break;
 	}
-}
-
-void
-SwitchPrivate::drawSlider( QPainter * p, const QStyleOption & opt,
-	const QColor & lightColor, const QColor & borderColor )
-{
-	Q_UNUSED( opt )
-
-	drawSliderHandle( p, QRect( offset + 1, 1, radius * 2 - 2, radius * 2 - 2 ),
-		radius, radius, borderColor, lightColor );
 }
 
 void
@@ -383,7 +371,9 @@ Switch::paintEvent( QPaintEvent * )
 
 	p.drawPath( rect.intersected( glow ) );
 
-	d->drawSlider( &p, opt, lightColor, borderColor );
+	drawSliderHandle( &p, QRect( d->offset + 1, 1,
+		d->radius * 2 - 2, d->radius * 2 - 2 ),
+			d->radius, d->radius, borderColor, lightColor );
 }
 
 void

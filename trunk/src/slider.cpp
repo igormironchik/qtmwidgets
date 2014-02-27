@@ -55,8 +55,6 @@ public:
 	}
 
 	void init();
-	inline void drawHandle( QPainter * p, const QRect & r,
-		const QColor & borderColor, const QColor & lightColor );
 
 	Slider * q;
 	int radius;
@@ -74,13 +72,6 @@ SliderPrivate::init()
 		sp.transpose();
 
 	q->setSizePolicy( sp );
-}
-
-void
-SliderPrivate::drawHandle( QPainter * p, const QRect & r,
-	const QColor & borderColor, const QColor & lightColor )
-{
-	drawSliderHandle( p, r, radius, radius, borderColor, lightColor );
 }
 
 
@@ -220,7 +211,7 @@ Slider::paintEvent( QPaintEvent * )
 	p.drawRect( grh );
 
 	p.setRenderHint( QPainter::Antialiasing );
-	d->drawHandle( &p, sh, borderColor, lightColor );
+	drawSliderHandle( &p, sh, d->radius, d->radius, borderColor, lightColor );
 }
 
 void

@@ -30,6 +30,7 @@
 
 // QtMWidgets include.
 #include "drawing.hpp"
+#include "color.hpp"
 
 // Qt include.
 #include <QPainter>
@@ -94,6 +95,31 @@ drawCylinder( QPainter * p, const QRect & r,
 	p->setPen( Qt::NoPen );
 	p->setBrush( backgroundGradient );
 	p->drawRect( r.x() + 3, 0, r.width() - 2 * 3, r.height() );
+}
+
+
+//
+// drawSliderHandle
+//
+
+void drawSliderHandle( QPainter * p, const QRect & r,
+	int xRadius, int yRadius, const QColor & borderColor,
+	const QColor & lightColor )
+{
+	p->setPen( borderColor );
+	p->setBrush( lightColor );
+	p->drawRoundedRect( r, xRadius, yRadius );
+
+	QLinearGradient g( QPointF( 0.0, 0.0 ), QPointF( 0.0, 1.0 ) );
+	g.setCoordinateMode( QGradient::ObjectBoundingMode );
+	g.setColorAt( 0.0, darkerColor( lightColor, 75 ) );
+	g.setColorAt( 1.0, darkerColor( lightColor, 10 ) );
+
+	p->setPen( Qt::NoPen );
+	p->setBrush( g );
+
+	p->drawRoundedRect( r.marginsRemoved( QMargins( 2, 2, 2, 2 ) ),
+		xRadius - 4, yRadius - 4 );
 }
 
 } /* namespace QtMWidgets */

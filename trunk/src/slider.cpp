@@ -30,6 +30,13 @@
 
 // QtMWidgets include.
 #include "slider.hpp"
+#include "private/color.hpp"
+#include "private/drawing.hpp"
+
+// Qt include.
+#include <QPainter>
+#include <QStyle>
+#include <QPalette>
 
 
 namespace QtMWidgets {
@@ -42,16 +49,16 @@ class SliderPrivate {
 public:
 	SliderPrivate( Slider * parent )
 		:	q( parent )
-		,	orientation( Qt::Vertical )
 		,	radius( 0 )
-		,	grooveHeight( 10 )
+		,	grooveHeight( 5 )
 	{
 	}
 
 	void init();
+	inline void drawHandle( QPainter * p, const QRect & r,
+		const QColor & borderColor, const QColor & lightColor );
 
 	Slider * q;
-	Qt::Orientation orientation;
 	int radius;
 	int grooveHeight;
 }; // class SliderPrivate;
@@ -63,10 +70,17 @@ SliderPrivate::init()
 
 	QSizePolicy sp( QSizePolicy::Expanding, QSizePolicy::Fixed );
 
-	if( orientation == Qt::Vertical )
+	if( q->orientation() == Qt::Vertical )
 		sp.transpose();
 
 	q->setSizePolicy( sp );
+}
+
+void
+SliderPrivate::drawHandle( QPainter * p, const QRect & r,
+	const QColor & borderColor, const QColor & lightColor )
+{
+	drawSliderHandle( p, r, radius, radius, borderColor, lightColor );
 }
 
 
@@ -78,6 +92,7 @@ Slider::Slider( QWidget * parent )
 	:	QAbstractSlider( parent )
 	,	d( new SliderPrivate( this ) )
 {
+	setOrientation( Qt::Vertical );
 	d->init();
 }
 
@@ -85,7 +100,7 @@ Slider::Slider( Qt::Orientation orientation, QWidget * parent )
 	:	QAbstractSlider( parent )
 	,	d( new SliderPrivate( this ) )
 {
-	d->orientation = orientation;
+	setOrientation( orientation );
 	d->init();
 }
 
@@ -119,13 +134,13 @@ Slider::sizeHint() const
 QSize
 Slider::minimumSizeHint() const
 {
-	const int minWidth = d->radius * 10;
-	const int height = d->radius;
+	const int minWidth = d->radius * 20;
+	const int height = d->radius * 2;
 
 	int w = minWidth;
 	int h = height;
 
-	if( d->orientation == Qt::Vertical )
+	if( orientation() == Qt::Vertical )
 	{
 		w = height;
 		h = minWidth;
@@ -135,9 +150,77 @@ Slider::minimumSizeHint() const
 }
 
 void
-Slider::paintEvent( QPaintEvent * e )
+Slider::paintEvent( QPaintEvent * )
 {
+	const QRect cr = contentsRect();
 
+	// Position and size of the groove.
+	int gx = 0, gy = 0, gw = 0, gh = 0;
+	// Size of the highlighted groove.
+	int grhw = 0, grhh = 0;
+	// Position of the slider's handle.
+	int hx = 0, hy = 0;
+
+	if( orientation() == Qt::Vertical )
+	{
+		gx = cr.topLeft().x() + cr.width() / 2 - d->grooveHeight / 2;
+		gy = cr.topLeft().y();
+		gw = d->grooveHeight;
+		gh = cr.height() - 1;
+
+		hx = cr.topLeft().x() + cr.width() / 2 - d->radius;
+		hy = QStyle::sliderPositionFromValue( minimum(), maximum(),
+			sliderPosition(), gh - d->radius * 2,
+			invertedAppearance() );
+
+		grhw = 1;
+		grhh = gh - hy - d->radius;
+	}
+	else
+	{
+		gx = cr.topLeft().x();
+		gy = cr.topLeft().y() + cr.height() / 2 - d->grooveHeight / 2;
+		gw = cr.width() - 1;
+		gh = d->grooveHeight;
+
+		hx = QStyle::sliderPositionFromValue( minimum(), maximum(),
+			sliderPosition(), gw - d->radius * 2,
+			invertedAppearance() );
+		hy = cr.topLeft().y() + cr.height() / 2 - d->radius;
+
+		grhw = gw - hx - d->radius;
+		grhh = 1;
+	}
+
+	const QRect gr = QRect( gx, gy, gw, gh );
+
+	const QRect grh = gr.marginsRemoved( QMargins( 1, 1, grhw, grhh ) );
+
+	const QRect sh = QRect( hx, hy, d->radius * 2, d->radius * 2 );
+
+	QPainter p( this );
+
+	const QColor borderColor = palette().color( QPalette::Shadow );
+	const QColor lightColor = palette().color( QPalette::Base );
+
+	QLinearGradient g( QPointF( 0.0, 0.0 ), QPointF( 0.0, 1.0 ) );
+	g.setCoordinateMode( QGradient::ObjectBoundingMode );
+	g.setColorAt( 0.0, darkerColor( lightColor, 75 ) );
+	g.setColorAt( 0.1, darkerColor( lightColor, 25 ) );
+	g.setColorAt( 1.0, darkerColor( lightColor, 10 ) );
+
+	p.setPen( borderColor );
+	p.setBrush( g );
+
+	p.drawRect( gr );
+
+	p.setPen( Qt::NoPen );
+	p.setBrush( palette().color( QPalette::Highlight ) );
+
+	p.drawRect( grh );
+
+	p.setRenderHint( QPainter::Antialiasing );
+	d->drawHandle( &p, sh, borderColor, lightColor );
 }
 
 void

@@ -31,6 +31,7 @@
 // QtMWidgets include.
 #include "switch.hpp"
 #include "private/color.hpp"
+#include "private/drawing.hpp"
 
 // Qt include.
 #include <QStyleOption>
@@ -64,7 +65,7 @@ public:
 	void emitSignals();
 	void drawText( QPainter * p, const QStyleOption & opt,
 		const QColor & on, const QColor & off );
-	void drawSlider( QPainter * p, const QStyleOption & opt,
+	inline void drawSlider( QPainter * p, const QStyleOption & opt,
 		const QColor & lightColor, const QColor & borderColor );
 	void initOffset( const QRect & r );
 
@@ -174,21 +175,8 @@ SwitchPrivate::drawSlider( QPainter * p, const QStyleOption & opt,
 {
 	Q_UNUSED( opt )
 
-	p->setPen( borderColor );
-	p->setBrush( lightColor );
-	p->drawRoundedRect( offset + 1, 1, radius * 2 - 2, radius * 2 - 2,
-		radius, radius );
-
-	QLinearGradient g( QPointF( 0.0, 0.0 ), QPointF( 0.0, 1.0 ) );
-	g.setCoordinateMode( QGradient::ObjectBoundingMode );
-	g.setColorAt( 0.0, darkerColor( lightColor, 75 ) );
-	g.setColorAt( 1.0, darkerColor( lightColor, 10 ) );
-
-	p->setPen( Qt::NoPen );
-	p->setBrush( g );
-
-	p->drawRoundedRect( offset + 2 + 1, 2 + 1, radius * 2 - 4 - 2,
-		radius * 2 - 4 - 2, radius - 4, radius - 4 );
+	drawSliderHandle( p, QRect( offset + 1, 1, radius * 2 - 2, radius * 2 - 2 ),
+		radius, radius, borderColor, lightColor );
 }
 
 void

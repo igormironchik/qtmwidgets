@@ -46,7 +46,7 @@ class SliderPrivate;
 
 /*!
 	This is the most common slider, almost identical to QSlider.
-	But it doesn't support style sheets, but it acceptable to use
+	But it doesn't support styles, but it acceptable to use
 	on mobile platforms. It has big slider's handle and highlights
 	position of the handle in the groove.
 */

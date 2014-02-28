@@ -37,6 +37,7 @@
 #include <QPainter>
 #include <QStyle>
 #include <QPalette>
+#include <QMouseEvent>
 
 
 namespace QtMWidgets {
@@ -50,15 +51,23 @@ public:
 	SliderPrivate( Slider * parent )
 		:	q( parent )
 		,	radius( 0 )
-		,	grooveHeight( 5 )
+		,	grooveHeight( 4 )
+		,	pressedControl( QStyle::SC_None )
+		,	clickOffset( 0 )
 	{
 	}
 
 	void init();
+	QRect handleRect() const;
+	int pixelPosToRangeValue( int p ) const;
+	inline int pick( const QPoint & pt ) const;
+	QRect grooveRect() const;
 
 	Slider * q;
 	int radius;
 	int grooveHeight;
+	QStyle::SubControl pressedControl;
+	int clickOffset;
 }; // class SliderPrivate;
 
 void
@@ -72,6 +81,84 @@ SliderPrivate::init()
 		sp.transpose();
 
 	q->setSizePolicy( sp );
+}
+
+QRect
+SliderPrivate::handleRect() const
+{
+	const QRect cr = q->contentsRect();
+
+	int hx = 0, hy = 0;
+
+	if( q->orientation() == Qt::Vertical )
+	{
+		hx = cr.topLeft().x() + cr.width() / 2 - radius;
+		hy = QStyle::sliderPositionFromValue( q->minimum(), q->maximum(),
+			q->sliderPosition(), cr.height() - radius * 2,
+			q->invertedAppearance() );
+	}
+	else
+	{
+		hx = QStyle::sliderPositionFromValue( q->minimum(), q->maximum(),
+			q->sliderPosition(), cr.width() - radius * 2,
+			q->invertedAppearance() );
+		hy = cr.topLeft().y() + cr.height() / 2 - radius;
+	}
+
+	return QRect( hx, hy, radius * 2, radius * 2 );
+}
+
+int
+SliderPrivate::pixelPosToRangeValue( int p ) const
+{
+	const QRect gr = grooveRect();
+
+	int sliderMin = 0, sliderMax = 0;
+
+	if( q->orientation() == Qt::Horizontal )
+	{
+		sliderMin = gr.x();
+		sliderMax = gr.right() - 2 * radius;
+	}
+	else
+	{
+		sliderMin = gr.y();
+		sliderMax = gr.bottom() - 2 * radius;
+	}
+
+	return QStyle::sliderValueFromPosition( q->minimum(), q->maximum(),
+		p - sliderMin, sliderMax - sliderMin, q->invertedAppearance() );
+}
+
+inline int
+SliderPrivate::pick( const QPoint & pt ) const
+{
+	return q->orientation() == Qt::Horizontal ? pt.x() : pt.y();
+}
+
+QRect
+SliderPrivate::grooveRect() const
+{
+	const QRect cr = q->contentsRect();
+
+	int gx = 0, gy = 0, gw = 0, gh = 0;
+
+	if( q->orientation() == Qt::Vertical )
+	{
+		gx = cr.topLeft().x() + cr.width() / 2 - grooveHeight / 2;
+		gy = cr.topLeft().y();
+		gw = grooveHeight;
+		gh = cr.height() - 1;
+	}
+	else
+	{
+		gx = cr.topLeft().x();
+		gy = cr.topLeft().y() + cr.height() / 2 - grooveHeight / 2;
+		gw = cr.width() - 1;
+		gh = grooveHeight;
+	}
+
+	return QRect( gx, gy, gw, gh );
 }
 
 
@@ -143,51 +230,29 @@ Slider::minimumSizeHint() const
 void
 Slider::paintEvent( QPaintEvent * )
 {
-	const QRect cr = contentsRect();
+	const QRect sh = d->handleRect();
+	const QRect gr = d->grooveRect();
 
-	// Position and size of the groove.
-	int gx = 0, gy = 0, gw = 0, gh = 0;
 	// Size of the highlighted groove.
 	int grhw = 0, grhh = 0;
-	// Position of the slider's handle.
-	int hx = 0, hy = 0;
 
 	if( orientation() == Qt::Vertical )
 	{
-		gx = cr.topLeft().x() + cr.width() / 2 - d->grooveHeight / 2;
-		gy = cr.topLeft().y();
-		gw = d->grooveHeight;
-		gh = cr.height() - 1;
-
-		hx = cr.topLeft().x() + cr.width() / 2 - d->radius;
-		hy = QStyle::sliderPositionFromValue( minimum(), maximum(),
-			sliderPosition(), gh - d->radius * 2,
-			invertedAppearance() );
-
-		grhw = 1;
-		grhh = gh - hy - d->radius;
+		grhw = 0;
+		grhh = gr.height() - sh.y() - d->radius;
 	}
 	else
 	{
-		gx = cr.topLeft().x();
-		gy = cr.topLeft().y() + cr.height() / 2 - d->grooveHeight / 2;
-		gw = cr.width() - 1;
-		gh = d->grooveHeight;
-
-		hx = QStyle::sliderPositionFromValue( minimum(), maximum(),
-			sliderPosition(), gw - d->radius * 2,
-			invertedAppearance() );
-		hy = cr.topLeft().y() + cr.height() / 2 - d->radius;
-
-		grhw = gw - hx - d->radius;
-		grhh = 1;
+		grhw = gr.width() - sh.x() - d->radius;
+		grhh = 0;
 	}
 
-	const QRect gr = QRect( gx, gy, gw, gh );
+	QRect grh;
 
-	const QRect grh = gr.marginsRemoved( QMargins( 1, 1, grhw, grhh ) );
-
-	const QRect sh = QRect( hx, hy, d->radius * 2, d->radius * 2 );
+	if( !invertedAppearance() )
+		grh = gr.marginsRemoved( QMargins( 1, 1, grhw, grhh ) );
+	else
+		grh = gr.marginsRemoved( QMargins( grhw, grhh, 1, 1 ) );
 
 	QPainter p( this );
 
@@ -217,19 +282,87 @@ Slider::paintEvent( QPaintEvent * )
 void
 Slider::mousePressEvent( QMouseEvent * e )
 {
+	if( maximum() == minimum() || ( e->buttons() ^ e->button() ) )
+	{
+		e->ignore();
+		return;
+	}
 
+	if( e->button() == Qt::LeftButton )
+	{
+		e->accept();
+		const QRect hr = d->handleRect();
+
+		if( hr.contains( e->pos() ) )
+		{
+			d->pressedControl = QStyle::SC_SliderHandle;
+			setRepeatAction( SliderNoAction );
+			triggerAction( SliderMove );
+			update();
+		}
+		else
+		{
+			d->pressedControl = QStyle::SC_SliderGroove;
+			SliderAction action = SliderNoAction;
+
+			const int pressValue =
+				d->pixelPosToRangeValue( d->pick( e->pos() ) - 2 * d->radius );
+
+			if( pressValue > value() )
+				action = SliderPageStepAdd;
+			else if( pressValue < value() )
+				action = SliderPageStepSub;
+			if( action )
+			{
+				triggerAction( action );
+				setRepeatAction( action );
+			}
+		}
+
+		if( d->pressedControl == QStyle::SC_SliderHandle )
+		{
+			d->clickOffset = d->pick( e->pos() - hr.topLeft() );
+			setRepeatAction( SliderNoAction );
+			setSliderDown( true );
+		}
+	}
+	else
+		e->ignore();
 }
 
 void
 Slider::mouseReleaseEvent( QMouseEvent * e )
 {
+	if( d->pressedControl == QStyle::SC_None || e->buttons() )
+	{
+		e->ignore();
+		return;
+	}
 
+	e->accept();
+	QStyle::SubControl oldPressed = QStyle::SubControl( d->pressedControl );
+	d->pressedControl = QStyle::SC_None;
+	setRepeatAction( SliderNoAction );
+	if( oldPressed == QStyle::SC_SliderHandle )
+		setSliderDown( false );
+	update();
 }
 
 void
 Slider::mouseMoveEvent( QMouseEvent * e )
 {
+	if( d->pressedControl != QStyle::SC_SliderHandle )
+	{
+		e->ignore();
+		return;
+	}
 
+	e->accept();
+
+	const int newPosition = d->pixelPosToRangeValue(
+		d->pick( e->pos() ) - d->clickOffset );
+
+	setSliderPosition( newPosition );
 }
 
 } /* namespace QtMWidgets */

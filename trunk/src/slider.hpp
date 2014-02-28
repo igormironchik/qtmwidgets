@@ -62,6 +62,14 @@ class Slider
 		to QFontMetrics::ascent().
 	*/
 	Q_PROPERTY( int handleRadius READ handleRadius WRITE setHandleRadius )
+	/*!
+		\property highlightColor
+
+		\brief color used to highlight the value
+
+		By default this color is QPalette::Highlight.
+	*/
+	Q_PROPERTY( QColor highlightColor READ highlightColor WRITE setHighlightColor )
 
 public:
 	Slider( QWidget * parent = 0 );
@@ -73,6 +81,11 @@ public:
 	int handleRadius() const;
 	//! Set handle radius.
 	void setHandleRadius( int r );
+
+	//! \return Highlight color.
+	const QColor & highlightColor() const;
+	//! Set highlight color.
+	void setHighlightColor( const QColor & c );
 
 	virtual QSize sizeHint() const;
 	virtual QSize minimumSizeHint() const;

@@ -62,12 +62,14 @@ public:
 	int pixelPosToRangeValue( int p ) const;
 	inline int pick( const QPoint & pt ) const;
 	QRect grooveRect() const;
+	QRect grooveHighlightedRect( const QRect & sh, const QRect & gr ) const;
 
 	Slider * q;
 	int radius;
 	int grooveHeight;
 	QStyle::SubControl pressedControl;
 	int clickOffset;
+	QColor highlightColor;
 }; // class SliderPrivate;
 
 void
@@ -81,6 +83,8 @@ SliderPrivate::init()
 		sp.transpose();
 
 	q->setSizePolicy( sp );
+
+	highlightColor = q->palette().color( QPalette::Highlight );
 }
 
 QRect
@@ -161,6 +165,35 @@ SliderPrivate::grooveRect() const
 	return QRect( gx, gy, gw, gh );
 }
 
+QRect
+SliderPrivate::grooveHighlightedRect( const QRect & sh, const QRect & gr ) const
+{
+	int grhw = 0, grhh = 0;
+
+	QRect grh;
+
+	if( !q->invertedAppearance() )
+	{
+		if( q->orientation() == Qt::Vertical )
+			grhh = gr.height() - sh.y() - radius;
+		else
+			grhw = gr.width() - sh.x() - radius;
+
+		grh = gr.marginsRemoved( QMargins( 1, 1, grhw, grhh ) );
+	}
+	else
+	{
+		if( q->orientation() == Qt::Vertical )
+			grhh = sh.y() + radius;
+		else
+			grhw= sh.x() + radius;
+
+		grh = gr.marginsRemoved( QMargins( grhw + 1, grhh + 1, 0, 0 ) );
+	}
+
+	return grh;
+}
+
 
 //
 // Slider
@@ -203,6 +236,22 @@ Slider::setHandleRadius( int r )
 	}
 }
 
+const QColor &
+Slider::highlightColor() const
+{
+	return d->highlightColor;
+}
+
+void
+Slider::setHighlightColor( const QColor & c )
+{
+	if( d->highlightColor != c )
+	{
+		d->highlightColor = c;
+		update();
+	}
+}
+
 QSize
 Slider::sizeHint() const
 {
@@ -232,27 +281,7 @@ Slider::paintEvent( QPaintEvent * )
 {
 	const QRect sh = d->handleRect();
 	const QRect gr = d->grooveRect();
-
-	// Size of the highlighted groove.
-	int grhw = 0, grhh = 0;
-
-	if( orientation() == Qt::Vertical )
-	{
-		grhw = 0;
-		grhh = gr.height() - sh.y() - d->radius;
-	}
-	else
-	{
-		grhw = gr.width() - sh.x() - d->radius;
-		grhh = 0;
-	}
-
-	QRect grh;
-
-	if( !invertedAppearance() )
-		grh = gr.marginsRemoved( QMargins( 1, 1, grhw, grhh ) );
-	else
-		grh = gr.marginsRemoved( QMargins( grhw, grhh, 1, 1 ) );
+	const QRect grh = d->grooveHighlightedRect( sh, gr );
 
 	QPainter p( this );
 
@@ -271,7 +300,7 @@ Slider::paintEvent( QPaintEvent * )
 	p.drawRect( gr );
 
 	p.setPen( Qt::NoPen );
-	p.setBrush( palette().color( QPalette::Highlight ) );
+	p.setBrush( d->highlightColor );
 
 	p.drawRect( grh );
 

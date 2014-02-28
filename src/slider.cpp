@@ -261,7 +261,7 @@ Slider::sizeHint() const
 QSize
 Slider::minimumSizeHint() const
 {
-	const int minWidth = d->radius * 20;
+	const int minWidth = d->radius * 10;
 	const int height = d->radius * 2;
 
 	int w = minWidth;

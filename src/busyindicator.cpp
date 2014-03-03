@@ -173,8 +173,7 @@ BusyIndicator::paintEvent( QPaintEvent * )
 	p.setRenderHint( QPainter::Antialiasing );
 	p.translate( width() / 2, height() / 2 );
 	p.rotate( d->animation->currentValue().toReal() );
-	p.drawPixmap( -d->size.width() / 2,
-		-d->size.height() / 2, d->pixmap );
+	p.drawPixmap( - d->outerRadius, - d->outerRadius, d->pixmap );
 }
 
 void

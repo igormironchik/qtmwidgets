@@ -7,4 +7,5 @@ SUBDIRS = picker \
           timepicker \
           switch \
           scrollarea \
-          tableview
+          tableview \
+          busyindicator

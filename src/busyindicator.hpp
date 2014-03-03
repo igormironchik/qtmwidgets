@@ -66,6 +66,14 @@ class BusyIndicator
 		The default value is true.
 	*/
 	Q_PROPERTY( bool running READ isRunning WRITE setRunning )
+	/*!
+		\property color
+
+		\brief color used to paint indicator
+
+		By default this color is QPalette::Highlight.
+	*/
+	Q_PROPERTY( QColor color READ color WRITE setColor )
 
 public:
 	BusyIndicator( QWidget * parent = 0 );
@@ -75,6 +83,11 @@ public:
 	bool isRunning() const;
 	//! Set busy indicator running property.
 	void setRunning( bool on );
+
+	//! \return Color used to paint indicator.
+	const QColor & color() const;
+	//! Set color used to paint indicator.
+	void setColor( const QColor & c );
 
 	virtual QSize minimumSizeHint() const;
 	virtual QSize sizeHint() const;

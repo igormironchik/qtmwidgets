@@ -33,7 +33,6 @@
 
 // Qt include.
 #include <QPainter>
-#include <QPixmap>
 #include <QVariantAnimation>
 
 
@@ -52,12 +51,10 @@ public:
 		,	size( outerRadius * 2, outerRadius * 2 )
 		,	running( true )
 		,	animation( 0 )
-		,	pixmap( size )
 	{
 	}
 
 	void init();
-	void preparePixmap();
 
 	BusyIndicator * q;
 	int outerRadius;
@@ -65,7 +62,7 @@ public:
 	QSize size;
 	bool running;
 	QVariantAnimation * animation;
-	QPixmap pixmap;
+	QColor color;
 }; // class BusyIndicatorPrivate
 
 void
@@ -80,35 +77,9 @@ BusyIndicatorPrivate::init()
 	QObject::connect( animation, SIGNAL( valueChanged( const QVariant & ) ),
 		q, SLOT( _q_update( const QVariant & ) ) );
 
-	preparePixmap();
+	color = q->palette().color( QPalette::Highlight );
 
 	animation->start();
-}
-
-void
-BusyIndicatorPrivate::preparePixmap()
-{
-	QPainterPath path;
-	path.setFillRule( Qt::OddEvenFill );
-	path.addEllipse( 0, 0, outerRadius * 2, outerRadius * 2 );
-	path.addEllipse( outerRadius - innerRadius, outerRadius - innerRadius,
-		innerRadius * 2, innerRadius * 2 );
-
-	pixmap.fill( Qt::transparent );
-	QPainter p( &pixmap );
-
-	p.setPen( Qt::NoPen );
-	p.setRenderHint( QPainter::Antialiasing );
-
-	QConicalGradient gradient( outerRadius, outerRadius, 0.0 );
-	gradient.setColorAt( 0.0, q->palette().color( QPalette::Highlight ) );
-	gradient.setColorAt( 1.0, Qt::transparent );
-
-	p.setBrush( gradient );
-
-	p.drawPath( path );
-
-	p.end();
 }
 
 
@@ -154,6 +125,22 @@ BusyIndicator::setRunning( bool on )
 	}
 }
 
+const QColor &
+BusyIndicator::color() const
+{
+	return d->color;
+}
+
+void
+BusyIndicator::setColor( const QColor & c )
+{
+	if( d->color != c )
+	{
+		d->color = c;
+		update();
+	}
+}
+
 QSize
 BusyIndicator::minimumSizeHint() const
 {
@@ -172,8 +159,24 @@ BusyIndicator::paintEvent( QPaintEvent * )
 	QPainter p( this );
 	p.setRenderHint( QPainter::Antialiasing );
 	p.translate( width() / 2, height() / 2 );
-	p.rotate( d->animation->currentValue().toReal() );
-	p.drawPixmap( - d->outerRadius, - d->outerRadius, d->pixmap );
+
+	QPainterPath path;
+	path.setFillRule( Qt::OddEvenFill );
+	path.addEllipse( - d->outerRadius, - d->outerRadius,
+		d->outerRadius * 2, d->outerRadius * 2 );
+	path.addEllipse( - d->innerRadius, - d->innerRadius,
+		d->innerRadius * 2, d->innerRadius * 2 );
+
+	p.setPen( Qt::NoPen );
+
+	QConicalGradient gradient( 0, 0, - d->animation->currentValue().toReal() );
+	gradient.setColorAt( 0.0, Qt::transparent );
+	gradient.setColorAt( 0.05, d->color );
+	gradient.setColorAt( 1.0, Qt::transparent );
+
+	p.setBrush( gradient );
+
+	p.drawPath( path );
 }
 
 void

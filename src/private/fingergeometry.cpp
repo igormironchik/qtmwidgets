@@ -34,6 +34,7 @@
 // Qt include.
 #include <QApplication>
 #include <QScreen>
+#include <QByteArray>
 
 
 namespace QtMWidgets {
@@ -48,6 +49,16 @@ static const qreal fingerSize = 0.0393700787 * 10;
 int
 FingerGeometry::width()
 {
+#ifdef Q_OS_ANDROID
+
+	static const int w =
+		qRound( qgetenv( "QT_ANDROID_THEME_DISPLAY_DPI" ).toDouble() *
+			fingerSize );
+
+	return w;
+
+#else
+
 	static const int w =
 		qRound(
 			(qreal) qMax( QApplication::primaryScreen()->logicalDotsPerInchX(),
@@ -55,11 +66,23 @@ FingerGeometry::width()
 			fingerSize );
 
 	return w;
+
+#endif
 }
 
 int
 FingerGeometry::height()
 {
+#ifdef Q_OS_ANDROID
+
+	static const int h =
+		qRound( qgetenv( "QT_ANDROID_THEME_DISPLAY_DPI" ).toDouble() *
+			fingerSize );
+
+	return h;
+
+#else
+
 	static const int h =
 		qRound(
 			(qreal) qMax( QApplication::primaryScreen()->logicalDotsPerInchY(),
@@ -67,6 +90,8 @@ FingerGeometry::height()
 			fingerSize );
 
 	return h;
+
+#endif
 }
 
 } /* namespace QtMWidgets */

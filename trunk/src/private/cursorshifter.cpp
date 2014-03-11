@@ -116,7 +116,8 @@ CursorShifter::setCursorPos( const QPoint & pos )
 	{
 		d->cursorPos = pos;
 
-		move( d->cursorPos.x() - d->basicSize, d->cursorPos.y() );
+		move( mapFromGlobal(
+			QPoint( d->cursorPos.x() - d->basicSize, d->cursorPos.y() ) ) );
 	}
 }
 

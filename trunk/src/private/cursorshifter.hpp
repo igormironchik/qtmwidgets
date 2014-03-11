@@ -102,7 +102,7 @@ protected:
 	virtual void paintEvent( QPaintEvent * );
 	virtual void mousePressEvent( QMouseEvent * e );
 	virtual void mouseMoveEvent( QMouseEvent * e );
-	virtual void mouseReleaseEvent( QMouseEvent * e );
+	virtual void mouseReleaseEvent( QMouseEvent * );
 
 private slots:
 	void _q_hideTimer();

@@ -5,7 +5,7 @@ DESTDIR = ../lib
 DEPENDPATH += . private
 INCLUDEPATH += . ..
 CONFIG += qt staticlib
-QT += core gui widgets widgets-private
+QT += core gui widgets
 
 OBJECTS_DIR = ./.obj
 MOC_DIR = ./.moc

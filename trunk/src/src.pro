@@ -5,7 +5,7 @@ DESTDIR = ../lib
 DEPENDPATH += . private
 INCLUDEPATH += . ..
 CONFIG += qt staticlib
-QT += core gui widgets
+QT += core gui widgets widgets-private
 
 OBJECTS_DIR = ./.obj
 MOC_DIR = ./.moc
@@ -28,7 +28,9 @@ HEADERS += private/drawing.hpp \
            private/fingergeometry.hpp \
            textlabel.hpp \
            slider.hpp \
-           busyindicator.hpp
+           busyindicator.hpp \
+           lineedit.hpp \
+           private/cursorshifter.hpp
 
 SOURCES += private/drawing.cpp \
            private/datetimeparser.cpp \
@@ -45,4 +47,6 @@ SOURCES += private/drawing.cpp \
            private/fingergeometry.cpp \
            textlabel.cpp \
            slider.cpp \
-           busyindicator.cpp
+           busyindicator.cpp \
+           lineedit.cpp \
+           private/cursorshifter.cpp

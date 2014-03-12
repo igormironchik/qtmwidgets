@@ -30,6 +30,7 @@
 
 // QtMWidgets include.
 #include "lineedit.hpp"
+#include "private/cursorshifter.hpp"
 
 
 namespace QtMWidgets {
@@ -42,11 +43,24 @@ class LineEditPrivate {
 public:
 	LineEditPrivate( LineEdit * parent )
 		:	q( parent )
+		,	shifter( 0 )
 	{
 	}
 
+	void init();
+
 	LineEdit * q;
+	CursorShifter * shifter;
 }; // class LineEditPrivate
+
+void
+LineEditPrivate::init()
+{
+	shifter = new CursorShifter( q );
+
+	QObject::connect( shifter, SIGNAL( posChanged( const QPoint & ) ),
+		q, SLOT( _q_cursorShifterPosChanged( const QPoint & ) ) );
+}
 
 
 //
@@ -57,12 +71,14 @@ LineEdit::LineEdit( QWidget * parent )
 	:	QLineEdit( parent )
 	,	d( new LineEditPrivate( this ) )
 {
+	d->init();
 }
 
 LineEdit::LineEdit( const QString & text, QWidget * parent )
 	:	QLineEdit( text, parent )
 	,	d( new LineEditPrivate( this ) )
 {
+	d->init();
 }
 
 LineEdit::~LineEdit()
@@ -72,6 +88,8 @@ LineEdit::~LineEdit()
 void
 LineEdit::keyPressEvent( QKeyEvent * e )
 {
+	d->shifter->immediatelyHide();
+
 	QLineEdit::keyPressEvent( e );
 }
 
@@ -79,11 +97,44 @@ void
 LineEdit::mousePressEvent( QMouseEvent * e )
 {
 	QLineEdit::mousePressEvent( e );
+
+	if( !isReadOnly() && !text().isEmpty() )
+	{
+		const QRect cr = cursorRect();
+
+		const QPoint pos = mapToGlobal( QPoint( cr.center().x(),
+			cr.y() + cr.height() ) );
+
+		d->shifter->setCursorPos( pos );
+		d->shifter->popup();
+	}
+}
+
+void
+LineEdit::focusOutEvent( QFocusEvent * e )
+{
+	d->shifter->immediatelyHide();
+
+	QLineEdit::focusOutEvent( e );
 }
 
 void
 LineEdit::_q_cursorShifterPosChanged( const QPoint & pos )
 {
+	const int oldPos = cursorPosition();
+	const int newPos = cursorPositionAt( mapFromGlobal( pos ) );
+
+	if( oldPos != newPos )
+	{
+		setCursorPosition( newPos );
+
+		repaint();
+
+		const QRect cr = cursorRect();
+
+		d->shifter->setCursorPos( mapToGlobal( QPoint( cr.center().x(),
+			cr.y() + cr.height() ) ) );
+	}
 }
 
 } /* namespace QtMWidgets */

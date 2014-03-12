@@ -97,12 +97,12 @@ public slots:
 	void setCursorPos( const QPoint & pos );
 	//! Pop up.
 	void popup();
+	//! Immediately hide.
+	void immediatelyHide();
 
 protected:
 	virtual void paintEvent( QPaintEvent * );
-	virtual void mousePressEvent( QMouseEvent * e );
-	virtual void mouseMoveEvent( QMouseEvent * e );
-	virtual void mouseReleaseEvent( QMouseEvent * );
+	virtual bool eventFilter( QObject * obj, QEvent * e );
 
 private slots:
 	void _q_hideTimer();

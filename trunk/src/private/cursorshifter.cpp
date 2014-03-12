@@ -38,6 +38,10 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include <QPainterPath>
+#include <QApplication>
+#include <QEvent>
+
+#include <QDebug>
 
 
 namespace QtMWidgets {
@@ -73,6 +77,11 @@ CursorShifterPrivate::init()
 	light = lighterColor( color, 75 );
 	basicSize = qRound( (qreal) FingerGeometry::width() * 0.2 );
 	timer = new QTimer( q );
+	q->setAttribute( Qt::WA_TranslucentBackground );
+	q->setWindowModality( Qt::NonModal );
+
+	QObject::connect( timer, SIGNAL( timeout() ),
+		q, SLOT( _q_hideTimer() ) );
 }
 
 
@@ -81,7 +90,10 @@ CursorShifterPrivate::init()
 //
 
 CursorShifter::CursorShifter( QWidget * parent )
-	:	QWidget( parent, Qt::Popup )
+	:	QWidget( parent, Qt::ToolTip | Qt::FramelessWindowHint |
+			Qt::WindowDoesNotAcceptFocus |
+			Qt::WindowTransparentForInput |
+			Qt::NoDropShadowWindowHint )
 	,	d( new CursorShifterPrivate( this ) )
 {
 	d->init();
@@ -116,16 +128,26 @@ CursorShifter::setCursorPos( const QPoint & pos )
 	{
 		d->cursorPos = pos;
 
-		move( mapFromGlobal(
-			QPoint( d->cursorPos.x() - d->basicSize, d->cursorPos.y() ) ) );
+		move( QPoint( d->cursorPos.x() - d->basicSize, d->cursorPos.y() ) );
 	}
 }
 
 void
 CursorShifter::popup()
 {
+	qApp->installEventFilter( this );
 	show();
-	d->timer->start( 1000 );
+	d->timer->start( 3000 );
+}
+
+void
+CursorShifter::immediatelyHide()
+{
+	d->timer->stop();
+
+	qApp->removeEventFilter( this );
+
+	hide();
 }
 
 void
@@ -148,37 +170,73 @@ CursorShifter::paintEvent( QPaintEvent * )
 	p.drawRect( 0, d->basicSize, d->basicSize * 2, d->basicSize * 2 );
 }
 
-void
-CursorShifter::mousePressEvent( QMouseEvent * e )
+bool
+CursorShifter::eventFilter( QObject * obj, QEvent * e )
 {
-	if( e->button() == Qt::LeftButton )
-	{
-		d->leftMouseButtonPressed = true;
-		d->timer->stop();
-		d->offset = QPoint( d->basicSize, 0 ) - e->pos();
-	}
-}
+	Q_UNUSED( obj )
 
-void
-CursorShifter::mouseMoveEvent( QMouseEvent * e )
-{
-	if( d->leftMouseButtonPressed )
-		emit posChanged( e->globalPos() - d->offset );
-}
-
-void
-CursorShifter::mouseReleaseEvent( QMouseEvent * )
-{
-	if( d->leftMouseButtonPressed )
+	switch( e->type() )
 	{
-		d->leftMouseButtonPressed = false;
-		d->timer->start( 1000 );
+		case QEvent::MouseButtonPress :
+		{
+			QMouseEvent * me = static_cast< QMouseEvent* > ( e );
+			QRect r = rect();
+			r.moveTo( pos() );
+			const QPoint pos = me->globalPos();
+
+			if( isVisible() && r.contains( pos ) )
+			{
+				d->leftMouseButtonPressed = true;
+				d->timer->stop();
+				d->offset = QPoint( r.topLeft().x() + d->basicSize - pos.x(),
+					r.topLeft().y() - pos.y() );
+
+				return true;
+			}
+
+			return false;
+		}
+		break;
+
+		case QEvent::MouseButtonRelease :
+		{
+			if( d->leftMouseButtonPressed )
+			{
+				d->leftMouseButtonPressed = false;
+				d->timer->start( 3000 );
+
+				return true;
+			}
+
+			return false;
+		}
+		break;
+
+		case QEvent::MouseMove :
+		{
+			QMouseEvent * me = static_cast< QMouseEvent* > ( e );
+
+			if( d->leftMouseButtonPressed )
+			{
+				emit posChanged( me->globalPos() + d->offset );
+
+				return true;
+			}
+
+			return false;
+		}
+		break;
+
+		default :
+			return false;
 	}
 }
 
 void
 CursorShifter::_q_hideTimer()
 {
+	qApp->removeEventFilter( this );
+
 	hide();
 }
 

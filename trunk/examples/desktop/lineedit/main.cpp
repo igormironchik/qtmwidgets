@@ -28,50 +28,39 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef QTMWIDGETS__LINEEDIT_HPP__INCLUDED
-#define QTMWIDGETS__LINEEDIT_HPP__INCLUDED
-
 // Qt include.
-#include <QLineEdit>
-#include <QScopedPointer>
+#include <QApplication>
+#include <QWidget>
+#include <QVBoxLayout>
+
+// QtMWidgets include.
+#include <QtMWidgets/LineEdit>
 
 
-namespace QtMWidgets {
-
-//
-// LineEdit
-//
-
-class LineEditPrivate;
-
-/*!
-	LineEdit is a QLineEdit but with pop-up CursorShifter.
-*/
-class LineEdit
-	:	public QLineEdit
+class Widget
+	:	public QWidget
 {
-	Q_OBJECT
-
 public:
-	LineEdit( QWidget * parent = 0 );
-	explicit LineEdit( const QString & text, QWidget * parent = 0 );
+	Widget()
+	{
+		QVBoxLayout * l = new QVBoxLayout( this );
 
-	virtual ~LineEdit();
+		QtMWidgets::LineEdit * edit =
+			new QtMWidgets::LineEdit( this );
+		edit->setPlaceholderText( tr( "Type Here" ) );
 
-protected:
-	virtual void keyPressEvent( QKeyEvent * e );
-	virtual void mousePressEvent( QMouseEvent * e );
-	virtual void focusOutEvent( QFocusEvent * e );
+		l->addWidget( edit );
+	}
+};
 
-private slots:
-	void _q_cursorShifterPosChanged( const QPoint & pos );
 
-private:
-	Q_DISABLE_COPY( LineEdit )
+int main( int argc, char ** argv )
+{
+	QApplication app( argc, argv );
 
-	QScopedPointer< LineEditPrivate > d;
-}; // class LineEdit
+	Widget w;
 
-} /* namespace QtMWidgets */
+	w.show();
 
-#endif // QTMWIDGETS__LINEEDIT_HPP__INCLUDED
+	return app.exec();
+}

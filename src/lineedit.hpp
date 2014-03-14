@@ -61,6 +61,7 @@ public:
 protected:
 	virtual void keyPressEvent( QKeyEvent * e );
 	virtual void mousePressEvent( QMouseEvent * e );
+	virtual void mouseMoveEvent( QMouseEvent * e );
 	virtual void focusOutEvent( QFocusEvent * e );
 
 private slots:

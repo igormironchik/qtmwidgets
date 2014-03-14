@@ -32,6 +32,9 @@
 #include "lineedit.hpp"
 #include "private/cursorshifter.hpp"
 
+// Qt include.
+#include <QMouseEvent>
+
 
 namespace QtMWidgets {
 
@@ -108,6 +111,12 @@ LineEdit::mousePressEvent( QMouseEvent * e )
 		d->shifter->setCursorPos( pos );
 		d->shifter->popup();
 	}
+}
+
+void
+LineEdit::mouseMoveEvent( QMouseEvent * e )
+{
+	e->ignore();
 }
 
 void

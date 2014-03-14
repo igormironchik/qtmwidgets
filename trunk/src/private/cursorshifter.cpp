@@ -40,6 +40,7 @@
 #include <QPainterPath>
 #include <QApplication>
 #include <QEvent>
+#include <QBitmap>
 
 #include <QDebug>
 
@@ -78,12 +79,12 @@ CursorShifterPrivate::init()
 	basicSize = qRound( (qreal) FingerGeometry::width() * 0.2 );
 	timer = new QTimer( q );
 	q->setAttribute( Qt::WA_TranslucentBackground );
+	q->setAttribute( Qt::WA_NoSystemBackground );
 	q->setWindowModality( Qt::NonModal );
 
 	QObject::connect( timer, SIGNAL( timeout() ),
 		q, SLOT( _q_hideTimer() ) );
 }
-
 
 //
 // CursorShifter
@@ -93,7 +94,8 @@ CursorShifter::CursorShifter( QWidget * parent )
 	:	QWidget( parent, Qt::ToolTip | Qt::FramelessWindowHint |
 			Qt::WindowDoesNotAcceptFocus |
 			Qt::WindowTransparentForInput |
-			Qt::NoDropShadowWindowHint )
+			Qt::NoDropShadowWindowHint |
+			Qt::WindowStaysOnTopHint )
 	,	d( new CursorShifterPrivate( this ) )
 {
 	d->init();

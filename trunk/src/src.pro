@@ -30,7 +30,8 @@ HEADERS += private/drawing.hpp \
            slider.hpp \
            busyindicator.hpp \
            lineedit.hpp \
-           private/cursorshifter.hpp
+           private/cursorshifter.hpp \
+           textedit.hpp
 
 SOURCES += private/drawing.cpp \
            private/datetimeparser.cpp \
@@ -49,4 +50,5 @@ SOURCES += private/drawing.cpp \
            slider.cpp \
            busyindicator.cpp \
            lineedit.cpp \
-           private/cursorshifter.cpp
+           private/cursorshifter.cpp \
+           textedit.cpp

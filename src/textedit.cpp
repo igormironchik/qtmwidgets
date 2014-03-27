@@ -36,6 +36,7 @@
 #include <QAbstractTextDocumentLayout>
 #include <QTextLayout>
 #include <QTextBlock>
+#include <QPainter>
 
 
 namespace QtMWidgets {
@@ -70,6 +71,7 @@ public:
 
 	QRectF rectForPosition( int pos ) const;
 	QPointF anchorPosition( const QString & name ) const;
+	void paintContents( QPaintEvent * e );
 
 	inline TextEdit * q_func() { return static_cast< TextEdit* >( q ); }
 	inline const TextEdit * q_func() const { return static_cast< const TextEdit* >( q ); }
@@ -88,6 +90,21 @@ TextEditPrivate::init()
 
 	doc = new QTextDocument( q );
 	cursor = QTextCursor( doc );
+
+	doc->setPageSize( QSize( 0, 0 ) );
+	doc->documentLayout()->setPaintDevice( q->viewport() );
+	doc->setDefaultFont( q->font() );
+	doc->setUndoRedoEnabled( false ); // flush undo buffer.
+	doc->setUndoRedoEnabled( true );
+
+	q->viewport()->setBackgroundRole( QPalette::Base );
+	q->setFocusPolicy( Qt::WheelFocus );
+	q->setAttribute( Qt::WA_KeyCompression );
+	q->setAttribute( Qt::WA_InputMethodEnabled );
+	q->setInputMethodHints( Qt::ImhMultiLine );
+	q->viewport()->setCursor( Qt::IBeamCursor );
+
+	q->viewport()->installEventFilter( q );
 }
 
 QRectF
@@ -161,6 +178,26 @@ TextEditPrivate::anchorPosition( const QString & name ) const
 	return QPointF( 0, r.top() );
 }
 
+void
+TextEditPrivate::paintContents( QPaintEvent * e )
+{
+	QPainter p( viewport );
+
+	if( doc->isEmpty() && !placeholderText.isEmpty() )
+	{
+		const QRect r = viewport->rect();
+
+		QColor col = q->palette().text().color();
+		col.setAlpha( 128 );
+		p.setPen( col );
+		const int margin = int( doc->documentMargin() );
+		p.drawText( r.adjusted( margin, margin, -margin, -margin ),
+			Qt::AlignTop | Qt::TextWordWrap, placeholderText );
+
+		return;
+	}
+}
+
 
 //
 // TextEdit
@@ -169,12 +206,16 @@ TextEditPrivate::anchorPosition( const QString & name ) const
 TextEdit::TextEdit( QWidget * parent )
 	:	ScrollArea( new TextEditPrivate( this ), parent )
 {
+	TextEditPrivate * d = d_func();
+
 	d->init();
 }
 
 TextEdit::TextEdit( const QString & text, QWidget * parent )
 	:	ScrollArea( new TextEditPrivate( this ), parent )
 {
+	TextEditPrivate * d = d_func();
+
 	d->init();
 
 	if( !text.isEmpty() )
@@ -564,37 +605,24 @@ TextEdit::keyReleaseEvent( QKeyEvent * e )
 void
 TextEdit::resizeEvent( QResizeEvent * e )
 {
-
+	ScrollArea::resizeEvent( e );
 }
 
-void
-TextEdit::paintEvent( QPaintEvent * )
+bool
+TextEdit::eventFilter( QObject * obj, QEvent * e )
 {
+	if( obj == viewport() && e->type() == QEvent::Paint )
+	{
+		TextEditPrivate * d = d_func();
 
-}
+		QPaintEvent * pe = static_cast< QPaintEvent* > ( e );
 
-void
-TextEdit::mousePressEvent( QMouseEvent * e )
-{
+		d->paintContents( pe );
 
-}
+		return true;
+	}
 
-void
-TextEdit::mouseMoveEvent( QMouseEvent * e )
-{
-
-}
-
-void
-TextEdit::mouseReleaseEvent( QMouseEvent * e )
-{
-
-}
-
-void
-TextEdit::wheelEvent( QWheelEvent * e )
-{
-
+	return false;
 }
 
 void

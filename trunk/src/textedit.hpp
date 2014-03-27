@@ -38,9 +38,37 @@
 #include <QScopedPointer>
 #include <QTextDocument>
 #include <QTextCursor>
+#include <QMimeData>
+#include <QTextDocumentFragment>
 
 
 namespace QtMWidgets {
+
+//
+// TextEditMimeData
+//
+
+class TextEditMimeData
+	:	public QMimeData
+{
+public:
+	inline TextEditMimeData( const QTextDocumentFragment & aFragment )
+		:	fragment( aFragment )
+	{
+	}
+
+	virtual QStringList formats() const;
+
+protected:
+	virtual QVariant retrieveData( const QString & mimeType,
+		QVariant::Type type ) const;
+
+private:
+	void setup() const;
+
+	mutable QTextDocumentFragment fragment;
+}; // class TextEditMimeData
+
 
 //
 // TextEdit
@@ -83,11 +111,32 @@ class TextEdit
 	*/
 	Q_PROPERTY( bool undoRedoEnabled READ isUndoRedoEnabled
 		WRITE setUndoRedoEnabled )
+	/*!
+		\property document
+
+		Document of the TextEdit.
+	*/
 	Q_PROPERTY( QTextDocument * document READ document WRITE setDocument
 		DESIGNABLE false )
+	/*!
+		\property placeholderText
+
+		The text that will be displayed to prompt user when
+		nothing entered yet.
+	*/
 	Q_PROPERTY( QString placeholderText READ placeholderText
 		WRITE setPlaceholderText )
+	/*!
+		\property readOnly
+
+		Is this TextEdit read-only?
+	*/
 	Q_PROPERTY( bool readOnly READ isReadOnly WRITE setReadOnly )
+	/*!
+		\property documentTitle
+
+		Title of the document
+	*/
 	Q_PROPERTY( QString documentTitle READ documentTitle
 		WRITE setDocumentTitle )
 
@@ -216,6 +265,13 @@ public slots:
 	void undo();
 	//! Redo.
 	void redo();
+
+	//! Cut text.
+	void cut();
+	//! Copy text.
+	void copy();
+	//! Paste text.
+	void paste();
 
 	//! Clear.
 	void clear();

@@ -37,9 +37,59 @@
 #include <QTextLayout>
 #include <QTextBlock>
 #include <QPainter>
+#include <QApplication>
+#include <QClipboard>
+#include <QBuffer>
+#include <QTextDocumentWriter>
 
 
 namespace QtMWidgets {
+
+//
+// TextEditMimeData
+//
+
+QStringList
+TextEditMimeData::formats() const
+{
+	if( !fragment.isEmpty() )
+		return QStringList() << QString::fromLatin1( "text/plain" )
+			<< QString::fromLatin1( "text/html" )
+			<< QString::fromLatin1( "application/vnd.oasis.opendocument.text" );
+	else
+		return QMimeData::formats();
+}
+
+QVariant
+TextEditMimeData::retrieveData( const QString & mimeType,
+	QVariant::Type type ) const
+{
+	if( !fragment.isEmpty() )
+		setup();
+
+	return QMimeData::retrieveData( mimeType, type );
+}
+
+void
+TextEditMimeData::setup() const
+{
+	TextEditMimeData * that = const_cast< TextEditMimeData* > ( this );
+	that->setData( QLatin1String( "text/html" ),
+		fragment.toHtml( "utf-8" ).toUtf8() );
+
+	{
+		QBuffer buffer;
+		QTextDocumentWriter writer( &buffer, "ODF" );
+		writer.write( fragment );
+		buffer.close();
+		that->setData( QLatin1String(
+			"application/vnd.oasis.opendocument.text" ), buffer.data() );
+	}
+
+	that->setText( fragment.toPlainText() );
+	fragment = QTextDocumentFragment();
+}
+
 
 //
 // TextEditPrivate
@@ -72,6 +122,8 @@ public:
 	QRectF rectForPosition( int pos ) const;
 	QPointF anchorPosition( const QString & name ) const;
 	void paintContents( QPaintEvent * e );
+	QMimeData * createMimeDataFromSelection() const;
+	void insertFromMimeData( const QMimeData * source );
 
 	inline TextEdit * q_func() { return static_cast< TextEdit* >( q ); }
 	inline const TextEdit * q_func() const { return static_cast< const TextEdit* >( q ); }
@@ -103,7 +155,6 @@ TextEditPrivate::init()
 	q->setAttribute( Qt::WA_InputMethodEnabled );
 	q->setInputMethodHints( Qt::ImhMultiLine );
 	q->viewport()->setCursor( Qt::IBeamCursor );
-
 	q->viewport()->installEventFilter( q );
 }
 
@@ -196,6 +247,55 @@ TextEditPrivate::paintContents( QPaintEvent * e )
 
 		return;
 	}
+}
+
+QMimeData *
+TextEditPrivate::createMimeDataFromSelection() const
+{
+	const QTextDocumentFragment fragment( cursor );
+	return new TextEditMimeData( fragment );
+}
+
+void
+TextEditPrivate::insertFromMimeData( const QMimeData * source )
+{
+	TextEdit * q = q_func();
+
+	if ( q->isReadOnly() || !source )
+		return;
+
+	bool hasData = false;
+
+	QTextDocumentFragment fragment;
+
+	if( source->hasFormat( QLatin1String( "application/x-qrichtext" ) ) )
+	{
+		QString richtext = QString::fromUtf8( source->data(
+			QLatin1String( "application/x-qrichtext" ) ) );
+		richtext.prepend( QLatin1String(
+			"<meta name=\"qrichtext\" content=\"1\" />" ) );
+		fragment = QTextDocumentFragment::fromHtml( richtext, doc );
+		hasData = true;
+	}
+	else if( source->hasHtml() )
+	{
+		fragment = QTextDocumentFragment::fromHtml( source->html(), doc );
+		hasData = true;
+	}
+	else
+	{
+		QString text = source->text();
+		if( !text.isNull() )
+		{
+			fragment = QTextDocumentFragment::fromPlainText( text );
+			hasData = true;
+		}
+	}
+
+	if( hasData )
+		cursor.insertFragment( fragment );
+
+	q->ensureCursorVisible();
 }
 
 
@@ -517,6 +617,44 @@ TextEdit::redo()
 }
 
 void
+TextEdit::cut()
+{
+	TextEditPrivate * d = d_func();
+
+	if( isReadOnly() || !d->cursor.hasSelection() )
+		return;
+
+	copy();
+
+	d->cursor.removeSelectedText();
+}
+
+void
+TextEdit::copy()
+{
+	TextEditPrivate * d = d_func();
+
+	if( !d->cursor.hasSelection() )
+		return;
+
+	QMimeData * data = d->createMimeDataFromSelection();
+
+	QApplication::clipboard()->setMimeData( data );
+}
+
+void
+TextEdit::paste()
+{
+	TextEditPrivate * d = d_func();
+
+	const QMimeData * md = QApplication::clipboard()->mimeData(
+		QClipboard::Clipboard );
+
+	if( md )
+		d->insertFromMimeData( md );
+}
+
+void
 TextEdit::clear()
 {
 	setText( QString() );
@@ -606,6 +744,12 @@ void
 TextEdit::resizeEvent( QResizeEvent * e )
 {
 	ScrollArea::resizeEvent( e );
+
+	TextEditPrivate * d = d_func();
+
+	d->doc->setPageSize( viewport()->size() );
+
+	setScrolledAreaSize( d->doc->size().toSize() );
 }
 
 bool

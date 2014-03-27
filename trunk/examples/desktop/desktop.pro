@@ -9,4 +9,5 @@ SUBDIRS = picker \
           scrollarea \
           tableview \
           busyindicator \
-          lineedit
+          lineedit \
+          textedit

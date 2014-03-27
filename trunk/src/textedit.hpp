@@ -236,11 +236,7 @@ protected:
 	virtual void keyPressEvent( QKeyEvent * e );
 	virtual void keyReleaseEvent( QKeyEvent * e );
 	virtual void resizeEvent( QResizeEvent * e );
-	virtual void paintEvent( QPaintEvent * );
-	virtual void mousePressEvent( QMouseEvent * e );
-	virtual void mouseMoveEvent( QMouseEvent * e );
-	virtual void mouseReleaseEvent( QMouseEvent * e );
-	virtual void wheelEvent( QWheelEvent * e );
+	virtual bool eventFilter( QObject * obj, QEvent * e );
 
 	virtual void scrollContentsBy( int dx, int dy );
 

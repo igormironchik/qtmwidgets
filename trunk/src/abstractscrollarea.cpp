@@ -583,7 +583,16 @@ AbstractScrollArea::setTopLeftPointShownArea( const QPoint & p )
 	const int dy = p.y() - d->topLeftCorner.y();
 
 	d->scrollContentsBy( dx, dy );
+
 	scrollContentsBy( dx, dy );
+
+	d->animateScrollIndicators();
+}
+
+void
+AbstractScrollArea::startScrollIndicatorsAnimation()
+{
+	d->animateScrollIndicators();
 }
 
 void

@@ -189,6 +189,9 @@ protected:
 	//! Set top-left corner of the shown scrolled area.
 	void setTopLeftPointShownArea( const QPoint & p );
 
+	//! Start animation of fading scroll indicators.
+	void startScrollIndicatorsAnimation();
+
 	virtual void resizeEvent( QResizeEvent * e );
 	virtual void mousePressEvent( QMouseEvent * e );
 	virtual void mouseReleaseEvent( QMouseEvent * e );

@@ -38,12 +38,30 @@
 #include <QTextBlock>
 #include <QPainter>
 #include <QApplication>
-#include <QClipboard>
 #include <QBuffer>
 #include <QTextDocumentWriter>
+#include <QTextList>
+#include <QDebug>
 
 
 namespace QtMWidgets {
+
+static QTextLine currentTextLine( const QTextCursor & cursor )
+{
+	const QTextBlock block = cursor.block();
+
+	if( !block.isValid() )
+		return QTextLine();
+
+	const QTextLayout * layout = block.layout();
+
+	if( !layout )
+		return QTextLine();
+
+	const int relativePos = cursor.position() - block.position();
+
+	return layout->lineForTextPosition( relativePos );
+}
 
 //
 // TextEditMimeData
@@ -124,6 +142,9 @@ public:
 	void paintContents( QPaintEvent * e );
 	QMimeData * createMimeDataFromSelection() const;
 	void insertFromMimeData( const QMimeData * source );
+	bool cursorMoveKeyEvent( QKeyEvent * e );
+	void pageUpDown( QTextCursor::MoveOperation op,
+		QTextCursor::MoveMode moveMode );
 
 	inline TextEdit * q_func() { return static_cast< TextEdit* >( q ); }
 	inline const TextEdit * q_func() const { return static_cast< const TextEdit* >( q ); }
@@ -247,6 +268,15 @@ TextEditPrivate::paintContents( QPaintEvent * e )
 
 		return;
 	}
+
+	const int xOffset = topLeftCorner.x();
+	const int yOffset = topLeftCorner.y();
+
+	QRect r = e->rect();
+	p.translate( -xOffset, -yOffset );
+	r.translate( xOffset, yOffset );
+
+	doc->drawContents( &p, r );
 }
 
 QMimeData *
@@ -294,6 +324,180 @@ TextEditPrivate::insertFromMimeData( const QMimeData * source )
 
 	if( hasData )
 		cursor.insertFragment( fragment );
+
+	q->ensureCursorVisible();
+}
+
+bool
+TextEditPrivate::cursorMoveKeyEvent( QKeyEvent * e )
+{
+	TextEdit * q = q_func();
+
+	if( cursor.isNull() )
+		return false;
+
+	const QTextCursor oldSelection = cursor;
+	const int oldCursorPos = cursor.position();
+
+	QTextCursor::MoveMode mode = QTextCursor::MoveAnchor;
+	QTextCursor::MoveOperation op = QTextCursor::NoMove;
+
+	if( e == QKeySequence::MoveToNextChar )
+		op = QTextCursor::Right;
+	else if( e == QKeySequence::MoveToPreviousChar )
+		op = QTextCursor::Left;
+	else if( e == QKeySequence::SelectNextChar )
+	{
+	   op = QTextCursor::Right;
+	   mode = QTextCursor::KeepAnchor;
+	}
+	else if( e == QKeySequence::SelectPreviousChar )
+	{
+		op = QTextCursor::Left;
+		mode = QTextCursor::KeepAnchor;
+	}
+	else if( e == QKeySequence::SelectNextWord )
+	{
+		op = QTextCursor::WordRight;
+		mode = QTextCursor::KeepAnchor;
+	}
+	else if( e == QKeySequence::SelectPreviousWord )
+	{
+		op = QTextCursor::WordLeft;
+		mode = QTextCursor::KeepAnchor;
+	}
+	else if( e == QKeySequence::SelectStartOfLine )
+	{
+		op = QTextCursor::StartOfLine;
+		mode = QTextCursor::KeepAnchor;
+	}
+	else if( e == QKeySequence::SelectEndOfLine )
+	{
+		op = QTextCursor::EndOfLine;
+		mode = QTextCursor::KeepAnchor;
+	}
+	else if( e == QKeySequence::SelectStartOfBlock )
+	{
+		op = QTextCursor::StartOfBlock;
+		mode = QTextCursor::KeepAnchor;
+	}
+	else if( e == QKeySequence::SelectEndOfBlock )
+	{
+		op = QTextCursor::EndOfBlock;
+		mode = QTextCursor::KeepAnchor;
+	}
+	else if( e == QKeySequence::SelectStartOfDocument )
+	{
+		op = QTextCursor::Start;
+		mode = QTextCursor::KeepAnchor;
+	}
+	else if( e == QKeySequence::SelectEndOfDocument )
+	{
+		op = QTextCursor::End;
+		mode = QTextCursor::KeepAnchor;
+	}
+	else if( e == QKeySequence::SelectPreviousLine )
+	{
+		op = QTextCursor::Up;
+		mode = QTextCursor::KeepAnchor;
+	}
+	else if( e == QKeySequence::SelectNextLine )
+	{
+		op = QTextCursor::Down;
+		mode = QTextCursor::KeepAnchor;
+
+		{
+			QTextBlock block = cursor.block();
+			QTextLine line = currentTextLine( cursor );
+			if( !block.next().isValid()
+				&& line.isValid()
+				&& line.lineNumber() == block.layout()->lineCount() - 1 )
+					op = QTextCursor::End;
+		}
+	}
+	else if( e == QKeySequence::MoveToNextWord )
+		op = QTextCursor::WordRight;
+	else if( e == QKeySequence::MoveToPreviousWord )
+		op = QTextCursor::WordLeft;
+	else if( e == QKeySequence::MoveToEndOfBlock )
+		op = QTextCursor::EndOfBlock;
+	else if( e == QKeySequence::MoveToStartOfBlock )
+		op = QTextCursor::StartOfBlock;
+	else if( e == QKeySequence::MoveToNextLine )
+		op = QTextCursor::Down;
+	else if( e == QKeySequence::MoveToPreviousLine )
+		op = QTextCursor::Up;
+	else if( e == QKeySequence::MoveToPreviousLine )
+		op = QTextCursor::Up;
+	else if( e == QKeySequence::MoveToStartOfLine )
+		op = QTextCursor::StartOfLine;
+	else if( e == QKeySequence::MoveToEndOfLine )
+		op = QTextCursor::EndOfLine;
+	else if( e == QKeySequence::MoveToStartOfDocument )
+		op = QTextCursor::Start;
+	else if( e == QKeySequence::MoveToEndOfDocument )
+		op = QTextCursor::End;
+	else
+		return false;
+
+	bool visualNavigation = cursor.visualNavigation();
+	cursor.setVisualNavigation( true );
+	const bool moved = cursor.movePosition( op, mode );
+	cursor.setVisualNavigation( visualNavigation );
+	q->ensureCursorVisible();
+
+	bool ignoreNavigationEvents = false;
+	bool isNavigationEvent = e->key() == Qt::Key_Up || e->key() == Qt::Key_Down;
+
+#ifdef QT_KEYPAD_NAVIGATION
+	ignoreNavigationEvents = ignoreNavigationEvents ||
+		QApplication::keypadNavigationEnabled();
+	isNavigationEvent = isNavigationEvent ||
+		( QApplication::navigationMode() == Qt::NavigationModeKeypadDirectional
+		 && ( e->key() == Qt::Key_Left || e->key() == Qt::Key_Right ) );
+#else
+	isNavigationEvent = isNavigationEvent || e->key() == Qt::Key_Left ||
+		e->key() == Qt::Key_Right;
+#endif
+
+	if( moved )
+	{
+		if( cursor.position() != oldCursorPos )
+			emit q->cursorPositionChanged();
+	}
+	else if( ignoreNavigationEvents && isNavigationEvent &&
+			oldSelection.anchor() == cursor.anchor())
+	{
+		return false;
+	}
+
+	return true;
+}
+
+void
+TextEditPrivate::pageUpDown( QTextCursor::MoveOperation op,
+	QTextCursor::MoveMode moveMode )
+{
+	TextEdit * q = q_func();
+
+	bool moved = false;
+	qreal lastY = q->cursorRect( cursor ).top();
+	qreal distance = 0;
+	// move using movePosition to keep the cursor's x
+	do {
+		qreal y = q->cursorRect( cursor ).top();
+		distance += qAbs( y - lastY );
+		lastY = y;
+		moved = cursor.movePosition( op, moveMode );
+	} while( moved && distance < viewport->height() );
+
+	if( moved )
+	{
+		if( op == QTextCursor::Up )
+			cursor.movePosition( QTextCursor::Down, moveMode );
+		else
+			cursor.movePosition( QTextCursor::Up, moveMode );
+	}
 
 	q->ensureCursorVisible();
 }
@@ -446,8 +650,12 @@ TextEdit::ensureCursorVisible()
 	QRectF crect = d->rectForPosition( d->cursor.position() )
 		.adjusted( -5, 0, 5, 0 );
 
-	scrollContentsBy( crect.topLeft().x() - d->topLeftCorner.x(),
-		crect.topLeft().y() - d->topLeftCorner.y() );
+	d->scrollContentsBy( d->topLeftCorner.x() - crect.topLeft().x(),
+		d->topLeftCorner.y() - crect.topLeft().y() );
+
+	scrollContentsBy( 0, 0 );
+
+	startScrollIndicatorsAnimation();
 }
 
 QTextCursor
@@ -643,12 +851,11 @@ TextEdit::copy()
 }
 
 void
-TextEdit::paste()
+TextEdit::paste( QClipboard::Mode mode )
 {
 	TextEditPrivate * d = d_func();
 
-	const QMimeData * md = QApplication::clipboard()->mimeData(
-		QClipboard::Clipboard );
+	const QMimeData * md = QApplication::clipboard()->mimeData( mode );
 
 	if( md )
 		d->insertFromMimeData( md );
@@ -731,13 +938,180 @@ TextEdit::scrollToAnchor( const QString & name )
 void
 TextEdit::keyPressEvent( QKeyEvent * e )
 {
+	TextEditPrivate * d = d_func();
 
-}
+	if( e == QKeySequence::SelectAll )
+	{
+		e->accept();
+		selectAll();
+		return;
+	}
+	else if( e == QKeySequence::Copy )
+	{
+		e->accept();
+		copy();
+		return;
+	}
 
-void
-TextEdit::keyReleaseEvent( QKeyEvent * e )
-{
+	if( e == QKeySequence::SelectPreviousPage )
+	{
+		e->accept();
+		d->pageUpDown( QTextCursor::Up, QTextCursor::KeepAnchor );
+		return;
+	}
+	else if( e ==QKeySequence::SelectNextPage )
+	{
+		e->accept();
+		d->pageUpDown( QTextCursor::Down, QTextCursor::KeepAnchor );
+		return;
+	}
 
+	if( !isReadOnly() )
+	{
+		if( e == QKeySequence::MoveToPreviousPage )
+		{
+			e->accept();
+			d->pageUpDown( QTextCursor::Up, QTextCursor::MoveAnchor );
+			return;
+		}
+		else if( e == QKeySequence::MoveToNextPage )
+		{
+			e->accept();
+			d->pageUpDown( QTextCursor::Down, QTextCursor::MoveAnchor );
+			return;
+		}
+	}
+
+	if( d->cursorMoveKeyEvent( e ) )
+	{
+		e->accept();
+		ensureCursorVisible();
+		return;
+	}
+
+	if( isReadOnly() )
+	{
+		e->ignore();
+		return;
+	}
+
+	if( e->key() == Qt::Key_Direction_L || e->key() == Qt::Key_Direction_R )
+	{
+		QTextBlockFormat fmt;
+		fmt.setLayoutDirection( ( e->key() == Qt::Key_Direction_L ) ?
+			Qt::LeftToRight : Qt::RightToLeft );
+		d->cursor.mergeBlockFormat( fmt );
+		e->accept();
+		ensureCursorVisible();
+	}
+
+	if( e->key() == Qt::Key_Backspace &&
+		!( e->modifiers() & ~Qt::ShiftModifier ) )
+	{
+		QTextBlockFormat blockFmt = d->cursor.blockFormat();
+		QTextList * list = d->cursor.currentList();
+
+		if( list && d->cursor.atBlockStart() && !d->cursor.hasSelection() )
+		{
+			list->remove( d->cursor.block() );
+		}
+		else if( d->cursor.atBlockStart() && blockFmt.indent() > 0 )
+		{
+			blockFmt.setIndent( blockFmt.indent() - 1 );
+			d->cursor.setBlockFormat( blockFmt );
+		}
+		else
+		{
+			QTextCursor localCursor = d->cursor;
+			localCursor.deletePreviousChar();
+		}
+
+		e->accept();
+		ensureCursorVisible();
+	}
+	else if( e == QKeySequence::InsertParagraphSeparator )
+	{
+		d->cursor.insertBlock();
+		e->accept();
+		ensureCursorVisible();
+	}
+	else if( e == QKeySequence::InsertLineSeparator )
+	{
+		d->cursor.insertText( QString( QChar::LineSeparator ) );
+		e->accept();
+		ensureCursorVisible();
+	}
+	else if( e == QKeySequence::Undo )
+		undo();
+	else if( e == QKeySequence::Redo )
+		redo();
+	else if( e == QKeySequence::Cut )
+		cut();
+	else if( e == QKeySequence::Paste )
+	{
+		QClipboard::Mode mode = QClipboard::Clipboard;
+		if( QGuiApplication::clipboard()->supportsSelection() )
+		{
+			if( e->modifiers() == ( Qt::CTRL | Qt::SHIFT ) &&
+				e->key() == Qt::Key_Insert )
+					mode = QClipboard::Selection;
+		}
+
+		paste( mode );
+	}
+	else if( e == QKeySequence::Delete )
+	{
+		QTextCursor localCursor = d->cursor;
+		localCursor.deleteChar();
+	}
+	else if( e == QKeySequence::DeleteEndOfWord )
+	{
+		if ( !d->cursor.hasSelection() )
+			d->cursor.movePosition( QTextCursor::NextWord,
+				QTextCursor::KeepAnchor );
+		d->cursor.removeSelectedText();
+	}
+	else if( e == QKeySequence::DeleteStartOfWord )
+	{
+		if( !d->cursor.hasSelection() )
+			d->cursor.movePosition( QTextCursor::PreviousWord,
+				QTextCursor::KeepAnchor );
+		d->cursor.removeSelectedText();
+	}
+	else if( e == QKeySequence::DeleteEndOfLine )
+	{
+		QTextBlock block = d->cursor.block();
+		if( d->cursor.position() == block.position() + block.length() - 2 )
+			d->cursor.movePosition( QTextCursor::Right,
+				QTextCursor::KeepAnchor );
+		else
+			d->cursor.movePosition( QTextCursor::EndOfBlock,
+				QTextCursor::KeepAnchor );
+		d->cursor.removeSelectedText();
+	}
+	else
+	{
+		QString text = e->text();
+
+		if( !text.isEmpty() &&
+			( text.at( 0 ).isPrint() || text.at( 0 ) == QLatin1Char( '\t' ) ) )
+		{
+			if( !d->cursor.hasSelection() && !d->cursor.atBlockEnd() )
+				d->cursor.deleteChar();
+
+			d->cursor.insertText( text );
+		}
+		else
+		{
+			e->ignore();
+			return;
+		}
+	}
+
+	e->accept();
+	ensureCursorVisible();
+	setScrolledAreaSize( d->doc->size().toSize() );
+	viewport()->update();
 }
 
 void
@@ -747,7 +1121,7 @@ TextEdit::resizeEvent( QResizeEvent * e )
 
 	TextEditPrivate * d = d_func();
 
-	d->doc->setPageSize( viewport()->size() );
+	d->doc->setTextWidth( viewport()->width() );
 
 	setScrolledAreaSize( d->doc->size().toSize() );
 }
@@ -772,7 +1146,10 @@ TextEdit::eventFilter( QObject * obj, QEvent * e )
 void
 TextEdit::scrollContentsBy( int dx, int dy )
 {
+	Q_UNUSED( dx )
+	Q_UNUSED( dy )
 
+	viewport()->update();
 }
 
 } /* namespace QtMWidgets */

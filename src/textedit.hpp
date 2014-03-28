@@ -40,6 +40,7 @@
 #include <QTextCursor>
 #include <QMimeData>
 #include <QTextDocumentFragment>
+#include <QClipboard>
 
 
 namespace QtMWidgets {
@@ -271,7 +272,7 @@ public slots:
 	//! Copy text.
 	void copy();
 	//! Paste text.
-	void paste();
+	void paste( QClipboard::Mode mode = QClipboard::Clipboard );
 
 	//! Clear.
 	void clear();
@@ -290,7 +291,6 @@ public slots:
 
 protected:
 	virtual void keyPressEvent( QKeyEvent * e );
-	virtual void keyReleaseEvent( QKeyEvent * e );
 	virtual void resizeEvent( QResizeEvent * e );
 	virtual bool eventFilter( QObject * obj, QEvent * e );
 

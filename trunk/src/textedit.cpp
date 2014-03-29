@@ -41,7 +41,7 @@
 #include <QBuffer>
 #include <QTextDocumentWriter>
 #include <QTextList>
-#include <QDebug>
+#include <QTimer>
 
 
 namespace QtMWidgets {
@@ -122,6 +122,9 @@ public:
 		,	doc( 0 )
 		,	isReadOnly( false )
 		,	cursorWidth( 1 )
+		,	cursorFlashTimer( 0 )
+		,	cursorShown( true )
+		,	hasFocus( false )
 	{
 	}
 
@@ -154,6 +157,9 @@ public:
 	QTextCursor cursor;
 	bool isReadOnly;
 	int cursorWidth;
+	QTimer * cursorFlashTimer;
+	bool cursorShown;
+	bool hasFocus;
 }; // class TextEditPrivate
 
 void
@@ -177,6 +183,12 @@ TextEditPrivate::init()
 	q->setInputMethodHints( Qt::ImhMultiLine );
 	q->viewport()->setCursor( Qt::IBeamCursor );
 	q->viewport()->installEventFilter( q );
+
+	cursorFlashTimer = new QTimer( q );
+	cursorFlashTimer->start( QApplication::cursorFlashTime() / 2 );
+
+	QObject::connect( cursorFlashTimer, SIGNAL( timeout() ),
+		q, SLOT( _q_cursorFlashTimer() ) );
 }
 
 QRectF
@@ -252,7 +264,9 @@ TextEditPrivate::anchorPosition( const QString & name ) const
 
 void
 TextEditPrivate::paintContents( QPaintEvent * e )
-{
+{	
+	TextEdit * q = q_func();
+
 	QPainter p( viewport );
 
 	if( doc->isEmpty() && !placeholderText.isEmpty() )
@@ -265,8 +279,6 @@ TextEditPrivate::paintContents( QPaintEvent * e )
 		const int margin = int( doc->documentMargin() );
 		p.drawText( r.adjusted( margin, margin, -margin, -margin ),
 			Qt::AlignTop | Qt::TextWordWrap, placeholderText );
-
-		return;
 	}
 
 	const int xOffset = topLeftCorner.x();
@@ -277,6 +289,16 @@ TextEditPrivate::paintContents( QPaintEvent * e )
 	r.translate( xOffset, yOffset );
 
 	doc->drawContents( &p, r );
+
+	if( hasFocus && cursorShown )
+	{
+		const QRect c = q->cursorRect();
+
+		QPen pen( Qt::black );
+		pen.setWidth( cursorWidth );
+		p.setPen( pen );
+		p.drawLine( c.center().x(), c.top(), c.center().x(), c.bottom() );
+	}
 }
 
 QMimeData *
@@ -1095,12 +1117,7 @@ TextEdit::keyPressEvent( QKeyEvent * e )
 
 		if( !text.isEmpty() &&
 			( text.at( 0 ).isPrint() || text.at( 0 ) == QLatin1Char( '\t' ) ) )
-		{
-			if( !d->cursor.hasSelection() && !d->cursor.atBlockEnd() )
-				d->cursor.deleteChar();
-
-			d->cursor.insertText( text );
-		}
+				d->cursor.insertText( text );
 		else
 		{
 			e->ignore();
@@ -1144,12 +1161,55 @@ TextEdit::eventFilter( QObject * obj, QEvent * e )
 }
 
 void
+TextEdit::mousePressEvent( QMouseEvent * e )
+{
+	TextEditPrivate * d = d_func();
+
+	const QTextCursor c = cursorForPosition( d->mapToContents( e->pos() ) );
+
+	setTextCursor( c );
+
+	AbstractScrollArea::mousePressEvent( e );
+}
+
+void
+TextEdit::focusInEvent( QFocusEvent * e )
+{
+	TextEditPrivate * d = d_func();
+
+	d->hasFocus = true;
+
+	AbstractScrollArea::focusInEvent( e );
+}
+
+void
+TextEdit::focusOutEvent( QFocusEvent * e )
+{
+	TextEditPrivate * d = d_func();
+
+	d->hasFocus = false;
+
+	AbstractScrollArea::focusOutEvent( e );
+}
+
+void
 TextEdit::scrollContentsBy( int dx, int dy )
 {
 	Q_UNUSED( dx )
 	Q_UNUSED( dy )
 
 	viewport()->update();
+}
+
+void
+TextEdit::_q_cursorFlashTimer()
+{
+	TextEditPrivate * d = d_func();
+
+	d->cursorShown = !d->cursorShown;;
+
+	if( d->hasFocus )
+		viewport()->update( cursorRect() );
 }
 
 } /* namespace QtMWidgets */

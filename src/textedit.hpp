@@ -293,8 +293,14 @@ protected:
 	virtual void keyPressEvent( QKeyEvent * e );
 	virtual void resizeEvent( QResizeEvent * e );
 	virtual bool eventFilter( QObject * obj, QEvent * e );
+	virtual void mousePressEvent( QMouseEvent * e );
+	virtual void focusInEvent( QFocusEvent * e );
+	virtual void focusOutEvent( QFocusEvent * e );
 
 	virtual void scrollContentsBy( int dx, int dy );
+
+private slots:
+	void _q_cursorFlashTimer();
 
 private:
 	Q_DISABLE_COPY( TextEdit )

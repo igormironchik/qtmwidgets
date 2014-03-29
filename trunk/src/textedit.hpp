@@ -289,13 +289,17 @@ public slots:
 	//! Scroll to anchor.
 	void scrollToAnchor( const QString & name );
 
+	virtual QVariant inputMethodQuery( Qt::InputMethodQuery property ) const;
+
 protected:
 	virtual void keyPressEvent( QKeyEvent * e );
 	virtual void resizeEvent( QResizeEvent * e );
 	virtual bool eventFilter( QObject * obj, QEvent * e );
 	virtual void mousePressEvent( QMouseEvent * e );
+	virtual void mouseReleaseEvent( QMouseEvent * e );
 	virtual void focusInEvent( QFocusEvent * e );
 	virtual void focusOutEvent( QFocusEvent * e );
+	virtual void inputMethodEvent( QInputMethodEvent * e );
 
 	virtual void scrollContentsBy( int dx, int dy );
 

@@ -43,6 +43,12 @@
 #include <QTextDocumentWriter>
 #include <QTextList>
 #include <QTimer>
+#include <QTextTable>
+#include <QStyle>
+#include <QStyleOption>
+
+// C++ include.
+#include <algorithm>
 
 
 namespace QtMWidgets {
@@ -63,6 +69,53 @@ static QTextLine currentTextLine( const QTextCursor & cursor )
 
 	return layout->lineForTextPosition( relativePos );
 }
+
+
+namespace {
+	struct TextFrameComparator {
+#if defined( Q_CC_MSVC ) && _MSC_VER < 1600
+		//The STL implementation of MSVC 2008 requires the definition
+		bool operator() ( QTextFrame * frame1, QTextFrame * frame2 )
+		{
+			return frame1->firstPosition() < frame2->firstPosition();
+		}
+#endif
+		bool operator() ( QTextFrame * frame, int position )
+		{
+			return frame->firstPosition() < position;
+		}
+
+		bool operator() ( int position, QTextFrame * frame )
+		{
+			return position < frame->firstPosition();
+		}
+	}; // struct TextFrameComparator
+}
+
+static QRectF boundingRectOfFloatsInSelection( const QTextCursor & cursor )
+{
+	QRectF r;
+	QTextFrame * frame = cursor.currentFrame();
+	const QList< QTextFrame* > children = frame->childFrames();
+
+	const QList< QTextFrame* >::ConstIterator firstFrame =
+		std::lower_bound( children.constBegin(), children.constEnd(),
+			cursor.selectionStart(), TextFrameComparator() );
+
+	const QList< QTextFrame* >::ConstIterator lastFrame =
+		std::upper_bound( children.constBegin(), children.constEnd(),
+			cursor.selectionEnd(), TextFrameComparator() );
+
+	for( QList< QTextFrame* >::ConstIterator it = firstFrame;
+		it != lastFrame; ++it)
+	{
+		if( (*it)->frameFormat().position() != QTextFrameFormat::InFlow )
+			r |= frame->document()->documentLayout()->frameBoundingRect( *it );
+	}
+
+	return r;
+}
+
 
 //
 // TextEditMimeData
@@ -150,6 +203,14 @@ public:
 	bool cursorMoveKeyEvent( QKeyEvent * e );
 	void pageUpDown( QTextCursor::MoveOperation op,
 		QTextCursor::MoveMode moveMode );
+	QVariant inputMethodQuery( Qt::InputMethodQuery property ) const;
+	void repaintOldAndNewSelection( const QTextCursor & oldSelection );
+	QRectF selectionRect( const QTextCursor & cursor ) const;
+	QRectF cursorRectPlusUnicodeDirectionMarkers(
+		const QTextCursor & cursor ) const;
+
+	QAbstractTextDocumentLayout::PaintContext
+	getPaintContext( QWidget * widget ) const;
 
 	inline TextEdit * q_func() { return static_cast< TextEdit* >( q ); }
 	inline const TextEdit * q_func() const { return static_cast< const TextEdit* >( q ); }
@@ -296,7 +357,13 @@ TextEditPrivate::paintContents( QPaintEvent * e )
 	p.translate( -xOffset, -yOffset );
 	r.translate( xOffset, yOffset );
 
-	doc->drawContents( &p, r );
+	p.save();
+	QAbstractTextDocumentLayout::PaintContext ctx = getPaintContext( q );
+	p.setClipRect( r, Qt::IntersectClip );
+	ctx.clip = r;
+
+	doc->documentLayout()->draw( &p, ctx );
+	p.restore();
 
 	if( hasFocus && cursorShown )
 	{
@@ -501,6 +568,8 @@ TextEditPrivate::cursorMoveKeyEvent( QKeyEvent * e )
 		return false;
 	}
 
+	repaintOldAndNewSelection( oldSelection );
+
 	return true;
 }
 
@@ -530,6 +599,180 @@ TextEditPrivate::pageUpDown( QTextCursor::MoveOperation op,
 	}
 
 	q->ensureCursorVisible();
+}
+
+QVariant
+TextEditPrivate::inputMethodQuery( Qt::InputMethodQuery property ) const
+{
+	const TextEdit * q = q_func();
+
+	QTextBlock block = cursor.block();
+
+	switch( property )
+	{
+		case Qt::ImCursorRectangle:
+			return q->cursorRect();
+		case Qt::ImFont:
+			return QVariant( cursor.charFormat().font() );
+		case Qt::ImCursorPosition:
+			return QVariant( cursor.position() - block.position() );
+		case Qt::ImSurroundingText:
+			return QVariant( block.text() );
+		case Qt::ImCurrentSelection:
+			return QVariant( cursor.selectedText() );
+		case Qt::ImMaximumTextLength:
+			return QVariant(); // No limit.
+		case Qt::ImAnchorPosition:
+			return QVariant( cursor.anchor() - block.position() );
+		default:
+			return QVariant();
+	}
+}
+
+void
+TextEditPrivate::repaintOldAndNewSelection( const QTextCursor & oldSelection )
+{
+	TextEdit * q = q_func();
+
+	if( cursor.hasSelection()
+		&& oldSelection.hasSelection()
+		&& cursor.currentFrame() == oldSelection.currentFrame()
+		&& !cursor.hasComplexSelection()
+		&& !oldSelection.hasComplexSelection()
+		&& cursor.anchor() == oldSelection.anchor() )
+	{
+		QTextCursor differenceSelection( doc );
+		differenceSelection.setPosition( oldSelection.position() );
+		differenceSelection.setPosition( cursor.position(),
+			QTextCursor::KeepAnchor );
+		q->update( selectionRect( differenceSelection ).toRect() );
+	}
+	else
+	{
+		if( !oldSelection.isNull() )
+			q->update( selectionRect( oldSelection ).toRect() |
+				cursorRectPlusUnicodeDirectionMarkers( oldSelection ).toRect() );
+
+		q->update( selectionRect( cursor ).toRect() |
+			cursorRectPlusUnicodeDirectionMarkers( cursor ).toRect() );
+	}
+}
+
+QRectF
+TextEditPrivate::selectionRect( const QTextCursor & cursor ) const
+{
+	QRectF r = rectForPosition( cursor.selectionStart() );
+
+	if( cursor.hasComplexSelection() && cursor.currentTable() )
+	{
+		QTextTable * table = cursor.currentTable();
+
+		r = doc->documentLayout()->frameBoundingRect( table );
+	}
+	else if( cursor.hasSelection() )
+	{
+		const int position = cursor.selectionStart();
+		const int anchor = cursor.selectionEnd();
+		const QTextBlock posBlock = doc->findBlock( position );
+		const QTextBlock anchorBlock = doc->findBlock( anchor );
+
+		if( posBlock == anchorBlock && posBlock.isValid() &&
+			posBlock.layout()->lineCount() )
+		{
+			const QTextLine posLine =
+				posBlock.layout()->lineForTextPosition(
+					position - posBlock.position() );
+			const QTextLine anchorLine =
+				anchorBlock.layout()->lineForTextPosition(
+					anchor - anchorBlock.position() );
+
+			const int firstLine = qMin( posLine.lineNumber(),
+				anchorLine.lineNumber() );
+			const int lastLine = qMax( posLine.lineNumber(),
+				anchorLine.lineNumber() );
+			const QTextLayout * layout = posBlock.layout();
+			r = QRectF();
+
+			for( int i = firstLine; i <= lastLine; ++i )
+			{
+				r |= layout->lineAt( i ).rect();
+				r |= layout->lineAt( i ).naturalTextRect();
+			}
+
+			r.translate( doc->documentLayout()->blockBoundingRect( posBlock )
+				.topLeft() );
+		}
+		else
+		{
+			QRectF anchorRect = rectForPosition( cursor.selectionEnd() );
+			r |= anchorRect;
+			r |= boundingRectOfFloatsInSelection( cursor );
+			QRectF frameRect( doc->documentLayout()->frameBoundingRect(
+				cursor.currentFrame() ) );
+			r.setLeft( frameRect.left() );
+			r.setRight( frameRect.right() );
+		}
+
+		if( r.isValid() )
+			r.adjust( -1, -1, 1, 1 );
+	}
+
+	return r;
+}
+
+QRectF
+TextEditPrivate::cursorRectPlusUnicodeDirectionMarkers(
+	const QTextCursor & cursor ) const
+{
+	if( cursor.isNull() )
+		return QRectF();
+
+	return rectForPosition( cursor.position() )
+		.adjusted( -4, 0, 4, 0 );
+}
+
+QAbstractTextDocumentLayout::PaintContext
+TextEditPrivate::getPaintContext( QWidget * widget ) const
+{
+	const TextEdit * q = q_func();
+
+	QAbstractTextDocumentLayout::PaintContext ctx;
+
+	ctx.cursorPosition = -1;
+	ctx.palette = q->palette();
+
+#ifdef QT_KEYPAD_NAVIGATION
+	if ( !QApplication::keypadNavigationEnabled() || q->hasEditFocus() )
+#endif
+	if( cursor.hasSelection() )
+	{
+		QAbstractTextDocumentLayout::Selection selection;
+		selection.cursor = cursor;
+
+		QPalette::ColorGroup cg = hasFocus ?
+			QPalette::Active : QPalette::Inactive;
+		selection.format.setBackground(
+			ctx.palette.brush( cg, QPalette::Highlight ) );
+		selection.format.setForeground(
+			ctx.palette.brush( cg, QPalette::HighlightedText ) );
+		QStyleOption opt;
+		QStyle * style = QApplication::style();
+
+		if( widget )
+		{
+			opt.initFrom( widget );
+			style = widget->style();
+		}
+
+		if( style->styleHint( QStyle::SH_RichText_FullWidthSelection,
+			&opt, widget ) )
+				selection.format.setProperty(
+					QTextFormat::FullWidthSelection, true );
+
+		ctx.selections.append( selection );
+	}
+
+	return ctx;
 }
 
 
@@ -617,9 +860,11 @@ TextEdit::setTextCursor( const QTextCursor & cursor )
 	TextEditPrivate * d = d_func();
 
 	const bool posChanged = cursor.position() != d->cursor.position();
+	const QTextCursor oldSelection = d->cursor;
 
 	d->cursor = cursor;
 	ensureCursorVisible();
+	d->repaintOldAndNewSelection( oldSelection );
 
 	if( posChanged )
 		emit cursorPositionChanged();
@@ -753,8 +998,10 @@ TextEdit::moveCursor( QTextCursor::MoveOperation operation,
 {
 	TextEditPrivate * d = d_func();
 
+	const QTextCursor oldSelection = d->cursor;
 	const bool moved = d->cursor.movePosition( operation, mode );
 	ensureCursorVisible();
+	d->repaintOldAndNewSelection( oldSelection );
 
 	if( moved )
 		emit cursorPositionChanged();
@@ -972,6 +1219,12 @@ TextEdit::keyPressEvent( QKeyEvent * e )
 
 	d->shifter->immediatelyHide();
 
+#ifdef QT_KEYPAD_NAVIGATION
+	if( !isReadOnly() && !hasEditFocus()
+		&& QApplication::keypadNavigationEnabled() )
+			setEditFocus( true );
+#endif
+
 	if( e == QKeySequence::SelectAll )
 	{
 		e->accept();
@@ -1175,6 +1428,8 @@ TextEdit::mousePressEvent( QMouseEvent * e )
 {
 	TextEditPrivate * d = d_func();
 
+	const QTextCursor oldSelection = d->cursor;
+
 	const QTextCursor c = cursorForPosition( d->mapToContents( e->pos() ) );
 
 	setTextCursor( c );
@@ -1190,7 +1445,23 @@ TextEdit::mousePressEvent( QMouseEvent * e )
 		d->shifter->popup();
 	}
 
+#ifdef QT_KEYPAD_NAVIGATION
+	if( !isReadOnly() && !hasEditFocus() &&
+		QApplication::keypadNavigationEnabled() )
+			setEditFocus( true );
+#endif
+
+	d->repaintOldAndNewSelection( oldSelection );
+
 	AbstractScrollArea::mousePressEvent( e );
+}
+
+void
+TextEdit::mouseReleaseEvent( QMouseEvent * e )
+{
+	qApp->inputMethod()->show();
+
+	AbstractScrollArea::mouseReleaseEvent( e );
 }
 
 void
@@ -1212,7 +1483,129 @@ TextEdit::focusOutEvent( QFocusEvent * e )
 
 	d->shifter->immediatelyHide();
 
+#ifdef QT_KEYPAD_NAVIGATION
+	if( hasEditFocus() )
+		setEditFocus( false );
+#endif
+
 	AbstractScrollArea::focusOutEvent( e );
+}
+
+void
+TextEdit::inputMethodEvent( QInputMethodEvent * e )
+{
+	TextEditPrivate * d = d_func();
+
+#ifdef QT_KEYPAD_NAVIGATION
+	if ( !isReadOnly() && QApplication::keypadNavigationEnabled()
+		&& !hasEditFocus() )
+			setEditFocus( true );
+#endif
+
+	if ( isReadOnly() || d->cursor.isNull())
+	{
+		e->ignore();
+		return;
+	}
+
+	bool isGettingInput = !e->commitString().isEmpty()
+		|| e->preeditString() != d->cursor.block().layout()->preeditAreaText()
+		|| e->replacementLength() > 0;
+
+	d->cursor.beginEditBlock();
+
+	if( isGettingInput )
+		d->cursor.removeSelectedText();
+
+	// insert commit string
+	if( !e->commitString().isEmpty() || e->replacementLength() )
+	{
+		QTextCursor c = d->cursor;
+		c.setPosition( c.position() + e->replacementStart() );
+		c.setPosition( c.position() + e->replacementLength(),
+			QTextCursor::KeepAnchor );
+		c.insertText( e->commitString() );
+	}
+
+	for( int i = 0; i < e->attributes().size(); ++i )
+	{
+		const QInputMethodEvent::Attribute & a = e->attributes().at( i );
+
+		if( a.type == QInputMethodEvent::Selection )
+		{
+			QTextCursor oldCursor = d->cursor;
+			int blockStart = a.start + d->cursor.block().position();
+			d->cursor.setPosition( blockStart, QTextCursor::MoveAnchor );
+			d->cursor.setPosition( blockStart + a.length,
+				QTextCursor::KeepAnchor );
+			ensureCursorVisible();
+			d->repaintOldAndNewSelection( oldCursor );
+		}
+	}
+
+	QTextBlock block = d->cursor.block();
+	QTextLayout * layout = block.layout();
+	if( isGettingInput )
+		layout->setPreeditArea( d->cursor.position() - block.position(),
+			e->preeditString() );
+	QList< QTextLayout::FormatRange > overrides;
+
+	for( int i = 0; i < e->attributes().size(); ++i )
+	{
+		const QInputMethodEvent::Attribute & a = e->attributes().at( i );
+
+		if( a.type == QInputMethodEvent::TextFormat )
+		{
+			QTextCharFormat f = qvariant_cast< QTextFormat >( a.value )
+				.toCharFormat();
+
+			if( f.isValid() )
+			{
+				QTextLayout::FormatRange o;
+				o.start = a.start + d->cursor.position() - block.position();
+				o.length = a.length;
+				o.format = f;
+				overrides.append( o );
+			}
+		}
+	}
+
+	layout->setAdditionalFormats( overrides );
+
+	d->cursor.endEditBlock();
+
+	ensureCursorVisible();
+}
+
+QVariant
+TextEdit::inputMethodQuery( Qt::InputMethodQuery property ) const
+{
+	const TextEditPrivate * d = d_func();
+
+	QVariant v;
+
+	switch( property )
+	{
+		case Qt::ImHints:
+			v = QWidget::inputMethodQuery( property );
+		break;
+
+		default:
+			v = d->inputMethodQuery( property );
+
+			const QPoint offset( -d->topLeftCorner.x(), -d->topLeftCorner.y() );
+
+			if( v.type() == QVariant::RectF )
+				v = v.toRectF().toRect().translated( offset );
+			else if( v.type() == QVariant::PointF )
+				v = v.toPointF().toPoint() + offset;
+			else if( v.type() == QVariant::Rect )
+				v = v.toRect().translated( offset );
+			else if( v.type() == QVariant::Point )
+				v = v.toPoint() + offset;
+	}
+
+	return v;
 }
 
 void

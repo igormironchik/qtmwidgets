@@ -42,8 +42,6 @@
 #include <QEvent>
 #include <QBitmap>
 
-#include <QDebug>
-
 
 namespace QtMWidgets {
 
@@ -56,6 +54,7 @@ public:
 	CursorShifterPrivate( CursorShifter * parent )
 		:	q( parent )
 		,	leftMouseButtonPressed( false )
+		,	cursorOverrided( false )
 	{
 	}
 
@@ -69,6 +68,7 @@ public:
 	QTimer * timer;
 	bool leftMouseButtonPressed;
 	QPoint offset;
+	bool cursorOverrided;
 }; // class CursorShifterPrivate
 
 void
@@ -150,6 +150,12 @@ CursorShifter::immediatelyHide()
 	qApp->removeEventFilter( this );
 
 	hide();
+
+	if( d->cursorOverrided )
+	{
+		d->cursorOverrided = false;
+		QApplication::restoreOverrideCursor();
+	}
 }
 
 void
@@ -191,7 +197,7 @@ CursorShifter::eventFilter( QObject * obj, QEvent * e )
 				d->leftMouseButtonPressed = true;
 				d->timer->stop();
 				d->offset = QPoint( r.topLeft().x() + d->basicSize - pos.x(),
-					r.topLeft().y() - pos.y() );
+					pos.y() - r.topLeft().y() );
 
 				return true;
 			}
@@ -218,9 +224,24 @@ CursorShifter::eventFilter( QObject * obj, QEvent * e )
 		{
 			QMouseEvent * me = static_cast< QMouseEvent* > ( e );
 
+			QRect r = rect();
+			r.moveTo( pos() );
+			const QPoint pos = me->globalPos();
+
+			if( isVisible() && r.contains( pos ) && !d->cursorOverrided )
+			{
+				d->cursorOverrided = true;
+				QApplication::setOverrideCursor( QCursor( Qt::ArrowCursor ) );
+			}
+			else if( d->cursorOverrided && ( !r.contains( pos ) | !isVisible() ) )
+			{
+				d->cursorOverrided = false;
+				QApplication::restoreOverrideCursor();
+			}
+
 			if( d->leftMouseButtonPressed )
 			{
-				emit posChanged( me->globalPos() + d->offset );
+				emit posChanged( me->globalPos() - d->offset );
 
 				return true;
 			}
@@ -240,6 +261,12 @@ CursorShifter::_q_hideTimer()
 	qApp->removeEventFilter( this );
 
 	hide();
+
+	if( d->cursorOverrided )
+	{
+		d->cursorOverrided = false;
+		QApplication::restoreOverrideCursor();
+	}
 }
 
 } /* namespace QtMWidgets */

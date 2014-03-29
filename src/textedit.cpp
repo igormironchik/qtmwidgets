@@ -31,6 +31,7 @@
 // QtMWidgets include.
 #include "textedit.hpp"
 #include "private/scrollarea_p.hpp"
+#include "private/cursorshifter.hpp"
 
 // Qt include.
 #include <QAbstractTextDocumentLayout>
@@ -125,6 +126,7 @@ public:
 		,	cursorFlashTimer( 0 )
 		,	cursorShown( true )
 		,	hasFocus( false )
+		,	shifter( 0 )
 	{
 	}
 
@@ -160,6 +162,7 @@ public:
 	QTimer * cursorFlashTimer;
 	bool cursorShown;
 	bool hasFocus;
+	CursorShifter * shifter;
 }; // class TextEditPrivate
 
 void
@@ -189,6 +192,11 @@ TextEditPrivate::init()
 
 	QObject::connect( cursorFlashTimer, SIGNAL( timeout() ),
 		q, SLOT( _q_cursorFlashTimer() ) );
+
+	shifter = new CursorShifter( q );
+
+	QObject::connect( shifter, SIGNAL( posChanged( const QPoint & ) ),
+		q, SLOT( _q_cursorShifterPosChanged( const QPoint & ) ) );
 }
 
 QRectF
@@ -962,6 +970,8 @@ TextEdit::keyPressEvent( QKeyEvent * e )
 {
 	TextEditPrivate * d = d_func();
 
+	d->shifter->immediatelyHide();
+
 	if( e == QKeySequence::SelectAll )
 	{
 		e->accept();
@@ -1169,6 +1179,17 @@ TextEdit::mousePressEvent( QMouseEvent * e )
 
 	setTextCursor( c );
 
+	if( !isReadOnly() && !d->doc->isEmpty() )
+	{
+		const QRect cr = cursorRect();
+
+		const QPoint pos = mapToGlobal( QPoint( cr.center().x(),
+			cr.y() + cr.height() ) );
+
+		d->shifter->setCursorPos( pos );
+		d->shifter->popup();
+	}
+
 	AbstractScrollArea::mousePressEvent( e );
 }
 
@@ -1188,6 +1209,8 @@ TextEdit::focusOutEvent( QFocusEvent * e )
 	TextEditPrivate * d = d_func();
 
 	d->hasFocus = false;
+
+	d->shifter->immediatelyHide();
 
 	AbstractScrollArea::focusOutEvent( e );
 }
@@ -1210,6 +1233,29 @@ TextEdit::_q_cursorFlashTimer()
 
 	if( d->hasFocus )
 		viewport()->update( cursorRect() );
+}
+
+void
+TextEdit::_q_cursorShifterPosChanged( const QPoint & pos )
+{
+	TextEditPrivate * d = d_func();
+
+	const int oldPos = d->cursor.position();
+	QPoint p = mapFromGlobal( pos );
+	p.setY( p.y() - fontMetrics().ascent() / 2 );
+	const int newPos = cursorForPosition( p ).position();
+
+	if( oldPos != newPos )
+	{
+		d->cursor.setPosition( newPos );
+
+		viewport()->repaint();
+
+		const QRect cr = cursorRect();
+
+		d->shifter->setCursorPos( mapToGlobal( QPoint( cr.center().x(),
+			cr.y() + cr.height() ) ) );
+	}
 }
 
 } /* namespace QtMWidgets */

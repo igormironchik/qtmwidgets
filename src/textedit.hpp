@@ -301,6 +301,7 @@ protected:
 
 private slots:
 	void _q_cursorFlashTimer();
+	void _q_cursorShifterPosChanged( const QPoint & pos );
 
 private:
 	Q_DISABLE_COPY( TextEdit )

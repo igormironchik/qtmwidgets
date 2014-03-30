@@ -47,6 +47,8 @@
 #include <QStyle>
 #include <QStyleOption>
 
+#include <QDebug>
+
 // C++ include.
 #include <algorithm>
 
@@ -193,6 +195,20 @@ public:
 	{
 		return QPoint( point.x() + topLeftCorner.x(),
 			point.y() + topLeftCorner.y() );
+	}
+
+	inline QPoint mapFromContents( const QPoint & point ) const
+	{
+		return QPoint( point.x() - topLeftCorner.x(),
+			point.y() - topLeftCorner.y() );
+	}
+
+	inline QRect mapFromContents( const QRect & r ) const
+	{
+		return QRect( r.x() - topLeftCorner.x(),
+			r.y() - topLeftCorner.y(),
+			r.width(),
+			r.height() );
 	}
 
 	QRectF rectForPosition( int pos ) const;
@@ -645,16 +661,17 @@ TextEditPrivate::repaintOldAndNewSelection( const QTextCursor & oldSelection )
 		differenceSelection.setPosition( oldSelection.position() );
 		differenceSelection.setPosition( cursor.position(),
 			QTextCursor::KeepAnchor );
-		q->update( selectionRect( differenceSelection ).toRect() );
+		q->update( mapFromContents(
+			selectionRect( differenceSelection ).toRect() ) );
 	}
 	else
 	{
 		if( !oldSelection.isNull() )
-			q->update( selectionRect( oldSelection ).toRect() |
-				cursorRectPlusUnicodeDirectionMarkers( oldSelection ).toRect() );
+			q->update( mapFromContents( selectionRect( oldSelection ).toRect() |
+				cursorRectPlusUnicodeDirectionMarkers( oldSelection ).toRect() ) );
 
-		q->update( selectionRect( cursor ).toRect() |
-			cursorRectPlusUnicodeDirectionMarkers( cursor ).toRect() );
+		q->update( mapFromContents( selectionRect( cursor ).toRect() |
+			cursorRectPlusUnicodeDirectionMarkers( cursor ).toRect() ) );
 	}
 }
 
@@ -1430,7 +1447,7 @@ TextEdit::mousePressEvent( QMouseEvent * e )
 
 	const QTextCursor oldSelection = d->cursor;
 
-	const QTextCursor c = cursorForPosition( d->mapToContents( e->pos() ) );
+	const QTextCursor c = cursorForPosition( e->pos() );
 
 	setTextCursor( c );
 
@@ -1438,8 +1455,8 @@ TextEdit::mousePressEvent( QMouseEvent * e )
 	{
 		const QRect cr = cursorRect();
 
-		const QPoint pos = mapToGlobal( QPoint( cr.center().x(),
-			cr.y() + cr.height() ) );
+		const QPoint pos = mapToGlobal( d->mapFromContents(
+			QPoint( cr.center().x(), cr.y() + cr.height() ) ) );
 
 		d->shifter->setCursorPos( pos );
 		d->shifter->popup();
@@ -1625,7 +1642,7 @@ TextEdit::_q_cursorFlashTimer()
 	d->cursorShown = !d->cursorShown;;
 
 	if( d->hasFocus )
-		viewport()->update( cursorRect() );
+		viewport()->update( d->mapFromContents( cursorRect() ) );
 }
 
 void
@@ -1646,8 +1663,9 @@ TextEdit::_q_cursorShifterPosChanged( const QPoint & pos )
 
 		const QRect cr = cursorRect();
 
-		d->shifter->setCursorPos( mapToGlobal( QPoint( cr.center().x(),
-			cr.y() + cr.height() ) ) );
+		d->shifter->setCursorPos( mapToGlobal(
+			d->mapFromContents( QPoint( cr.center().x(),
+				cr.y() + cr.height() ) ) ) );
 	}
 }
 

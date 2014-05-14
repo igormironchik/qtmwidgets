@@ -40,16 +40,16 @@ namespace QtMWidgets {
 
 class NavigationArrowPrivate {
 public:
-	NavigationArrowPrivate( NavigationArrow::Type t,
+	NavigationArrowPrivate( NavigationArrow::Direction d,
 		NavigationArrow * parent )
 		:	q( parent )
-		,	type( t )
+		,	direction( d )
 	{
 	}
 
 	NavigationArrow * q;
 
-	NavigationArrow::Type type;
+	NavigationArrow::Direction direction;
 }; // class NavigationArrowPrivate
 
 
@@ -57,14 +57,31 @@ public:
 // NavigationArrow
 //
 
-NavigationArrow::NavigationArrow( Type type, QWidget * parent )
+NavigationArrow::NavigationArrow( Direction direction, QWidget * parent )
 	:	QWidget( parent )
-	,	d( new NavigationArrowPrivate( type, this ) )
+	,	d( new NavigationArrowPrivate( direction, this ) )
 {
 }
 
 NavigationArrow::~NavigationArrow()
 {
+}
+
+NavigationArrow::Direction
+NavigationArrow::direction() const
+{
+	return d->direction;
+}
+
+void
+NavigationArrow::setDirection( Direction direct )
+{
+	if( d->direction != direct )
+	{
+		d->direction = direct;
+
+		update();
+	}
 }
 
 QSize

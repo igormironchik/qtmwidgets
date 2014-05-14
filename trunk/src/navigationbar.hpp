@@ -98,6 +98,9 @@ public:
 	//! \return Widget with the given \a index index.
 	QWidget * widget( int index ) const;
 
+	virtual QSize minimumSizeHint() const;
+	virtual QSize sizeHint() const;
+
 public slots:
 	//!	Show screen with the given \a index index.
 	void showScreen( int index );

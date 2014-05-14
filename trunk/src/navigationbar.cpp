@@ -107,6 +107,18 @@ NavigationBar::widget( int index ) const
 	return 0;
 }
 
+QSize
+NavigationBar::minimumSizeHint() const
+{
+	return QSize();
+}
+
+QSize
+NavigationBar::sizeHint() const
+{
+	return QSize();
+}
+
 void
 NavigationBar::showScreen( int index )
 {

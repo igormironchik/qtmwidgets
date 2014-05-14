@@ -55,20 +55,32 @@ class NavigationArrow
 {
 	Q_OBJECT
 
-	Q_ENUMS( Type )
+	Q_ENUMS( Direction )
+
+	/*!
+		\property direction
+
+		Direction of the arrow.
+	*/
+	Q_PROPERTY( Direction direction READ direction WRITE setDirection )
 
 public:
-	//! Type of the arrow.
-	enum Type {
+	//! Direction of the arrow.
+	enum Direction {
 		//! Left arrow.
 		Left = 1,
 		//! Right arrow.
 		Right = 2
-	}; // enum Type
+	}; // enum Direction
 
 public:
-	explicit NavigationArrow( Type type, QWidget * parent = 0 );
+	explicit NavigationArrow( Direction direction, QWidget * parent = 0 );
 	virtual ~NavigationArrow();
+
+	//! \return Direction of the arrow.
+	Direction direction() const;
+	//! Set direction of the arrow.
+	void setDirection( Direction direct );
 
 	virtual QSize minimumSizeHint() const;
 	virtual QSize sizeHint() const;

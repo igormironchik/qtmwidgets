@@ -10,4 +10,5 @@ SUBDIRS = picker \
           tableview \
           busyindicator \
           lineedit \
-          textedit
+          textedit \
+          navigationarrow

@@ -30,6 +30,13 @@
 
 // QtMWidgets include.
 #include "navigationarrow.hpp"
+#include "private/fingergeometry.hpp"
+#include "private/drawing.hpp"
+#include "private/color.hpp"
+
+// Qt include.
+#include <QPainter>
+#include <QTimer>
 
 
 namespace QtMWidgets {
@@ -47,9 +54,24 @@ public:
 	{
 	}
 
+	void init()
+	{
+		baseColor = q->palette().color( QPalette::Highlight );
+		color = baseColor;
+		timer = new QTimer( q );
+
+		QObject::connect( timer, SIGNAL( timeout() ),
+			q, SLOT( _q_timer() ) );
+
+		q->setSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed );
+	}
+
 	NavigationArrow * q;
 
 	NavigationArrow::Direction direction;
+	QColor color;
+	QColor baseColor;
+	QTimer * timer;
 }; // class NavigationArrowPrivate
 
 
@@ -61,6 +83,7 @@ NavigationArrow::NavigationArrow( Direction direction, QWidget * parent )
 	:	QWidget( parent )
 	,	d( new NavigationArrowPrivate( direction, this ) )
 {
+	d->init();
 }
 
 NavigationArrow::~NavigationArrow()
@@ -87,25 +110,54 @@ NavigationArrow::setDirection( Direction direct )
 QSize
 NavigationArrow::minimumSizeHint() const
 {
-	return QSize();
+	const int width = FingerGeometry::width() / 3;
+	const int height = FingerGeometry::height() / 2;
+
+	return QSize( width, height );
 }
 
 QSize
 NavigationArrow::sizeHint() const
 {
-	return QSize();
+	return minimumSizeHint();
 }
 
 void
 NavigationArrow::animate()
 {
+	if( d->timer->isActive() )
+		d->timer->stop();
 
+	d->color = lighterColor( d->baseColor, 25 );
+
+	d->timer->start( 500 );
+
+	update();
 }
 
 void
 NavigationArrow::paintEvent( QPaintEvent * )
 {
+	QPainter p( this );
+	p.setRenderHint( QPainter::Antialiasing );
 
+	const QRect r = rect();
+
+	if( d->direction == Left )
+	{
+		p.rotate( 180 );
+		p.translate( - r.width(), - r.height() );
+	}
+
+	drawArrow( &p, r, d->color );
+}
+
+void
+NavigationArrow::_q_timer()
+{
+	d->color = d->baseColor;
+
+	update();
 }
 
 } /* namespace QtMWidgets */

@@ -60,6 +60,14 @@ void drawSliderHandle( QPainter * p, const QRect & r,
 	int xRadius, int yRadius, const QColor & borderColor,
 	const QColor & lightColor );
 
+
+//
+// drawArrow
+//
+
+void drawArrow( QPainter * p, const QRect & r,
+	const QColor & color );
+
 } /* namespace QtMWidgets */
 
 #endif // QTMWIDGETS__DRAWING_HPP__INCLUDED

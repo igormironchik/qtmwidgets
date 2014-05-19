@@ -92,6 +92,9 @@ public slots:
 protected:
 	virtual void paintEvent( QPaintEvent * );
 
+private slots:
+	void _q_timer();
+
 private:
 	Q_DISABLE_COPY( NavigationArrow )
 

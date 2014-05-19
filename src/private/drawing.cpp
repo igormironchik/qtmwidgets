@@ -38,6 +38,7 @@
 #include <QLinearGradient>
 #include <QBrush>
 #include <QPen>
+#include <QPainterPath>
 
 
 namespace QtMWidgets {
@@ -120,6 +121,31 @@ void drawSliderHandle( QPainter * p, const QRect & r,
 
 	p->drawRoundedRect( r.marginsRemoved( QMargins( 2, 2, 2, 2 ) ),
 		xRadius - 4, yRadius - 4 );
+}
+
+
+//
+// drawArrow
+//
+
+void drawArrow( QPainter * p, const QRect & r,
+	const QColor & color )
+{
+	const qreal width = r.width() / 3;
+	const qreal middle = r.height() / 2;
+
+	QPainterPath path;
+	path.moveTo( r.x(), r.y() );
+	path.lineTo( r.x() + width, r.y() );
+	path.lineTo( r.x() + r.width(), r.y() + middle );
+	path.lineTo( r.x() + width, r.y() + r.height() );
+	path.lineTo( r.x(), r.y() + r.height() );
+	path.lineTo( r.x() + r.width() - width, r.y() + middle );
+	path.lineTo( r.x(), r.y() );
+
+	p->setPen( color );
+	p->setBrush( color );
+	p->drawPath( path );
 }
 
 } /* namespace QtMWidgets */

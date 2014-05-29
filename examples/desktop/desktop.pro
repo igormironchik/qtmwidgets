@@ -11,4 +11,5 @@ SUBDIRS = picker \
           busyindicator \
           lineedit \
           textedit \
-          navigationarrow
+          navigationarrow \
+          navigationbutton

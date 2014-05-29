@@ -54,6 +54,19 @@ class NavigationButton
 
 	Q_ENUMS( Direction )
 
+	/*!
+		\property text
+
+		Text of the button.
+	*/
+	Q_PROPERTY( QString text READ text WRITE setText )
+	/*!
+		\property direction
+
+		Direction of the button.
+	*/
+	Q_PROPERTY( Direction direction READ direction WRITE setDirection )
+
 public:
 	//! Direction of the button.
 	enum Direction {
@@ -65,7 +78,21 @@ public:
 
 public:
 	explicit NavigationButton( Direction direction, QWidget * parent = 0 );
+
+	NavigationButton( Direction direction, const QString & text,
+		QWidget * parent = 0 );
+
 	virtual ~NavigationButton();
+
+	//! \return Text of the button.
+	const QString & text() const;
+	//! Set text of the button.
+	void setText( const QString & t );
+
+	//! \return Direction of the button.
+	Direction direction() const;
+	//! Set direction of the button.
+	void setDirection( Direction direct );
 
 	virtual QSize minimumSizeHint() const;
 	virtual QSize sizeHint() const;
@@ -76,7 +103,6 @@ protected:
 private slots:
 	void _q_pressed();
 	void _q_released();
-	void _q_clicked();
 
 private:
 	Q_DISABLE_COPY( NavigationButton )

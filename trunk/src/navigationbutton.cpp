@@ -188,6 +188,7 @@ NavigationButton::paintEvent( QPaintEvent * )
 	const int arrowWidth = FingerGeometry::width() / 3;
 	const int arrowHeight = FingerGeometry::height() / 2;
 	const int delta = ( r.height() - arrowHeight ) /2;
+	const int offset = 10;
 
 	int flags = Qt::TextSingleLine | Qt::AlignVCenter;
 
@@ -196,10 +197,10 @@ NavigationButton::paintEvent( QPaintEvent * )
 		arrowRect.setRect( r.width() - arrowWidth, r.y() + delta,
 			arrowWidth, arrowHeight );
 
-		textRect.setRect( r.x() + arrowWidth, r.y(),
-			r.width() - arrowWidth, r.height() );
+		textRect.setRect( r.x() + arrowWidth + offset, r.y(),
+			r.width() - arrowWidth - offset, r.height() );
 
-		flags |= Qt::AlignRight;
+		flags |= Qt::AlignLeft;
 	}
 	else
 	{
@@ -207,9 +208,9 @@ NavigationButton::paintEvent( QPaintEvent * )
 			arrowWidth, arrowHeight );
 
 		textRect.setRect( r.x(), r.y(),
-			r.width() - arrowWidth, r.height() );
+			r.width() - arrowWidth - offset, r.height() );
 
-		flags |= Qt::AlignLeft;
+		flags |= Qt::AlignRight;
 	}
 
 	QStyleOption opt;
@@ -231,13 +232,17 @@ NavigationButton::paintEvent( QPaintEvent * )
 void
 NavigationButton::_q_pressed()
 {
+	d->color = lighterColor( d->baseColor, 50 );
 
+	update();
 }
 
 void
 NavigationButton::_q_released()
 {
+	d->color = d->baseColor;
 
+	update();
 }
 
 } /* namespace QtMWidgets */

@@ -31,12 +31,17 @@
 // QtMWidgets include.
 #include "navigationbar.hpp"
 #include "navigationbutton.hpp"
+#include "textlabel.hpp"
+#include "private/fingergeometry.hpp"
 
 // Qt include.
 #include <QStackedWidget>
 #include <QVector>
 #include <QMap>
 #include <QSharedPointer>
+#include <QGridLayout>
+#include <QVBoxLayout>
+#include <QResizeEvent>
 
 
 namespace QtMWidgets {
@@ -93,6 +98,10 @@ public:
 		:	q( parent )
 		,	stack( 0 )
 		,	root( 0 )
+		,	left( 0 )
+		,	right( 0 )
+		,	title( 0 )
+		,	grid( 0 )
 	{
 	}
 
@@ -103,12 +112,46 @@ public:
 	QStackedWidget * stack;
 	QSharedPointer< NavigationItem > root;
 	QMap< int, QSharedPointer< NavigationItem > > itemsMap;
+	NavigationButton * left;
+	NavigationButton * right;
+	TextLabel * title;
+	QGridLayout * grid;
 }; // class NavigationBarPrivate
 
 void
 NavigationBarPrivate::init()
 {
+	q->setBackgroundRole( QPalette::Base );
+	q->setAutoFillBackground( true );
+
 	stack = new QStackedWidget( q );
+	stack->setFrameStyle( QFrame::NoFrame | QFrame::Plain );
+
+	left = new NavigationButton( NavigationButton::Left, q );
+	right = new NavigationButton( NavigationButton::Right, q );
+	title = new TextLabel( q );
+
+	QTextOption opt = title->textOption();
+	opt.setAlignment( Qt::AlignCenter );
+	opt.setWrapMode( QTextOption::NoWrap );
+
+	title->setTextOption( opt );
+
+	QVBoxLayout * layout = new QVBoxLayout( q );
+	layout->setSpacing( 0 );
+	layout->setContentsMargins( 3, 3, 3, 3 );
+
+	grid = new QGridLayout;
+	grid->addWidget( left, 0, 0 );
+	grid->addWidget( title, 0, 1 );
+	grid->addWidget( right, 0, 2 );
+	grid->setRowMinimumHeight( 0, FingerGeometry::height() );
+
+	left->hide();
+	right->hide();
+
+	layout->addLayout( grid );
+	layout->addWidget( stack );
 }
 
 void
@@ -168,6 +211,7 @@ NavigationBar::setMainWidget( const QString & title,
 	d->root->title = title;
 
 	d->stack->setCurrentIndex( index );
+	d->title->setText( title );
 
 	return index;
 }
@@ -231,13 +275,13 @@ NavigationBar::widget( int index ) const
 QSize
 NavigationBar::minimumSizeHint() const
 {
-	return QSize();
+	return QSize( FingerGeometry::width(), FingerGeometry::height() );
 }
 
 QSize
 NavigationBar::sizeHint() const
 {
-	return QSize();
+	return minimumSizeHint();
 }
 
 void
@@ -256,6 +300,18 @@ void
 NavigationBar::showNextScreen()
 {
 
+}
+
+void
+NavigationBar::resizeEvent( QResizeEvent * e )
+{
+	const int width = e->size().width() / 3;
+
+	d->grid->setColumnMinimumWidth( 0, width );
+	d->grid->setColumnMinimumWidth( 1, width );
+	d->grid->setColumnMinimumWidth( 2, width );
+
+	e->accept();
 }
 
 } /* namespace QtMWidgets */

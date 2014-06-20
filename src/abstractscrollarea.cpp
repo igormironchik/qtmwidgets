@@ -154,7 +154,7 @@ AbstractScrollAreaPrivate::init()
 		q, SLOT( _q_animateScrollIndicators() ) );
 
 	q->setFocusPolicy( Qt::WheelFocus );
-	q->setFrameStyle( QFrame::StyledPanel | QFrame::Sunken );
+	q->setFrameStyle( QFrame::NoFrame | QFrame::Plain );
 	q->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
 
 	layoutChildren( opt );

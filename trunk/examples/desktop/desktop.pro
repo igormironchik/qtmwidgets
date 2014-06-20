@@ -12,4 +12,5 @@ SUBDIRS = picker \
           lineedit \
           textedit \
           navigationarrow \
-          navigationbutton
+          navigationbutton \
+          navigationbar

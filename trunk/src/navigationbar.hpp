@@ -109,6 +109,9 @@ public slots:
 	//! Show next screen.
 	void showNextScreen();
 
+protected:
+	virtual void resizeEvent( QResizeEvent * e );
+
 private:
 	Q_DISABLE_COPY( NavigationBar )
 

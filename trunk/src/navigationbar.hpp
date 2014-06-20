@@ -32,7 +32,7 @@
 #define QTMWIDGETS__NAVIGATIONBAR_HPP__INCLUDED
 
 // Qt include.
-#include <QStackedWidget>
+#include <QWidget>
 #include <QScopedPointer>
 
 
@@ -52,7 +52,7 @@ class NavigationBarPrivate;
 	a back button, a title, and a right button.
 */
 class NavigationBar
-	:	public QStackedWidget
+	:	public QWidget
 {
 	Q_OBJECT
 

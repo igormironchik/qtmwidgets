@@ -30,9 +30,58 @@
 
 // QtMWidgets include.
 #include "navigationbar.hpp"
+#include "navigationbutton.hpp"
+
+// Qt include.
+#include <QStackedWidget>
+#include <QVector>
+#include <QMap>
+#include <QSharedPointer>
 
 
 namespace QtMWidgets {
+
+//
+// NavigationItem
+//
+
+class NavigationItem {
+public:
+
+	NavigationItem()
+		:	index( -1 )
+		,	parent( 0 )
+	{
+	}
+
+	NavigationItem( const NavigationItem & other )
+		:	title( other.title )
+		,	index( other.index )
+		,	children( other.children )
+		,	parent( other.parent )
+	{
+	}
+
+	NavigationItem & operator = ( const NavigationItem & other )
+	{
+		if( this != &other )
+		{
+			title = other.title;
+			index = other.index;
+			children = other.children;
+			parent = other.parent;
+		}
+
+		return *this;
+	}
+
+	QString title;
+	int index;
+	QVector< QSharedPointer< NavigationItem > > children;
+	QVector< int > childrenIndexes;
+	NavigationItem * parent;
+}; // class NavigationItem
+
 
 //
 // NavigationBarPrivate
@@ -42,11 +91,45 @@ class NavigationBarPrivate {
 public:
 	NavigationBarPrivate( NavigationBar * parent )
 		:	q( parent )
+		,	stack( 0 )
+		,	root( 0 )
 	{
 	}
 
+	void init();
+	void removeWidget( int index );
+
 	NavigationBar * q;
+	QStackedWidget * stack;
+	QSharedPointer< NavigationItem > root;
+	QMap< int, QSharedPointer< NavigationItem > > itemsMap;
 }; // class NavigationBarPrivate
+
+void
+NavigationBarPrivate::init()
+{
+	stack = new QStackedWidget( q );
+}
+
+void
+NavigationBarPrivate::removeWidget( int index )
+{
+	QSharedPointer< NavigationItem > item = itemsMap[ index ];
+
+	itemsMap.remove( index );
+	stack->removeWidget( stack->widget( index ) );
+
+	foreach( int childIndex, item->childrenIndexes )
+		removeWidget( childIndex );
+
+	if( item->parent )
+	{
+		item->parent->children.removeAt(
+			item->parent->children.indexOf( item ) );
+		item->parent->childrenIndexes.removeAt(
+			item->parent->childrenIndexes.indexOf( index ) );
+	}
+}
 
 
 //
@@ -54,9 +137,10 @@ public:
 //
 
 NavigationBar::NavigationBar( QWidget * parent )
-	:	QStackedWidget( parent )
+	:	QWidget( parent )
 	,	d( new NavigationBarPrivate( this ) )
 {
+	d->init();
 }
 
 NavigationBar::~NavigationBar()
@@ -67,44 +151,81 @@ int
 NavigationBar::setMainWidget( const QString & title,
 	QWidget * widget )
 {
-	return 0;
+	const int index = d->stack->addWidget( widget );
+
+	if( d->root )
+	{
+		foreach( int index, d->itemsMap.keys() )
+			d->stack->removeWidget( d->stack->widget( index ) );
+
+		d->itemsMap.clear();
+	}
+
+	d->root = QSharedPointer< NavigationItem > ( new NavigationItem );
+	d->itemsMap[ index ] = d->root;
+
+	d->root->index = index;
+	d->root->title = title;
+
+	d->stack->setCurrentIndex( index );
+
+	return index;
 }
 
 int
 NavigationBar::addWidget( int parentIndex, const QString & title,
 	QWidget * widget )
 {
-	return 0;
+	const int index = d->stack->addWidget( widget );
+
+	if( d->itemsMap.contains( parentIndex ) )
+	{
+		QSharedPointer< NavigationItem > parent = d->itemsMap[ parentIndex ];
+
+		QSharedPointer< NavigationItem > item( new NavigationItem );
+		item->index = index;
+		item->title = title;
+		item->parent = parent.data();
+
+		parent->children.append( item );
+		parent->childrenIndexes.append( index );
+		d->itemsMap[ index ] = item;
+	}
+
+	return index;
 }
 
 void
 NavigationBar::removeWidget( QWidget * widget )
 {
+	const int index = d->stack->indexOf( widget );
 
+	if( index != -1 )
+		d->removeWidget( index );
 }
 
 int
 NavigationBar::currentIndex() const
 {
-	return 0;
+	return d->stack->currentIndex();
 }
 
 QWidget *
 NavigationBar::currentWidget() const
 {
-	return 0;
+	return d->stack->currentWidget();
 }
 
 int
 NavigationBar::indexOf( QWidget * widget ) const
 {
-	return 0;
+	return d->stack->indexOf( widget );
 }
 
 QWidget *
 NavigationBar::widget( int index ) const
 {
-	return 0;
+	return d->stack->widget( index );
 }
 
 QSize

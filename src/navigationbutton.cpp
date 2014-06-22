@@ -63,6 +63,7 @@ public:
 	QString text;
 	QColor color;
 	QColor baseColor;
+	QColor textColor;
 }; // class NavigationButtonPrivate
 
 
@@ -75,6 +76,7 @@ NavigationButtonPrivate::init()
 
 	baseColor = q->palette().color( QPalette::Highlight );
 	color = baseColor;
+	textColor = baseColor;
 }
 
 QString
@@ -162,6 +164,23 @@ NavigationButton::setDirection( Direction direct )
 	}
 }
 
+const QColor &
+NavigationButton::textColor() const
+{
+	return d->textColor;
+}
+
+void
+NavigationButton::setTextColor( const QColor & c )
+{
+	if( d->textColor != c )
+	{
+		d->textColor = c;
+
+		update();
+	}
+}
+
 QSize
 NavigationButton::minimumSizeHint() const
 {
@@ -218,6 +237,7 @@ NavigationButton::paintEvent( QPaintEvent * )
 
 	const QString text = d->makeString( d->text, textRect, flags, opt );
 
+	p.setPen( d->textColor );
 	p.drawText( textRect, flags, text );
 
 	if( d->direction == Left )

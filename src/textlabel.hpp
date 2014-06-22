@@ -102,6 +102,12 @@ class TextLabel
 		The default margin is 0.
 	*/
 	Q_PROPERTY( int margin READ margin WRITE setMargin )
+	/*!
+		\property color
+
+		Color of the text.
+	*/
+	Q_PROPERTY( QColor color READ color WRITE setColor )
 
 public:
 	/*!
@@ -141,6 +147,11 @@ public:
 	int margin() const;
 	//! Set margin.
 	void setMargin( int margin );
+
+	//! \return Color of the text.
+	const QColor & color() const;
+	//! Set color.
+	void setColor( const QColor & c );
 
 	virtual bool hasHeightForWidth() const;
 	virtual int	heightForWidth( int w ) const;

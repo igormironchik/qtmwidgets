@@ -57,6 +57,7 @@ public:
 	TextLabel * q;
 	QStaticText staticText;
 	int margin;
+	QColor color;
 }; // class TextLabelPrivate
 
 void
@@ -75,6 +76,8 @@ TextLabelPrivate::init()
 	QSizePolicy sp( QSizePolicy::Preferred, QSizePolicy::Preferred );
 	sp.setHeightForWidth( true );
 	q->setSizePolicy( sp );
+
+	color = q->palette().color( QPalette::WindowText );
 }
 
 
@@ -160,6 +163,23 @@ TextLabel::setMargin( int margin )
 	update();
 }
 
+const QColor &
+TextLabel::color() const
+{
+	return d->color;
+}
+
+void
+TextLabel::setColor( const QColor & c )
+{
+	if( d->color != c )
+	{
+		d->color = c;
+
+		update();
+	}
+}
+
 bool
 TextLabel::hasHeightForWidth() const
 {
@@ -220,6 +240,7 @@ TextLabel::paintEvent( QPaintEvent * e )
 	const QRect cr = contentsRect();
 
 	p.setClipRect( cr );
+	p.setPen( d->color );
 
 	int vAlign = d->staticText.textOption().alignment() & Qt::AlignVertical_Mask;
 

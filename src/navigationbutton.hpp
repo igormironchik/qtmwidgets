@@ -66,6 +66,12 @@ class NavigationButton
 		Direction of the button.
 	*/
 	Q_PROPERTY( Direction direction READ direction WRITE setDirection )
+	/*!
+		\property textColor
+
+		Color of the text.
+	*/
+	Q_PROPERTY( QColor textColor READ textColor WRITE setTextColor )
 
 public:
 	//! Direction of the button.
@@ -93,6 +99,11 @@ public:
 	Direction direction() const;
 	//! Set direction of the button.
 	void setDirection( Direction direct );
+
+	//! \return Text color.
+	const QColor & textColor() const;
+	//! Set text color.
+	void setTextColor( const QColor & c );
 
 	virtual QSize minimumSizeHint() const;
 	virtual QSize sizeHint() const;

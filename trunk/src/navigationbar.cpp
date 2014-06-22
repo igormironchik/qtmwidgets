@@ -130,6 +130,7 @@ NavigationBarPrivate::init()
 	left = new NavigationButton( NavigationButton::Left, q );
 	right = new NavigationButton( NavigationButton::Right, q );
 	title = new TextLabel( q );
+	title->setColor( q->palette().color( QPalette::Highlight ) );
 
 	QTextOption opt = title->textOption();
 	opt.setAlignment( Qt::AlignCenter );

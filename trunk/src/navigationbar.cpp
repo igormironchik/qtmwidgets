@@ -42,6 +42,8 @@
 #include <QGridLayout>
 #include <QVBoxLayout>
 #include <QResizeEvent>
+#include <QStack>
+#include <QHideEvent>
 
 
 namespace QtMWidgets {
@@ -116,6 +118,8 @@ public:
 	NavigationButton * right;
 	TextLabel * title;
 	QGridLayout * grid;
+	QStack< int > backStack;
+	QStack< int > forwardStack;
 }; // class NavigationBarPrivate
 
 void
@@ -246,7 +250,15 @@ NavigationBar::removeWidget( QWidget * widget )
 	const int index = d->stack->indexOf( widget );
 
 	if( index != -1 )
+	{
 		d->removeWidget( index );
+
+		d->backStack.clear();
+		d->forwardStack.clear();
+
+		d->left->hide();
+		d->right->hide();
+	}
 }
 
 int
@@ -288,19 +300,78 @@ NavigationBar::sizeHint() const
 void
 NavigationBar::showScreen( int index )
 {
+	if( d->itemsMap.contains( index ) && currentIndex() != -1 )
+	{
+		QSharedPointer< NavigationItem > nextItem = d->itemsMap[ index ];
+		QSharedPointer< NavigationItem > currentItem = d->itemsMap[ currentIndex() ];
 
+		d->backStack.push( currentIndex() );
+
+		d->left->setText( currentItem->title );
+		d->left->show();
+
+		d->title->setText( nextItem->title );
+
+		d->stack->setCurrentIndex( index );
+	}
 }
 
 void
 NavigationBar::showPreviousScreen()
 {
+	if( !d->backStack.isEmpty() )
+	{
+		const int prevIndex = d->backStack.pop();
+		QSharedPointer< NavigationItem > prevItem = d->itemsMap[ prevIndex ];
+		QSharedPointer< NavigationItem > currentItem = d->itemsMap[ currentIndex() ];
 
+		d->forwardStack.push( currentIndex() );
+
+		d->title->setText( prevItem->title );
+
+		d->right->setText( currentItem->title );
+		d->right->show();
+
+		d->stack->setCurrentIndex( prevIndex );
+
+		if( !d->backStack.isEmpty() )
+		{
+			QSharedPointer< NavigationItem > backItem = d->itemsMap[ d->backStack.top() ];
+
+			d->left->setText( backItem->title );
+		}
+		else
+			d->left->hide();
+	}
 }
 
 void
 NavigationBar::showNextScreen()
 {
+	if( !d->forwardStack.isEmpty() )
+	{
+		const int nextIndex = d->forwardStack.pop();
+		QSharedPointer< NavigationItem > nextItem = d->itemsMap[ nextIndex ];
+		QSharedPointer< NavigationItem > currentItem = d->itemsMap[ currentIndex() ];
 
+		d->backStack.push( currentIndex() );
+
+		d->title->setText( nextItem->title );
+
+		d->left->setText( currentItem->title );
+		d->left->show();
+
+		d->stack->setCurrentIndex( nextIndex );
+
+		if( !d->forwardStack.isEmpty() )
+		{
+			QSharedPointer< NavigationItem > item = d->itemsMap[ d->forwardStack.top() ];
+
+			d->right->setText( item->title );
+		}
+		else
+			d->right->hide();
+	}
 }
 
 void
@@ -311,6 +382,21 @@ NavigationBar::resizeEvent( QResizeEvent * e )
 	d->grid->setColumnMinimumWidth( 0, width );
 	d->grid->setColumnMinimumWidth( 1, width );
 	d->grid->setColumnMinimumWidth( 2, width );
+
+	e->accept();
+}
+
+void
+NavigationBar::hideEvent( QHideEvent * e )
+{
+	if( !isVisible() )
+	{
+		d->backStack.clear();
+		d->forwardStack.clear();
+
+		d->left->hide();
+		d->right->hide();
+	}
 
 	e->accept();
 }

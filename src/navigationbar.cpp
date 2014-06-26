@@ -136,11 +136,22 @@ NavigationBarPrivate::init()
 	title = new TextLabel( q );
 	title->setColor( q->palette().color( QPalette::Highlight ) );
 
+	QObject::connect( left, SIGNAL( clicked() ),
+		q, SLOT( showPreviousScreen() ) );
+	QObject::connect( right, SIGNAL( clicked() ),
+		q, SLOT( showNextScreen() ) );
+
 	QTextOption opt = title->textOption();
 	opt.setAlignment( Qt::AlignCenter );
 	opt.setWrapMode( QTextOption::NoWrap );
 
 	title->setTextOption( opt );
+
+	QFont f = title->font();
+	f.setBold( true );
+	f.setPointSize( f.pointSize() + 1 );
+
+	title->setFont( f );
 
 	QVBoxLayout * layout = new QVBoxLayout( q );
 	layout->setSpacing( 0 );

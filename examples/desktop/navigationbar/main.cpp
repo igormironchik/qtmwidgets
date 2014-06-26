@@ -32,6 +32,7 @@
 #include <QApplication>
 #include <QWidget>
 #include <QVBoxLayout>
+#include <QMap>
 
 // QtMWidgets include.
 #include <QtMWidgets/TableView>
@@ -39,23 +40,50 @@
 #include <QtMWidgets/TextLabel>
 #include <QtMWidgets/Slider>
 #include <QtMWidgets/NavigationBar>
+#include <QtMWidgets/NavigationButton>
+
+
+class RingtoneScreen
+	:	public QWidget
+{
+public:
+	RingtoneScreen( QWidget * parent )
+		:	QWidget( parent )
+	{
+		QVBoxLayout * l = new QVBoxLayout( this );
+
+		QtMWidgets::TextLabel * label = new QtMWidgets::TextLabel( this );
+		label->setText( QLatin1String( "We have to implement list with "
+			"ringtones in the future" ) );
+
+		l->addWidget( label );
+	}
+};
 
 
 class Widget
 	:	public QWidget
 {
+	Q_OBJECT
+
+	const QString ringtoneString = QLatin1String( "Ringtone" );
+
 public:
 	Widget()
+		:	bar( 0 )
 	{
 		QVBoxLayout * l = new QVBoxLayout( this );
 		l->setSpacing( 0 );
 		l->setContentsMargins( 0, 0, 0, 0 );
 
-		QtMWidgets::NavigationBar * bar = new QtMWidgets::NavigationBar( this );
+		bar = new QtMWidgets::NavigationBar( this );
 
 		QtMWidgets::TableView * mainScreen = createMainScreen( bar );
 
-		const int mainScreenIndex = bar->setMainWidget( tr( "Sounds" ), mainScreen );
+		const int mainScreenIndex = bar->setMainWidget(
+			QLatin1String( "Sounds" ), mainScreen );
+
+		createRingtoneScreen( mainScreenIndex );
 
 		l->addWidget( bar );
 
@@ -109,8 +137,9 @@ private:
 
 		QtMWidgets::TableViewCell * ringtone =
 			new QtMWidgets::TableViewCell( sounds );
-		ringtone->textLabel()->setText( QLatin1String( "Ringtone" ) );
+		ringtone->textLabel()->setText( ringtoneString );
 		sounds->addCell( ringtone );
+		cells.insert( ringtoneString, ringtone );
 
 		QtMWidgets::TableViewCell * textTone =
 			new QtMWidgets::TableViewCell( sounds );
@@ -141,6 +170,36 @@ private:
 
 		return view;
 	}
+
+	void createRingtoneScreen( int mainScreenIndex )
+	{
+		QtMWidgets::TableViewCell * cell = cells[ ringtoneString ];
+
+		QtMWidgets::NavigationButton * btn = new QtMWidgets::NavigationButton(
+			QtMWidgets::NavigationButton::Right, cell );
+		btn->setText( QLatin1String( "Xylophone" ) );
+
+		cell->setAccessoryWidget( btn );
+
+		connect( btn, SIGNAL( clicked() ),
+			this, SLOT( selectRingtone() ) );
+
+		const int index = bar->addWidget( mainScreenIndex,
+			ringtoneString, new RingtoneScreen( bar ) );
+
+		indexes.insert( ringtoneString, index );
+	}
+
+private slots:
+	void selectRingtone()
+	{
+		bar->showScreen( indexes[ ringtoneString ] );
+	}
+
+private:
+	QMap< QString, QtMWidgets::TableViewCell* > cells;
+	QMap< QString, int > indexes;
+	QtMWidgets::NavigationBar * bar;
 };
 
 
@@ -154,3 +213,5 @@ int main( int argc, char ** argv )
 
 	return app.exec();
 }
+
+#include "main.moc"

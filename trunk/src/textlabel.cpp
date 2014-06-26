@@ -115,6 +115,8 @@ void
 TextLabel::setText( const QString & text )
 {
 	d->staticText.setText( text );
+
+	update();
 }
 
 Qt::TextFormat
@@ -127,6 +129,8 @@ void
 TextLabel::setTextFormat( Qt::TextFormat format )
 {
 	d->staticText.setTextFormat( format );
+
+	update();
 }
 
 QTextOption
@@ -139,6 +143,8 @@ void
 TextLabel::setTextOption( const QTextOption & textOption )
 {
 	d->staticText.setTextOption( textOption );
+
+	update();
 }
 
 int

@@ -84,6 +84,9 @@ public:
 protected:
 	virtual bool eventFilter( QObject * obj, QEvent * event );
 
+private slots:
+	void _q_animation( const QVariant & v );
+
 private:
 	Q_DISABLE_COPY( Scroller )
 

@@ -1036,6 +1036,7 @@ DateTimePicker::mousePressEvent( QMouseEvent * event )
 {
 	if( event->button() == Qt::LeftButton )
 	{
+		d->scrolling = false;
 		d->mousePos = event->pos();
 		d->leftMouseButtonPressed = true;
 		d->findMovableSection( event->pos() );

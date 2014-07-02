@@ -31,6 +31,7 @@
 // QtMWidgets include.
 #include "abstractscrollarea.hpp"
 #include "private/abstractscrollarea_p.hpp"
+#include "private/scroller.hpp"
 
 // Qt include.
 #include <QStyleOption>
@@ -149,9 +150,7 @@ AbstractScrollAreaPrivate::init()
 	vertIndicator = new ScrollIndicator( ic, Qt::Vertical, viewport );
 
 	animationTimer = new QTimer( q );
-
-	QObject::connect( animationTimer, SIGNAL( timeout() ),
-		q, SLOT( _q_animateScrollIndicators() ) );
+	scroller = new Scroller( q, q );
 
 	q->setFocusPolicy( Qt::WheelFocus );
 	q->setFrameStyle( QFrame::NoFrame | QFrame::Plain );
@@ -390,6 +389,18 @@ AbstractScrollArea::AbstractScrollArea( QWidget * parent )
 	,	d( new AbstractScrollAreaPrivate( this ) )
 {
 	d->init();
+
+	connect( d->animationTimer, &QTimer::timeout,
+		this, &AbstractScrollArea::_q_animateScrollIndicators );
+
+	connect( d->scroller, &Scroller::scroll,
+		this, &AbstractScrollArea::_q_kineticScrolling );
+
+	connect( d->scroller, &Scroller::aboutToStart,
+		this, &AbstractScrollArea::_q_kineticScrollingAboutToStart );
+
+	connect( d->scroller, &Scroller::finished,
+		this, &AbstractScrollArea::_q_kineticScrollingFinished );
 }
 
 AbstractScrollArea::AbstractScrollArea( AbstractScrollAreaPrivate * dd,
@@ -398,6 +409,18 @@ AbstractScrollArea::AbstractScrollArea( AbstractScrollAreaPrivate * dd,
 	,	d( dd )
 {
 	d->init();
+
+	connect( d->animationTimer, &QTimer::timeout,
+		this, &AbstractScrollArea::_q_animateScrollIndicators );
+
+	connect( d->scroller, &Scroller::scroll,
+		this, &AbstractScrollArea::_q_kineticScrolling );
+
+	connect( d->scroller, &Scroller::aboutToStart,
+		this, &AbstractScrollArea::_q_kineticScrollingAboutToStart );
+
+	connect( d->scroller, &Scroller::finished,
+		this, &AbstractScrollArea::_q_kineticScrollingFinished );
 }
 
 AbstractScrollArea::~AbstractScrollArea()
@@ -714,6 +737,27 @@ AbstractScrollArea::_q_animateScrollIndicators()
 
 	if( d->vertIndicator->shown )
 		d->vertIndicator->update();
+}
+
+void
+AbstractScrollArea::_q_kineticScrolling( int dx, int dy )
+{
+	d->scrollContentsBy( dx, dy );
+	scrollContentsBy( dx, dy );
+}
+
+void
+AbstractScrollArea::_q_kineticScrollingAboutToStart()
+{
+	d->stopScrollIndicatorsAnimation();
+}
+
+void
+AbstractScrollArea::_q_kineticScrollingFinished()
+{
+	if( d->horIndicator->policy == ScrollIndicatorAsNeeded ||
+		d->vertIndicator->policy == ScrollIndicatorAsNeeded )
+			d->animateScrollIndicators();
 }
 
 } /* namespace QtMWidgets */

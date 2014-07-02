@@ -205,6 +205,9 @@ protected:
 
 private slots:
 	void _q_animateScrollIndicators();
+	void _q_kineticScrolling( int dx, int dy );
+	void _q_kineticScrollingAboutToStart();
+	void _q_kineticScrollingFinished();
 
 private:
 	Q_DISABLE_COPY( AbstractScrollArea )

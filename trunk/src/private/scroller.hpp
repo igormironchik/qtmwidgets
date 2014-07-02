@@ -71,6 +71,14 @@ signals:
 		Emitted when target should be scrolled.
 	*/
 	void scroll( int dx, int dy );
+	/*!
+		Emitted when kinetic scrolling is about to start.
+	*/
+	void aboutToStart();
+	/*!
+		Emitted when kinetic scrolling finished.
+	*/
+	void finished();
 
 public:
 	explicit Scroller( QObject * target, QObject * parent = 0 );
@@ -86,6 +94,7 @@ protected:
 
 private slots:
 	void _q_animation( const QVariant & v );
+	void _q_animationFinished();
 
 private:
 	Q_DISABLE_COPY( Scroller )

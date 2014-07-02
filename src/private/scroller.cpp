@@ -52,8 +52,8 @@ public:
 		,	target( t )
 		,	minVelocity( 0 )
 		,	scrollTime( 3000 )
-		,	xVelocity( 0 )
-		,	yVelocity( 0 )
+		,	xVelocity( 0.0 )
+		,	yVelocity( 0.0 )
 		,	mousePressed( false )
 		,	maxPause( 300 )
 		,	scrollAnimation( 0 )
@@ -68,8 +68,8 @@ public:
 	QElapsedTimer elapsed;
 	QPoint pos;
 	uint scrollTime;
-	uint xVelocity;
-	uint yVelocity;
+	qreal xVelocity;
+	qreal yVelocity;
 	bool mousePressed;
 	qint64 maxPause;
 	QVariantAnimation * scrollAnimation;
@@ -144,8 +144,8 @@ Scroller::eventFilter( QObject * obj, QEvent * event )
 					d->yVelocity >= d->minVelocity )
 				{
 					const QPoint newPos = QPoint(
-						d->pos.x() + d->xVelocity * d->scrollTime / 1000,
-						d->pos.y() + d->yVelocity * d->scrollTime / 1000 );
+						d->pos.x() + qRound( d->xVelocity * d->scrollTime / 1000 ),
+						d->pos.y() + qRound( d->yVelocity * d->scrollTime / 1000 ) );
 
 					d->scrollAnimation->setStartValue( d->pos );
 					d->scrollAnimation->setEndValue( newPos );
@@ -169,8 +169,8 @@ Scroller::eventFilter( QObject * obj, QEvent * event )
 
 				if( p.manhattanLength() > 5 )
 				{
-					d->xVelocity = (uint) ( (qreal) p.x() / time );
-					d->yVelocity = (uint) ( (qreal) p.y() / time );
+					d->xVelocity = (qreal) p.x() / time;
+					d->yVelocity = (qreal) p.y() / time;
 				}
 
 				d->pos = e->pos();

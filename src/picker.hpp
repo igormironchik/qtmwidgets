@@ -386,6 +386,7 @@ private slots:
 	void _q_rowsRemoved( const QModelIndex & parent, int start, int end );
 	void _q_modelDestroyed();
 	void _q_modelReset();
+	void _q_scroll( int dx, int dy );
 
 protected:
 	virtual void paintEvent( QPaintEvent * event );

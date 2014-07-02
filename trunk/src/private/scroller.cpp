@@ -132,8 +132,8 @@ Scroller::eventFilter( QObject * obj, QEvent * event )
 
 			d->pos = e->pos();
 			d->mousePressed = true;
-			d->xVelocity = 0;
-			d->yVelocity = 0;
+			d->xVelocity = 0.0;
+			d->yVelocity = 0.0;
 
 			d->scrollAnimation->stop();
 
@@ -172,15 +172,15 @@ Scroller::eventFilter( QObject * obj, QEvent * event )
 
 				const QPoint p = e->pos() - d->pos;
 
+				d->pos = e->pos();
+
 				if( p.manhattanLength() > 5 )
 				{
 					d->xVelocity = (qreal) p.x() / time;
 					d->yVelocity = (qreal) p.y() / time;
+
+					d->elapsed.restart();
 				}
-
-				d->pos = e->pos();
-
-				d->elapsed.restart();
 			}
 		}
 

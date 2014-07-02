@@ -32,6 +32,7 @@
 #include "picker.hpp"
 #include "private/drawing.hpp"
 #include "private/color.hpp"
+#include "private/scroller.hpp"
 
 // Qt include.
 #include <QStandardItemModel>
@@ -75,6 +76,7 @@ public:
 		,	mouseWasMoved( false )
 		,	wasPainted( false )
 		,	mouseMoveDelta( 0 )
+		,	scroller( 0 )
 	{}
 
 	void init();
@@ -121,6 +123,7 @@ public:
 	bool wasPainted;
 	int mouseMoveDelta;
 	QColor highlightColor;
+	Scroller * scroller;
 }; // class PickerPrivate
 
 void
@@ -130,6 +133,8 @@ PickerPrivate::init()
 		QSizePolicy::Fixed ) );
 
 	q->setModel( new QStandardItemModel( 0, 1, q ) );
+
+	scroller = new Scroller( q, q );
 
 	QStyleOption opt;
 	opt.initFrom( q );
@@ -450,6 +455,9 @@ Picker::Picker( QWidget * parent, Qt::WindowFlags f )
 	,	d( new PickerPrivate( this ) )
 {
 	d->init();
+
+	connect( d->scroller, &Scroller::scroll,
+		this, &Picker::_q_scroll );
 }
 
 Picker::~Picker()
@@ -954,6 +962,15 @@ Picker::_q_modelReset()
 	if( d->currentIndex.row() != d->indexBeforeChange )
 		_q_emitCurrentIndexChanged( d->currentIndex );
 
+	update();
+}
+
+void
+Picker::_q_scroll( int dx, int dy )
+{
+	Q_UNUSED( dx )
+
+	d->drawItemOffset += dy;
 	update();
 }
 

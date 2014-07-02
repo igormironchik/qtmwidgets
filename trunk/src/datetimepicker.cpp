@@ -33,6 +33,7 @@
 #include "private/datetimeparser.hpp"
 #include "private/drawing.hpp"
 #include "private/color.hpp"
+#include "private/scroller.hpp"
 
 // Qt include.
 #include <QEvent>
@@ -75,6 +76,8 @@ public:
 		,	daysSection( -1 )
 		,	monthSection( -1 )
 		,	yearSection( -1 )
+		,	scroller( new Scroller( q, q ) )
+		,	scrolling( false )
 	{
 		initDaysMonthYearSectionIndex();
 		fillValues();
@@ -96,6 +99,7 @@ public:
 	void updateCurrentDateTime();
 	void initDaysMonthYearSectionIndex();
 	void fillValues( bool updateIndexes = true );
+	void releaseScrolling();
 
 	DateTimePicker * q;
 	QDateTime minimum;
@@ -114,6 +118,8 @@ public:
 	int daysSection;
 	int monthSection;
 	int yearSection;
+	Scroller * scroller;
+	bool scrolling;
 }; // class DateTimePickerPrivate
 
 void
@@ -606,6 +612,20 @@ DateTimePickerPrivate::fillValues( bool updateIndexes )
 	}
 }
 
+void
+DateTimePickerPrivate::releaseScrolling()
+{
+	leftMouseButtonPressed = false;
+
+	clearOffset();
+	updateDaysIfNeeded();
+	updateCurrentDateTime();
+
+	movableSection = -1;
+
+	q->update();
+}
+
 
 //
 // DateTimePicker
@@ -618,6 +638,15 @@ DateTimePicker::DateTimePicker( QWidget * parent )
 {
 	setSizePolicy( QSizePolicy( QSizePolicy::Fixed,
 		QSizePolicy::Fixed ) );
+
+	connect( d->scroller, &Scroller::aboutToStart,
+		this, &DateTimePicker::_q_scrollAboutToStart );
+
+	connect( d->scroller, &Scroller::scroll,
+		this, &DateTimePicker::_q_scroll );
+
+	connect( d->scroller, &Scroller::finished,
+		this, &DateTimePicker::_q_scrollFinished );
 }
 
 DateTimePicker::DateTimePicker( const QDateTime & dt, QWidget * parent )
@@ -628,6 +657,15 @@ DateTimePicker::DateTimePicker( const QDateTime & dt, QWidget * parent )
 		QSizePolicy::Fixed ) );
 
 	setDateTime( dt.isValid() ? dt : DATETIMEPICKER_DATETIME_MIN );
+
+	connect( d->scroller, &Scroller::aboutToStart,
+		this, &DateTimePicker::_q_scrollAboutToStart );
+
+	connect( d->scroller, &Scroller::scroll,
+		this, &DateTimePicker::_q_scroll );
+
+	connect( d->scroller, &Scroller::finished,
+		this, &DateTimePicker::_q_scrollFinished );
 }
 
 DateTimePicker::DateTimePicker( const QDate & date, QWidget * parent )
@@ -638,6 +676,15 @@ DateTimePicker::DateTimePicker( const QDate & date, QWidget * parent )
 		QSizePolicy::Fixed ) );
 
 	setDate( date.isValid() ? date : DATETIMEPICKER_DATE_MIN );
+
+	connect( d->scroller, &Scroller::aboutToStart,
+		this, &DateTimePicker::_q_scrollAboutToStart );
+
+	connect( d->scroller, &Scroller::scroll,
+		this, &DateTimePicker::_q_scroll );
+
+	connect( d->scroller, &Scroller::finished,
+		this, &DateTimePicker::_q_scrollFinished );
 }
 
 DateTimePicker::DateTimePicker( const QTime & time, QWidget * parent )
@@ -648,6 +695,15 @@ DateTimePicker::DateTimePicker( const QTime & time, QWidget * parent )
 		QSizePolicy::Fixed ) );
 
 	setTime( time.isValid() ? time : DATETIMEPICKER_TIME_MIN );
+
+	connect( d->scroller, &Scroller::aboutToStart,
+		this, &DateTimePicker::_q_scrollAboutToStart );
+
+	connect( d->scroller, &Scroller::scroll,
+		this, &DateTimePicker::_q_scroll );
+
+	connect( d->scroller, &Scroller::finished,
+		this, &DateTimePicker::_q_scrollFinished );
 }
 
 DateTimePicker::DateTimePicker( const QVariant & val, QVariant::Type parserType,
@@ -676,6 +732,15 @@ DateTimePicker::DateTimePicker( const QVariant & val, QVariant::Type parserType,
 			setDateTime( QDateTime( DATETIMEPICKER_DATE_INITIAL,
 				DATETIMEPICKER_TIME_MIN ) );
 	}
+
+	connect( d->scroller, &Scroller::aboutToStart,
+		this, &DateTimePicker::_q_scrollAboutToStart );
+
+	connect( d->scroller, &Scroller::scroll,
+		this, &DateTimePicker::_q_scroll );
+
+	connect( d->scroller, &Scroller::finished,
+		this, &DateTimePicker::_q_scrollFinished );
 }
 
 DateTimePicker::~DateTimePicker()
@@ -996,18 +1061,8 @@ DateTimePicker::mouseMoveEvent( QMouseEvent * event )
 void
 DateTimePicker::mouseReleaseEvent( QMouseEvent * event )
 {
-	if( d->leftMouseButtonPressed )
-	{
-		d->leftMouseButtonPressed = false;
-
-		d->clearOffset();
-		d->updateDaysIfNeeded();
-		d->updateCurrentDateTime();
-
-		d->movableSection = -1;
-
-		update();
-	}
+	if( d->leftMouseButtonPressed && !d->scrolling )
+		d->releaseScrolling();
 
 	event->accept();
 }
@@ -1036,6 +1091,30 @@ DateTimePicker::paintEvent( QPaintEvent * )
 	}
 
 	d->drawWindow( &p, opt );
+}
+
+void
+DateTimePicker::_q_scroll( int dx, int dy )
+{
+	Q_UNUSED( dx )
+
+	d->updateOffset( dy );
+
+	update();
+}
+
+void
+DateTimePicker::_q_scrollAboutToStart()
+{
+	d->scrolling = true;
+}
+
+void
+DateTimePicker::_q_scrollFinished()
+{
+	d->scrolling = false;
+
+	d->releaseScrolling();
 }
 
 } /* namespace QtMWidgets */

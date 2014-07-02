@@ -499,6 +499,11 @@ protected:
 	DateTimePicker( const QVariant & val, QVariant::Type parserType,
 		QWidget * parent = 0 );
 
+private slots:
+	void _q_scroll( int dx, int dy );
+	void _q_scrollAboutToStart();
+	void _q_scrollFinished();
+
 private:
 	friend class DateTimePickerPrivate;
 

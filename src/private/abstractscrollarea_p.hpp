@@ -82,6 +82,8 @@ protected:
 }; // class ScrollIndicator
 
 
+class Scroller;
+
 //
 // AbstractScrollAreaPrivate
 //
@@ -103,6 +105,7 @@ public:
 		,	animationTimer( 0 )
 		,	animationTimeout( 100 )
 		,	animationAlphaDelta( 25 )
+		,	scroller( 0 )
 	{
 	}
 
@@ -137,6 +140,7 @@ public:
 	QTimer * animationTimer;
 	int animationTimeout;
 	int animationAlphaDelta;
+	Scroller * scroller;
 }; // class AbstractScrollAreaPrivate
 
 } /* namespace QtMWidgets */

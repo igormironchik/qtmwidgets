@@ -83,7 +83,7 @@ ScrollerPrivate::init()
 	target->installEventFilter( q );
 
 	scrollAnimation = new QVariantAnimation( q );
-	scrollAnimation->setEasingCurve( QEasingCurve::OutExpo );
+	scrollAnimation->setEasingCurve( QEasingCurve::OutCirc );
 	scrollAnimation->setDuration( scrollTime );
 }
 
@@ -100,6 +100,9 @@ Scroller::Scroller( QObject * target, QObject * parent )
 
 	connect( d->scrollAnimation, &QVariantAnimation::valueChanged,
 		this, &Scroller::_q_animation );
+
+	connect( d->scrollAnimation, &QVariantAnimation::finished,
+		this, &Scroller::_q_animationFinished );
 }
 
 Scroller::~Scroller()
@@ -140,8 +143,8 @@ Scroller::eventFilter( QObject * obj, QEvent * event )
 		{
 			if( d->elapsed.elapsed() <= d->maxPause )
 			{
-				if( d->xVelocity >= d->minVelocity ||
-					d->yVelocity >= d->minVelocity )
+				if( qAbs( d->xVelocity ) >= d->minVelocity ||
+					qAbs( d->yVelocity ) >= d->minVelocity )
 				{
 					const QPoint newPos = QPoint(
 						d->pos.x() + qRound( d->xVelocity * d->scrollTime / 1000 ),
@@ -149,6 +152,8 @@ Scroller::eventFilter( QObject * obj, QEvent * event )
 
 					d->scrollAnimation->setStartValue( d->pos );
 					d->scrollAnimation->setEndValue( newPos );
+
+					emit aboutToStart();
 
 					d->scrollAnimation->start();
 				}
@@ -188,10 +193,19 @@ Scroller::eventFilter( QObject * obj, QEvent * event )
 void
 Scroller::_q_animation( const QVariant & v )
 {
-	const QPoint p = v.toPoint() - d->pos;
-	d->pos = v.toPoint();
+	if( d->scrollAnimation->state() == QAbstractAnimation::Running )
+	{
+		const QPoint p = v.toPoint() - d->pos;
+		d->pos = v.toPoint();
 
-	emit scroll( p.x(), p.y() );
+		emit scroll( p.x(), p.y() );
+	}
+}
+
+void
+Scroller::_q_animationFinished()
+{
+	emit finished();
 }
 
 } /* namespace QtMWidgets */

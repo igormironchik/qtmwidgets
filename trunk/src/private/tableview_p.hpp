@@ -37,14 +37,15 @@
 
 // Qt include.
 #include <QLabel>
-#include <QHBoxLayout>
 #include <QList>
+#include <QVBoxLayout>
 
 
 namespace QtMWidgets {
 
 class MinimumSizeLabel;
 class TextLabel;
+class TableViewCellLayout;
 
 
 //
@@ -74,8 +75,7 @@ public:
 	TextLabel * textLabel;
 	TextLabel * detailedTextLabel;
 	QWidget * accessoryWidget;
-	QHBoxLayout * layout;
-	QVBoxLayout * textLayout;
+	TableViewCellLayout * layout;
 }; // class TableViewCellPrivate
 
 class RowsSeparator;

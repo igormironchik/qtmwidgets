@@ -106,13 +106,9 @@ private:
 
 		QtMWidgets::TableViewCell * volume =
 			new QtMWidgets::TableViewCell( ringerAndAlerts );
-		volume->textLabel()->setSizePolicy( QSizePolicy::Fixed,
-			QSizePolicy::Fixed );
 		volume->layout()->setSpacing( 0 );
 		QtMWidgets::Slider * volumeSlider = new QtMWidgets::Slider(
 			Qt::Horizontal, volume );
-		volumeSlider->setSizePolicy( QSizePolicy::Expanding,
-			QSizePolicy::Fixed );
 		volume->setAccessoryWidget( volumeSlider );
 		ringerAndAlerts->addCell( volume );
 

@@ -78,6 +78,291 @@ public:
 
 
 //
+// TableViewCellLayout
+//
+
+class TableViewCellLayout
+	:	public QLayout
+{
+public:
+	explicit TableViewCellLayout( QWidget * parent );
+	virtual ~TableViewCellLayout();
+
+	void setImageLabel( MinimumSizeLabel * label );
+	void setTextLabel( TextLabel * label );
+	void setDetailedTextLabel( TextLabel * label );
+	void setAccessoryWidget( QWidget * w );
+
+	virtual void addItem( QLayoutItem * item );
+	virtual int count() const;
+	virtual QLayoutItem * itemAt( int index ) const;
+	virtual void setGeometry( const QRect & rect );
+	virtual QLayoutItem * takeAt( int index );
+	virtual bool hasHeightForWidth() const;
+	virtual int heightForWidth( int w ) const;
+
+	virtual QSize minimumSize() const;
+	virtual QSize sizeHint() const;
+
+private:
+	void setTextGeometry( const QRect & r, int imageOffset,
+		int accessoryWidth );
+
+private:
+	MinimumSizeLabel * imageLabel;
+	TextLabel * textLabel;
+	TextLabel * detailedTextLabel;
+	QWidget * accessoryWidget;
+}; // class TableViewCellLayout
+
+TableViewCellLayout::TableViewCellLayout( QWidget * parent )
+	:	QLayout( parent )
+	,	imageLabel( 0 )
+	,	textLabel( 0 )
+	,	detailedTextLabel( 0 )
+	,	accessoryWidget( 0 )
+{
+}
+
+TableViewCellLayout::~TableViewCellLayout()
+{
+}
+
+void
+TableViewCellLayout::setImageLabel( MinimumSizeLabel * label )
+{
+	imageLabel = label;
+
+	update();
+}
+
+void
+TableViewCellLayout::setTextLabel( TextLabel * label )
+{
+	textLabel = label;
+
+	update();
+}
+
+void
+TableViewCellLayout::setDetailedTextLabel( TextLabel * label )
+{
+	detailedTextLabel = label;
+
+	update();
+}
+
+void
+TableViewCellLayout::setAccessoryWidget( QWidget * w )
+{
+	accessoryWidget = w;
+
+	update();
+}
+
+void
+TableViewCellLayout::addItem( QLayoutItem * item )
+{
+	Q_UNUSED( item )
+}
+
+int
+TableViewCellLayout::count() const
+{
+	return 4;
+}
+
+QLayoutItem *
+TableViewCellLayout::itemAt( int index ) const
+{
+	Q_UNUSED( index )
+
+	return 0;
+}
+
+void
+TableViewCellLayout::setTextGeometry( const QRect & r, int imageOffset,
+	int accessoryWidth )
+{
+	const int width = r.width() - imageOffset - accessoryWidth -
+		( accessoryWidth > 0 ? spacing() : 0 );
+	const int textHeight = textLabel->heightForWidth( width );
+	const int detailedTextHeight = detailedTextLabel->heightForWidth( width );
+
+	if( detailedTextHeight == 0 && textHeight != 0 )
+	{
+		textLabel->setGeometry( r.x() + imageOffset, r.y(),
+			width, r.height() );
+		detailedTextLabel->setGeometry( r.x(), r.y(), 0, 0 );
+	}
+	else if( textHeight == 0 && detailedTextHeight != 0 )
+	{
+		detailedTextLabel->setGeometry( r.x() + imageOffset, r.y(),
+			width, r.height() );
+		textLabel->setGeometry( r.x(), r.y(), 0, 0 );
+	}
+	else if( textHeight != 0 && detailedTextHeight != 0 )
+	{
+		textLabel->setGeometry( r.x() + imageOffset, r.y(),
+			width, textHeight );
+		detailedTextLabel->setGeometry( r.x() + imageOffset, r.y() +
+			textHeight + spacing(), width, detailedTextHeight );
+	}
+}
+
+void
+TableViewCellLayout::setGeometry( const QRect & rect )
+{
+	QLayout::setGeometry( rect );
+
+	const QMargins m = contentsMargins();
+	const QRect r = rect.adjusted( m.left(), m.top(), -m.right(), -m.bottom() );
+
+	int imageOffset = 0;
+
+	const QSize accessorySizeHint = accessoryWidget->sizeHint();
+
+	if( !imageLabel->pixmap() || !imageLabel->text().isEmpty() )
+	{
+		if( accessorySizeHint.isEmpty() && textLabel->text().isEmpty() &&
+			detailedTextLabel->text().isEmpty() )
+		{
+			imageLabel->setGeometry( r );
+			textLabel->setGeometry( r.x(), r.y(), 0, 0 );
+			detailedTextLabel->setGeometry( r.x(), r.y(), 0, 0 );
+			accessoryWidget->setGeometry( r.x(), r.y(), 0, 0 );
+
+			return;
+		}
+
+		const QSize imageSize = imageLabel->sizeHint();
+
+		imageLabel->setGeometry( r.x(), r.y(),
+			imageSize.width(), imageSize.height() );
+
+		imageOffset += imageSize.width() + spacing();
+	}
+	else
+		imageLabel->setGeometry( r.x(), r.y(), 0, 0 );
+
+	if( accessorySizeHint.isEmpty() )
+	{
+		accessoryWidget->setGeometry( r.x(), r.y(), 0, 0 );
+
+		setTextGeometry( r, imageOffset, 0 );
+	}
+	else if( textLabel->text().isEmpty() && detailedTextLabel->text().isEmpty() &&
+		!accessorySizeHint.isEmpty() )
+	{
+		textLabel->setGeometry( r.x(), r.y(), 0, 0 );
+		detailedTextLabel->setGeometry( r.x(), r.y(), 0, 0 );
+
+		const int offset = ( accessorySizeHint.height() < r.height() ?
+			( r.height() - accessorySizeHint.height() ) / 2 : 0 );
+
+		accessoryWidget->setGeometry( r.x() + imageOffset, r.y() + offset,
+			r.width() - imageOffset, r.height() - offset * 2 );
+	}
+	else if( ( !textLabel->text().isEmpty() || !detailedTextLabel->text().isEmpty() ) &&
+		!accessorySizeHint.isEmpty() )
+	{
+		const int offset = ( accessorySizeHint.height() < r.height() ?
+			( r.height() - accessorySizeHint.height() ) / 2 : 0 );
+
+		accessoryWidget->setGeometry( r.x() + r.width() -
+			accessorySizeHint.width(), r.y() + offset,
+			accessorySizeHint.width(), r.height() - offset * 2 );
+
+		setTextGeometry( r, imageOffset, accessorySizeHint.width() );
+	}
+	else
+	{
+		textLabel->setGeometry( r.x(), r.y(), 0, 0 );
+		detailedTextLabel->setGeometry( r.x(), r.y(), 0, 0 );
+		accessoryWidget->setGeometry( r.x(), r.y(), 0, 0 );
+	}
+}
+
+QLayoutItem *
+TableViewCellLayout::takeAt( int index )
+{
+	Q_UNUSED( index )
+
+	return 0;
+}
+
+bool
+TableViewCellLayout::hasHeightForWidth() const
+{
+	return true;
+}
+
+int
+TableViewCellLayout::heightForWidth( int w ) const
+{
+	const QSize imageSize = imageLabel->sizeHint();
+	const QSize accessorySize = accessoryWidget->sizeHint();
+
+	const int textWidth = qMax( 10,
+		w - imageSize.width() - accessorySize.width() );
+
+	int height = textLabel->heightForWidth( textWidth ) + spacing() +
+		detailedTextLabel->heightForWidth( textWidth );
+
+	height = qMax( height, imageSize.height() );
+	height = qMax( height, accessorySize.height() );
+
+	return height;
+}
+
+QSize
+TableViewCellLayout::minimumSize() const
+{
+	const QSize imageSize = imageLabel->minimumSizeHint();
+
+	int width = imageSize.width();
+	int height = imageSize.height();
+
+	const QSize textSize = textLabel->minimumSizeHint();
+	const QSize detailedTextSize = detailedTextLabel->minimumSizeHint();
+
+	width += qMax( textSize.width(), detailedTextSize.width() );
+	height = qMax( height,
+		textSize.height() + detailedTextSize.height() + spacing() );
+
+	const QSize accessorySize = accessoryWidget->minimumSizeHint();
+
+	width += accessorySize.width();
+	height = qMax( height, accessorySize.height() );
+
+	return QSize( width, height );
+}
+
+QSize
+TableViewCellLayout::sizeHint() const
+{
+	const QSize imageSize = imageLabel->sizeHint();
+
+	int width = imageSize.width();
+	int height = imageSize.height();
+
+	const QSize textSize = textLabel->sizeHint();
+	const QSize detailedTextSize = detailedTextLabel->sizeHint();
+
+	width += qMax( textSize.width(), detailedTextSize.width() );
+	height = qMax( height,
+		textSize.height() + detailedTextSize.height() + spacing() );
+
+	const QSize accessorySize = accessoryWidget->sizeHint();
+
+	width += accessorySize.width();
+	height = qMax( height, accessorySize.height() );
+
+	return QSize( width, height );
+}
+
+
+//
 // TableViewCellPrivate
 //
 
@@ -89,43 +374,33 @@ TableViewCellPrivate::init()
 	q->setBackgroundRole( QPalette::Base );
 	q->setAutoFillBackground( true );
 
-	layout = new QHBoxLayout( q );
+	layout = new TableViewCellLayout( q );
 	layout->setContentsMargins( 3, 3, 3, 3 );
 
 	imageLabel = new MinimumSizeLabel( q );
-	imageLabel->setSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed );
 	imageLabel->setBackgroundRole( QPalette::Base );
-	layout->addWidget( imageLabel );
-
-	textLayout = new QVBoxLayout();
-	textLayout->setSpacing( 0 );
-	textLayout->setContentsMargins( 0, 0, 0, 0 );
+	imageLabel->setAutoFillBackground( true );
+	imageLabel->setAlignment( Qt::AlignCenter );
+	imageLabel->setWordWrap( true );
+	layout->setImageLabel( imageLabel );
 
 	textLabel = new TextLabel( q );
-	QSizePolicy textLabelSizePolicy( QSizePolicy::Expanding,
-		QSizePolicy::Expanding );
-	textLabelSizePolicy.setHeightForWidth( true );
-	textLabel->setSizePolicy( textLabelSizePolicy );
 	textLabel->setBackgroundRole( QPalette::Base );
+	textLabel->setAutoFillBackground( true );
+	layout->setTextLabel( textLabel );
 
 	detailedTextLabel = new TextLabel( q );
-	QSizePolicy detailedTextSizePolicy( QSizePolicy::Fixed,
-		QSizePolicy::Fixed );
-	detailedTextSizePolicy.setHeightForWidth( true );
-	detailedTextLabel->setSizePolicy( detailedTextSizePolicy );
 	detailedTextLabel->setBackgroundRole( QPalette::Base );
+	detailedTextLabel->setAutoFillBackground( true );
 	QFont f = detailedTextLabel->font();
 	f.setPointSize( qMax( f.pointSize() - 1, 5 ) );
 	detailedTextLabel->setFont( f );
-
-	textLayout->addWidget( textLabel );
-	textLayout->addWidget( detailedTextLabel );
-
-	layout->addLayout( textLayout );
+	layout->setDetailedTextLabel( detailedTextLabel );
 
 	accessoryWidget = new QWidget( q );
 	accessoryWidget->setBackgroundRole( QPalette::Base );
-	layout->addWidget( accessoryWidget );
+	accessoryWidget->setAutoFillBackground( true );
+	layout->setAccessoryWidget( accessoryWidget );
 }
 
 
@@ -149,12 +424,6 @@ TableViewCell::TableViewCell( TableViewCellPrivate * dd, QWidget * parent )
 
 TableViewCell::~TableViewCell()
 {
-}
-
-QHBoxLayout *
-TableViewCell::layout() const
-{
-	return d->layout;
 }
 
 QLabel *
@@ -187,14 +456,15 @@ TableViewCell::setAccessoryWidget( QWidget * accessory )
 	if( accessory == d->accessoryWidget || !accessory )
 		return;
 
-	d->layout->removeWidget( d->accessoryWidget );
 	delete d->accessoryWidget;
 	d->accessoryWidget = 0;
 	if( accessory->parentWidget() != this )
 		accessory->setParent( this );
 	d->accessoryWidget = accessory;
-	d->layout->addWidget( d->accessoryWidget );
+	d->layout->setAccessoryWidget( d->accessoryWidget );
 	d->accessoryWidget->show();
+
+	updateGeometry();
 }
 
 QSize
@@ -205,14 +475,10 @@ TableViewCell::minimumSizeHint() const
 		FingerGeometry::height() );
 
 	const int textWidth = qMax( d->textLabel->sizeHint().width(),
-		d->detailedTextLabel->sizeHint().width() ) +
-		d->textLayout->contentsMargins().left() +
-		d->textLayout->contentsMargins().right();
+		d->detailedTextLabel->sizeHint().width() );
 	const int textHeight = d->textLabel->sizeHint().height() +
 		d->detailedTextLabel->sizeHint().height() +
-		d->textLayout->contentsMargins().top() +
-		d->textLayout->contentsMargins().bottom() +
-		d->textLayout->spacing();
+		d->layout->spacing();
 
 	width += textWidth;
 	height = qMax( height, textHeight );

@@ -85,9 +85,6 @@ public:
 	TableViewCell( QWidget * parent = 0 );
 	virtual ~TableViewCell();
 
-	//! \return Layout of the cell.
-	QHBoxLayout * layout() const;
-
 	//! \return Label with image.
 	QLabel * imageLabel() const;
 	//! \return Label with text.

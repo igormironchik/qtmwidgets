@@ -302,15 +302,16 @@ TableViewCellLayout::heightForWidth( int w ) const
 {
 	const QSize imageSize = imageLabel->sizeHint();
 	const QSize accessorySize = accessoryWidget->sizeHint();
+	const QMargins m = contentsMargins();
 
 	const int textWidth = qMax( 10,
 		w - imageSize.width() - accessorySize.width() );
 
 	int height = textLabel->heightForWidth( textWidth ) + spacing() +
-		detailedTextLabel->heightForWidth( textWidth );
+		detailedTextLabel->heightForWidth( textWidth ) + m.top() + m.bottom();
 
-	height = qMax( height, imageSize.height() );
-	height = qMax( height, accessorySize.height() );
+	height = qMax( height, imageSize.height() + m.top() + m.bottom() );
+	height = qMax( height, accessorySize.height() + m.top() + m.bottom() );
 
 	return height;
 }

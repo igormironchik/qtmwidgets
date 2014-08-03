@@ -35,7 +35,8 @@ HEADERS += private/drawing.hpp \
            navigationbar.hpp \
            navigationbutton.hpp \
            navigationarrow.hpp \
-           private/scroller.hpp
+           private/scroller.hpp \
+           toolbar.hpp
 
 SOURCES += private/drawing.cpp \
            private/datetimeparser.cpp \
@@ -59,4 +60,5 @@ SOURCES += private/drawing.cpp \
            navigationbar.cpp \
            navigationbutton.cpp \
            navigationarrow.cpp \
-           private/scroller.cpp
+           private/scroller.cpp \
+           toolbar.cpp

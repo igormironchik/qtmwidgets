@@ -157,6 +157,9 @@ public:
 	//! \return Icon size of the ToolBar.
 	QSize iconSize() const;
 
+	virtual QSize minimumSizeHint() const;
+	virtual QSize sizeHint() const;
+
 public slots:
 	//! Set icn's size of the ToolBar.
 	void setIconSize( const QSize & iconSize );

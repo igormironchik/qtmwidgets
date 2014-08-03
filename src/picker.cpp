@@ -31,8 +31,8 @@
 // QtMWidgets include.
 #include "picker.hpp"
 #include "private/drawing.hpp"
-#include "private/color.hpp"
-#include "private/scroller.hpp"
+#include "color.hpp"
+#include "scroller.hpp"
 
 // Qt include.
 #include <QStandardItemModel>

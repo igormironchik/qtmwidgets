@@ -31,7 +31,7 @@
 // QtMWidgets include.
 #include "abstractscrollarea.hpp"
 #include "private/abstractscrollarea_p.hpp"
-#include "private/scroller.hpp"
+#include "scroller.hpp"
 
 // Qt include.
 #include <QStyleOption>

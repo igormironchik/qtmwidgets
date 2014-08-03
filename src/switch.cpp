@@ -30,7 +30,7 @@
 
 // QtMWidgets include.
 #include "switch.hpp"
-#include "private/color.hpp"
+#include "color.hpp"
 #include "private/drawing.hpp"
 
 // Qt include.

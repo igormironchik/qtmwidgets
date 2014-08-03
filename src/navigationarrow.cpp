@@ -30,9 +30,9 @@
 
 // QtMWidgets include.
 #include "navigationarrow.hpp"
-#include "private/fingergeometry.hpp"
+#include "fingergeometry.hpp"
 #include "private/drawing.hpp"
-#include "private/color.hpp"
+#include "color.hpp"
 
 // Qt include.
 #include <QPainter>

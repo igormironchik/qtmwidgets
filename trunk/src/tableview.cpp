@@ -32,7 +32,7 @@
 #include "tableview.hpp"
 #include "textlabel.hpp"
 #include "private/tableview_p.hpp"
-#include "private/fingergeometry.hpp"
+#include "fingergeometry.hpp"
 
 // Qt include.
 #include <QVBoxLayout>

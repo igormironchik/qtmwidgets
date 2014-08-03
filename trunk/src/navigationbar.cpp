@@ -32,7 +32,7 @@
 #include "navigationbar.hpp"
 #include "navigationbutton.hpp"
 #include "textlabel.hpp"
-#include "private/fingergeometry.hpp"
+#include "fingergeometry.hpp"
 
 // Qt include.
 #include <QStackedWidget>

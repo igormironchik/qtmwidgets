@@ -32,8 +32,8 @@
 #include "datetimepicker.hpp"
 #include "private/datetimeparser.hpp"
 #include "private/drawing.hpp"
-#include "private/color.hpp"
-#include "private/scroller.hpp"
+#include "color.hpp"
+#include "scroller.hpp"
 
 // Qt include.
 #include <QEvent>

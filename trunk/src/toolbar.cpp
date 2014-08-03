@@ -30,7 +30,7 @@
 
 // QtMWidgets include.
 #include "toolbar.hpp"
-#include "private/fingergeometry.hpp"
+#include "fingergeometry.hpp"
 
 // Qt include.
 #include <QActionEvent>

@@ -12,7 +12,7 @@ MOC_DIR = ./.moc
 
 HEADERS += private/drawing.hpp \
            private/datetimeparser.hpp \
-           private/color.hpp \
+           color.hpp \
            picker.hpp \
            timepicker.hpp \
            datepicker.hpp \
@@ -25,7 +25,7 @@ HEADERS += private/drawing.hpp \
            private/layoutengine.hpp \
            tableview.hpp \
            private/tableview_p.hpp \
-           private/fingergeometry.hpp \
+           fingergeometry.hpp \
            textlabel.hpp \
            slider.hpp \
            busyindicator.hpp \
@@ -35,12 +35,12 @@ HEADERS += private/drawing.hpp \
            navigationbar.hpp \
            navigationbutton.hpp \
            navigationarrow.hpp \
-           private/scroller.hpp \
+           scroller.hpp \
            toolbar.hpp
 
 SOURCES += private/drawing.cpp \
            private/datetimeparser.cpp \
-           private/color.cpp \
+           color.cpp \
            picker.cpp \
            timepicker.cpp \
            datepicker.cpp \
@@ -50,7 +50,7 @@ SOURCES += private/drawing.cpp \
            abstractscrollarea.cpp \
            private/layoutengine.cpp \
            tableview.cpp \
-           private/fingergeometry.cpp \
+           fingergeometry.cpp \
            textlabel.cpp \
            slider.cpp \
            busyindicator.cpp \
@@ -60,5 +60,5 @@ SOURCES += private/drawing.cpp \
            navigationbar.cpp \
            navigationbutton.cpp \
            navigationarrow.cpp \
-           private/scroller.cpp \
+           scroller.cpp \
            toolbar.cpp

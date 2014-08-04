@@ -37,6 +37,7 @@
 // Qt include.
 #include <QPainter>
 #include <QTimer>
+#include <QMouseEvent>
 
 
 namespace QtMWidgets {
@@ -51,6 +52,7 @@ public:
 		NavigationArrow * parent )
 		:	q( parent )
 		,	direction( d )
+		,	leftButtonPressed( false )
 	{
 	}
 
@@ -72,6 +74,7 @@ public:
 	QColor color;
 	QColor baseColor;
 	QTimer * timer;
+	bool leftButtonPressed;
 }; // class NavigationArrowPrivate
 
 
@@ -113,7 +116,8 @@ NavigationArrow::minimumSizeHint() const
 	const int width = FingerGeometry::width() / 3;
 	const int height = FingerGeometry::height() / 2;
 
-	return QSize( width, height );
+	return ( ( d->direction == Left || d->direction == Right ) ?
+		QSize( width, height ) : QSize( height, width ) );
 }
 
 QSize
@@ -143,13 +147,42 @@ NavigationArrow::paintEvent( QPaintEvent * )
 
 	const QRect r = rect();
 
+	if( d->direction == Right )
+		drawArrow( &p, r, d->color );
 	if( d->direction == Left )
 	{
 		p.rotate( 180 );
 		p.translate( - r.width(), - r.height() );
-	}
 
-	drawArrow( &p, r, d->color );
+		drawArrow( &p, r, d->color );
+	}
+	else if( d->direction == Top )
+	{
+		p.rotate( 180 );
+		p.translate( - r.width(), - r.height() );
+
+		drawArrow2( &p, r, d->color );
+	}
+	else if( d->direction == Bottom )
+		drawArrow2( &p, r, d->color );
+}
+
+void
+NavigationArrow::mousePressEvent( QMouseEvent * e )
+{
+	if( e->button() == Qt::LeftButton )
+		d->leftButtonPressed = true;
+}
+
+void
+NavigationArrow::mouseReleaseEvent( QMouseEvent * )
+{
+	if( d->leftButtonPressed )
+	{
+		d->leftButtonPressed = false;
+
+		emit clicked();
+	}
 }
 
 void

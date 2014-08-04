@@ -39,6 +39,63 @@
 namespace QtMWidgets {
 
 //
+// ToolButton
+//
+
+class ToolButtonPrivate;
+
+/*!
+	Button in the ToolBar.
+*/
+class ToolButton
+	:	public QWidget
+{
+	Q_OBJECT
+
+	/*!
+		\property iconSize
+
+		\brief size of icon.
+	*/
+	Q_PROPERTY( QSize iconSize READ iconSize WRITE setIconSize
+		NOTIFY iconSizeChanged )
+
+signals:
+	/*!
+		This signal is emitted when the icon size is changed. The \a
+		iconSize parameter holds the toolbar's new icon size.
+
+		\sa iconSize
+	*/
+	void iconSizeChanged( const QSize & iconSize );
+
+public:
+	explicit ToolButton( QAction * action, QWidget * parent = 0 );
+	virtual ~ToolButton();
+
+	//! \return Icon's size.
+	QSize iconSize() const;
+
+	virtual QSize minimumSizeHint() const;
+	virtual QSize sizeHint() const;
+
+public slots:
+	//! Set icon's size.
+	void setIconSize( const QSize & s );
+
+protected:
+	virtual void paintEvent( QPaintEvent * );
+	virtual void mousePressEvent( QMouseEvent * e );
+	virtual void mouseReleaseEvent( QMouseEvent * );
+
+private:
+	Q_DISABLE_COPY( ToolButton )
+
+	QScopedPointer< ToolButtonPrivate > d;
+}; // class ToolButton
+
+
+//
 // ToolBar
 //
 

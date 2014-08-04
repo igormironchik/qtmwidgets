@@ -76,6 +76,9 @@ public:
 	//! \return Icon's size.
 	QSize iconSize() const;
 
+	//! \return Action for this button.
+	QAction * action() const;
+
 	virtual QSize minimumSizeHint() const;
 	virtual QSize sizeHint() const;
 

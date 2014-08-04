@@ -13,4 +13,5 @@ SUBDIRS = picker \
           textedit \
           navigationarrow \
           navigationbutton \
-          navigationbar
+          navigationbar \
+          toolbar

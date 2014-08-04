@@ -148,4 +148,29 @@ void drawArrow( QPainter * p, const QRect & r,
 	p->drawPath( path );
 }
 
+
+//
+// drawArrow2
+//
+
+void drawArrow2( QPainter * p, const QRect & r,
+	const QColor & color )
+{
+	const qreal width = r.height() / 3;
+	const qreal middle = r.width() / 2;
+
+	QPainterPath path;
+	path.moveTo( r.x(), r.y() );
+	path.lineTo( r.x(), r.y() + width );
+	path.lineTo( r.x() + middle, r.y() + r.height() );
+	path.lineTo( r.x() + r.width(), r.y() + width );
+	path.lineTo( r.x() + r.width(), r.y() );
+	path.lineTo( r.x() + middle, r.y() + r.height() - width );
+	path.lineTo( r.x(), r.y() );
+
+	p->setPen( color );
+	p->setBrush( color );
+	p->drawPath( path );
+}
+
 } /* namespace QtMWidgets */

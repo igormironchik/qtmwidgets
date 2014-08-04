@@ -64,13 +64,23 @@ class NavigationArrow
 	*/
 	Q_PROPERTY( Direction direction READ direction WRITE setDirection )
 
+signals:
+	/*!
+		This signal emitted when user clicked on the arrow.
+	*/
+	void clicked();
+
 public:
 	//! Direction of the arrow.
 	enum Direction {
 		//! Left arrow.
 		Left = 1,
 		//! Right arrow.
-		Right = 2
+		Right = 2,
+		//! Top arrow.
+		Top = 3,
+		//! Bottom arrow.
+		Bottom = 4
 	}; // enum Direction
 
 public:
@@ -91,6 +101,8 @@ public slots:
 
 protected:
 	virtual void paintEvent( QPaintEvent * );
+	virtual void mousePressEvent( QMouseEvent * e );
+	virtual void mouseReleaseEvent( QMouseEvent * );
 
 private slots:
 	void _q_timer();

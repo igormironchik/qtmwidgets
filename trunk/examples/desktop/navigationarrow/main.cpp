@@ -47,12 +47,20 @@ class Widget
 public:
 	Widget()
 	{
-		QVBoxLayout * l = new QVBoxLayout( this );
+		layout = new QVBoxLayout( this );
+
+		QHBoxLayout * h = new QHBoxLayout;
 
 		arrow = new QtMWidgets::NavigationArrow(
 			QtMWidgets::NavigationArrow::Right, this );
 
-		l->addWidget( arrow );
+		arrow2 = new QtMWidgets::NavigationArrow(
+			QtMWidgets::NavigationArrow::Bottom, this );
+
+		h->addWidget( arrow );
+		h->addWidget( arrow2 );
+
+		layout->addLayout( h );
 
 		QHBoxLayout * hbox = new QHBoxLayout;
 
@@ -64,7 +72,7 @@ public:
 		hbox->addWidget( ani );
 		connect( ani, SIGNAL( clicked() ), this, SLOT( animate() ) );
 
-		l->addLayout( hbox );
+		layout->addLayout( hbox );
 
 		resize( 300, 150 );
 	}
@@ -76,15 +84,23 @@ private slots:
 			arrow->setDirection( QtMWidgets::NavigationArrow::Right );
 		else
 			arrow->setDirection( QtMWidgets::NavigationArrow::Left );
+
+		if( arrow2->direction() == QtMWidgets::NavigationArrow::Top )
+			arrow2->setDirection( QtMWidgets::NavigationArrow::Bottom );
+		else
+			arrow2->setDirection( QtMWidgets::NavigationArrow::Top );
 	}
 
 	void animate()
 	{
 		arrow->animate();
+		arrow2->animate();
 	}
 
 private:
 	QtMWidgets::NavigationArrow * arrow;
+	QtMWidgets::NavigationArrow * arrow2;
+	QVBoxLayout * layout;
 };
 
 

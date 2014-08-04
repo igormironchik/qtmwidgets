@@ -53,6 +53,7 @@ public:
 	ToolButtonPrivate( QAction * a, ToolButton * parent )
 		:	q( parent )
 		,	action( a )
+		,	iconSize( QSize( 32, 32 ) )
 		,	leftButtonPressed( false )
 	{
 	}
@@ -72,8 +73,6 @@ ToolButton::ToolButton( QAction * action, QWidget * parent )
 	:	QWidget( parent )
 	,	d( new ToolButtonPrivate( action, this ) )
 {
-	if( !action->icon().isNull() )
-		d->iconSize = action->icon().availableSizes().front();
 }
 
 ToolButton::~ToolButton()
@@ -84,6 +83,12 @@ QSize
 ToolButton::iconSize() const
 {
 	return d->iconSize;
+}
+
+QAction *
+ToolButton::action() const
+{
+	return d->action;
 }
 
 QSize
@@ -162,10 +167,11 @@ public:
 
 	void setLeftArrow( NavigationArrow * a );
 	void setRightArrow( NavigationArrow * a );
-
 	void addButton( ToolButton * b );
-
+	void removeButton( QAction * a );
 	void setOrientation( Qt::Orientation o );
+	void setOffset( int o );
+	void setIconSize( const QSize & s );
 
 	virtual void addItem( QLayoutItem * item );
 	virtual int count() const;
@@ -182,6 +188,7 @@ private:
 	NavigationArrow * right;
 	QVector< ToolButton* > buttons;
 	Qt::Orientation orientation;
+	int offset;
 }; // class ToolBarLayout
 
 ToolBarLayout::ToolBarLayout( QWidget * parent )
@@ -189,6 +196,7 @@ ToolBarLayout::ToolBarLayout( QWidget * parent )
 	,	left( 0 )
 	,	right( 0 )
 	,	orientation( Qt::Horizontal )
+	,	offset( 0 )
 {
 }
 
@@ -217,6 +225,28 @@ ToolBarLayout::addButton( ToolButton * b )
 }
 
 void
+ToolBarLayout::removeButton( QAction * a )
+{
+	int i = 0;
+	int i_max = buttons.size();
+
+	for( ; i < i_max; ++i )
+	{
+		if( buttons.at( i )->action() == a )
+			break;
+	}
+
+	if( i != i_max )
+	{
+		ToolButton * b = buttons.at( i );
+		buttons.removeAt( i );
+		b->deleteLater();
+
+		update();
+	}
+}
+
+void
 ToolBarLayout::setOrientation( Qt::Orientation o )
 {
 	if( orientation != o )
@@ -225,6 +255,24 @@ ToolBarLayout::setOrientation( Qt::Orientation o )
 
 		update();
 	}
+}
+
+void
+ToolBarLayout::setOffset( int o )
+{
+	if( offset != o )
+	{
+		offset = o;
+
+		update();
+	}
+}
+
+void
+ToolBarLayout::setIconSize( const QSize & s )
+{
+	foreach( ToolButton * b, buttons )
+		b->setIconSize( s );
 }
 
 void
@@ -255,7 +303,128 @@ ToolBarLayout::setGeometry( const QRect & rect )
 	const QMargins m = contentsMargins();
 	const QRect r = rect.adjusted( m.left(), m.top(), -m.right(), -m.bottom() );
 
+	int x = 0;
+	int y = 0;
 
+	if( !buttons.isEmpty() )
+	{
+		if( offset < 0 )
+			offset = 0;
+
+		const QSize leftSize = left->sizeHint();
+		const QSize rightSize = right->sizeHint();
+
+		if( orientation == Qt::Horizontal )
+			y = ( r.height() - leftSize.height() ) / 2;
+		else
+			x = ( r.width() - leftSize.width() ) / 2;
+
+		left->setGeometry( x, y, leftSize.width(), leftSize.height() );
+
+		if( offset > 0 )
+		{
+			left->show();
+
+			if( orientation == Qt::Horizontal )
+				x += leftSize.width();
+			else
+				y += leftSize.height();
+		}
+		else
+			left->hide();
+
+		const QSize buttonSize = buttons.at( 0 )->sizeHint();
+		const int dim = ( orientation == Qt::Horizontal ?
+			buttonSize.width() : buttonSize.height() ) + spacing();
+		int i = 0;
+		int tmpOffset = offset;
+
+		while( tmpOffset > dim )
+		{
+			if( orientation == Qt::Horizontal )
+			{
+				if( ( buttons.size() - i ) * dim <
+					r.width() - leftSize.width() - rightSize.width() )
+						break;
+			}
+			else
+			{
+				if( ( buttons.size() - i ) * dim <
+					r.height() - leftSize.height() - rightSize.height() )
+						break;
+			}
+
+			buttons.at( i )->hide();
+			++i;
+			tmpOffset -= dim;
+		}
+
+		int stop = 0;
+
+		if( orientation == Qt::Horizontal )
+		{
+			x = offset % dim;
+			tmpOffset = x;
+			stop = r.width() - leftSize.width() - rightSize.width();
+			y = ( r.height() - buttonSize.height() ) / 2;
+		}
+		else
+		{
+			y = offset % dim;
+			tmpOffset = y;
+			stop = r.height() - leftSize.height() - rightSize.height();
+			x = ( r.width() - buttonSize.width() ) / 2;
+		}
+
+		while( tmpOffset < stop )
+		{
+			buttons.at( i )->setGeometry( x, y,
+				buttonSize.width(), buttonSize.height() );
+			buttons.at( i )->show();
+
+			if( orientation == Qt::Horizontal )
+				x += dim;
+			else
+				y += dim;
+
+			tmpOffset += dim;
+			++i;
+		}
+
+		if( i + 1 < buttons.size() )
+		{
+			if( orientation == Qt::Horizontal )
+			{
+				x = r.width() - rightSize.width();
+				y = ( r.height() - leftSize.height() ) / 2;
+			}
+			else
+			{
+				x = ( r.width() - leftSize.width() ) / 2;
+				y = r.height() - rightSize.height();
+			}
+
+			right->setGeometry( x, y,
+				rightSize.width(), rightSize.height() );
+			right->show();
+		}
+		else
+			right->hide();
+
+		for( ; i < buttons.size(); ++i )
+			buttons.at( i )->hide();
+
+		if( left->isVisible() )
+			left->raise();
+
+		if( right->isVisible() )
+			right->raise();
+	}
+	else
+	{
+		left->hide();
+		right->hide();
+	}
 }
 
 QLayoutItem *
@@ -275,13 +444,37 @@ ToolBarLayout::hasHeightForWidth() const
 QSize
 ToolBarLayout::minimumSize() const
 {
-	return QSize();
+	int width = 0;
+	int height = 0;
+
+	const QSize arrowSize = left->sizeHint();
+
+	QSize buttonSize;
+
+	if( !buttons.isEmpty() )
+		buttonSize = buttons.at( 0 )->sizeHint();
+	else
+		buttonSize = QSize( FingerGeometry::width(),
+			FingerGeometry::height() );
+
+	if( orientation == Qt::Horizontal )
+	{
+		width = arrowSize.width() * 2 + buttonSize.width() * 2;
+		height = qMax( arrowSize.height(), buttonSize.height() );
+	}
+	else
+	{
+		height = arrowSize.height() * 2 + buttonSize.height() * 2;
+		width = qMax( arrowSize.width(), buttonSize.width() );
+	}
+
+	return QSize( width, height );
 }
 
 QSize
 ToolBarLayout::sizeHint() const
 {
-	return QSize();
+	return minimumSize();
 }
 
 
@@ -413,11 +606,7 @@ ToolBar::iconSize() const
 QSize
 ToolBar::minimumSizeHint() const
 {
-	const int width = FingerGeometry::width() * 2;
-	const int height = FingerGeometry::height();
-
-	return ( d->orientation == Qt::Horizontal ?
-		QSize( width, height ) : QSize( height, width ) );
+	return d->layout->sizeHint();
 }
 
 QSize
@@ -435,6 +624,8 @@ ToolBar::setIconSize( const QSize & iconSize )
 		{
 			d->iconSize = iconSize;
 
+			d->layout->setIconSize( d->iconSize );
+
 			emit iconSizeChanged( d->iconSize );
 		}
 	}
@@ -449,17 +640,17 @@ ToolBar::actionEvent( QActionEvent * event )
 	{
 		case QEvent::ActionAdded :
 		{
+			ToolButton * b = new ToolButton( action, this );
+			d->layout->addButton( b );
 		}
 			break;
 
 		case QEvent::ActionChanged :
-		{
-		}
+			d->layout->invalidate();
 			break;
 
 		case QEvent::ActionRemoved :
-		{
-		}
+			d->layout->removeButton( action );
 			break;
 
 		default :

@@ -61,7 +61,7 @@ public:
 
 		layout->addWidget( toolbar );
 
-		resize( 100, 100 );
+		resize( 150, 150 );
 	}
 }; // class Widget
 

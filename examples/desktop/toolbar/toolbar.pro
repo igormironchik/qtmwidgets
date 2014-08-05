@@ -2,7 +2,7 @@
 TEMPLATE = app
 TARGET = toolbar
 DESTDIR = .
-CONFIG += console
+CONFIG += windows
 QT += core gui widgets
 
 SOURCES += main.cpp

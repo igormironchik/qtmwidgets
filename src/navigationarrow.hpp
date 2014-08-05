@@ -102,7 +102,7 @@ public slots:
 protected:
 	virtual void paintEvent( QPaintEvent * );
 	virtual void mousePressEvent( QMouseEvent * e );
-	virtual void mouseReleaseEvent( QMouseEvent * );
+	virtual void mouseReleaseEvent( QMouseEvent * e );
 
 private slots:
 	void _q_timer();

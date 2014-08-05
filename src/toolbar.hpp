@@ -89,7 +89,7 @@ public slots:
 protected:
 	virtual void paintEvent( QPaintEvent * );
 	virtual void mousePressEvent( QMouseEvent * e );
-	virtual void mouseReleaseEvent( QMouseEvent * );
+	virtual void mouseReleaseEvent( QMouseEvent * e );
 
 private:
 	Q_DISABLE_COPY( ToolButton )
@@ -226,6 +226,10 @@ public slots:
 
 protected:
 	virtual void actionEvent( QActionEvent * event );
+
+private slots:
+	void _q_leftArrowClicked();
+	void _q_rightArrowClicked();
 
 private:
 	Q_DISABLE_COPY( ToolBar )

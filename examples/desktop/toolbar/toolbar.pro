@@ -2,10 +2,12 @@
 TEMPLATE = app
 TARGET = toolbar
 DESTDIR = .
-CONFIG += windows
+CONFIG += console
 QT += core gui widgets
 
 SOURCES += main.cpp
+
+RESOURCES = resources.qrc
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../../lib/ -lQtMWidgets
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../../lib/ -lQtMWidgets

@@ -66,6 +66,9 @@ public:
 			q, SLOT( _q_timer() ) );
 
 		q->setSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed );
+
+		q->setBackgroundRole( QPalette::Base );
+		q->setAutoFillBackground( true );
 	}
 
 	NavigationArrow * q;

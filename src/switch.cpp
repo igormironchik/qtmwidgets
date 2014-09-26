@@ -54,6 +54,7 @@ public:
 		,	radius( 0 )
 		,	textWidth( 0 )
 		,	offset( 0 )
+		,	mouseMoveDelta( 0 )
 		,	leftMouseButtonPressed( false )
 	{
 		init();
@@ -75,6 +76,7 @@ public:
 	int radius;
 	int textWidth;
 	int offset;
+	int mouseMoveDelta;
 	bool leftMouseButtonPressed;
 	QPoint mousePos;
 }; // class SwitchPrivate
@@ -383,6 +385,7 @@ Switch::mousePressEvent( QMouseEvent * event )
 	{
 		d->mousePos = event->pos();
 		d->leftMouseButtonPressed = true;
+		d->mouseMoveDelta = 0;
 	}
 
 	event->accept();
@@ -391,9 +394,32 @@ Switch::mousePressEvent( QMouseEvent * event )
 void
 Switch::mouseReleaseEvent( QMouseEvent * event )
 {
+	event->accept();
+
 	d->leftMouseButtonPressed = false;
 
 	const int distance = rect().width() - d->radius * 2;
+
+	if( d->mouseMoveDelta < 3 )
+	{
+		switch( d->state )
+		{
+			case NotAcceptedCheck :
+			case AcceptedCheck :
+				d->setState( NotAcceptedUncheck );
+			break;
+
+			case NotAcceptedUncheck :
+			case AcceptedUncheck :
+				d->setState( NotAcceptedCheck );
+			break;
+
+			default :
+				break;
+		}
+
+		return;
+	}
 
 	if( d->offset <= distance / 2 )
 	{
@@ -429,8 +455,6 @@ Switch::mouseReleaseEvent( QMouseEvent * event )
 			break;
 		}
 	}
-
-	event->accept();
 }
 
 void
@@ -440,6 +464,7 @@ Switch::mouseMoveEvent( QMouseEvent * event )
 	{
 		const int delta = event->pos().x() - d->mousePos.x();
 		d->offset += delta;
+		d->mouseMoveDelta += qAbs( delta );
 		d->mousePos = event->pos();
 
 		if( d->offset < 0 )

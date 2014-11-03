@@ -131,6 +131,8 @@ ScrollArea::setWidget( QWidget * widget )
 	if( widget == d->widget || !widget )
 		return;
 
+	d->horIndicator->setParent( 0 );
+	d->vertIndicator->setParent( 0 );
 	delete d->widget;
 	d->widget = 0;
 	if( widget->parentWidget() != d->viewport )

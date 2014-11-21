@@ -14,4 +14,5 @@ SUBDIRS = picker \
           navigationarrow \
           navigationbutton \
           navigationbar \
-          toolbar
+          toolbar \
+          stepper

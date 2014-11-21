@@ -36,6 +36,7 @@ HEADERS += private/drawing.hpp \
            navigationbutton.hpp \
            navigationarrow.hpp \
            scroller.hpp \
+           stepper.hpp \
            toolbar.hpp
 
 SOURCES += private/drawing.cpp \
@@ -61,4 +62,5 @@ SOURCES += private/drawing.cpp \
            navigationbutton.cpp \
            navigationarrow.cpp \
            scroller.cpp \
+           stepper.cpp \
            toolbar.cpp

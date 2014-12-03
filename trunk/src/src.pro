@@ -37,7 +37,9 @@ HEADERS += private/drawing.hpp \
            navigationarrow.hpp \
            scroller.hpp \
            stepper.hpp \
-           toolbar.hpp
+           toolbar.hpp \
+           pageview.hpp \
+           pagecontrol.hpp
 
 SOURCES += private/drawing.cpp \
            private/datetimeparser.cpp \
@@ -63,4 +65,6 @@ SOURCES += private/drawing.cpp \
            navigationarrow.cpp \
            scroller.cpp \
            stepper.cpp \
-           toolbar.cpp
+           toolbar.cpp \
+           pageview.cpp \
+           pagecontrol.cpp

@@ -35,6 +35,10 @@
 
 // Qt include.
 #include <QStyleOption>
+#include <QVector>
+#include <QResizeEvent>
+#include <QPainter>
+#include <QMouseEvent>
 
 
 namespace QtMWidgets {
@@ -49,12 +53,27 @@ public:
 		:	q( parent )
 		,	count( 0 )
 		,	currentIndex( -1 )
+		,	radius( 0 )
+		,	buttonSize( 0 )
+		,	linesCount( 0 )
+		,	countInOneLine( 0 )
+		,	countInLastLine( 0 )
+		,	widgetWidth( 0 )
+		,	leftButtonPressed( false )
 	{
 		init();
 	}
 
 	//! Init.
 	void init();
+	//! Update buttons info.
+	void updateButtonsInfo( int width );
+	//! Update buttons geometry.
+	void updateButtonsGeometry();
+	//! Update buttons geometry for the given line.
+	void updateButtonGeometryForLine( int line );
+	//! \return Index of the button for the given pos.
+	int findButton( const QPoint & pos );
 
 	//! Parent.
 	PageControl * q;
@@ -66,6 +85,24 @@ public:
 	QColor pageIndicatorColor;
 	//! Current page indicator color.
 	QColor currentPageIndicatorColor;
+	//! Indicator radius.
+	int radius;
+	//! Size of the button with indicator.
+	int buttonSize;
+	//! Count of lines.
+	int linesCount;
+	//! Count of items in one line.
+	int countInOneLine;
+	//! Count of items in the last line.
+	int countInLastLine;
+	//! Width of the widget.
+	int widgetWidth;
+	//! Rectangles of the buttons.
+	QVector< QRect > rectangles;
+	//! Click position.
+	QPoint clickPos;
+	//! Left mouse button was pressed.
+	bool leftButtonPressed;
 }; // class PageControlPrivate
 
 void
@@ -76,6 +113,69 @@ PageControlPrivate::init()
 
 	currentPageIndicatorColor = opt.palette.color( QPalette::Highlight );
 	pageIndicatorColor = lighterColor( currentPageIndicatorColor, 75 );
+
+	radius = FingerGeometry::width() * 0.3 / 2;
+
+	buttonSize = radius / 4 + radius * 2;
+}
+
+void
+PageControlPrivate::updateButtonsInfo( int width )
+{
+	if( width <= 0 )
+		widgetWidth = q->rect().width();
+	else
+		widgetWidth = width;
+
+	countInOneLine = widgetWidth / buttonSize;
+
+	countInLastLine = count % countInOneLine;
+
+	linesCount = count / countInOneLine + ( countInLastLine > 0 ? 1 : 0 );
+}
+
+void
+PageControlPrivate::updateButtonsGeometry()
+{
+	for( int line = 0; line < linesCount; ++line )
+		updateButtonGeometryForLine( line );
+}
+
+void
+PageControlPrivate::updateButtonGeometryForLine( int line )
+{
+	int count = countInOneLine;
+
+	if( line == linesCount - 1 )
+		count = countInLastLine;
+
+	int index = line * countInOneLine;
+
+	const int offset = ( widgetWidth - count * buttonSize ) / 2;
+
+	const int y = line * buttonSize;
+
+	const int size = buttonSize - 1;
+
+	for( int i = 0; i < count; ++i )
+	{
+		rectangles[ index ] = QRect( offset + i * buttonSize, y,
+			size, size );
+
+		++index;
+	}
+}
+
+int
+PageControlPrivate::findButton( const QPoint & pos )
+{
+	for( int i = 0; i < count; ++i )
+	{
+		if( rectangles[ i ].contains( pos ) )
+			return i;
+	}
+
+	return -1;
 }
 
 
@@ -148,13 +248,15 @@ PageControl::hasHeightForWidth() const
 int
 PageControl::heightForWidth( int width ) const
 {
-	return 0;
+	d->updateButtonsInfo( width );
+
+	return d->linesCount * d->buttonSize;
 }
 
 QSize
 PageControl::minimumSizeHint() const
 {
-	return QSize();
+	return QSize( d->count * d->buttonSize, d->buttonSize );
 }
 
 QSize
@@ -166,25 +268,100 @@ PageControl::sizeHint() const
 void
 PageControl::setCurrentIndex( int index )
 {
+	if( d->currentIndex != index && index >= 0 && index < d->count )
+	{
+		d->currentIndex = index;
 
+		emit currentChanged( d->currentIndex );
+
+		update();
+	}
 }
 
 void
 PageControl::setCount( int c )
 {
+	if( d->count != c && c >= 0 )
+	{
+		d->count = c;
 
+		d->updateButtonsInfo( rect().width() );
+
+		if( d->count > 0 )
+		{
+			d->rectangles.reserve( d->count );
+
+			d->rectangles.fill( QRect(), d->count );
+
+			d->updateButtonsGeometry();
+		}
+		else
+		{
+			d->rectangles.clear();
+
+			d->currentIndex = -1;
+
+			emit currentChanged( d->currentIndex );
+		}
+	}
 }
 
 void
 PageControl::paintEvent( QPaintEvent * )
 {
+	QPainter p( this );
+	p.setRenderHint( QPainter::Antialiasing );
+	p.setPen( d->pageIndicatorColor );
 
+	for( int i = 0; i < d->count; ++i )
+	{
+		if( i == d->currentIndex )
+			p.setBrush( d->currentPageIndicatorColor );
+		else
+			p.setBrush( d->pageIndicatorColor );
+
+		p.drawEllipse( d->rectangles[ i ].center(), d->radius, d->radius );
+	}
 }
 
 void
 PageControl::resizeEvent( QResizeEvent * e )
 {
+	d->updateButtonsInfo( e->size().width() );
 
+	d->updateButtonsGeometry();
+
+	update();
+
+	e->accept();
+}
+
+void
+PageControl::mousePressEvent( QMouseEvent * e )
+{
+	if( e->button() == Qt::LeftButton )
+	{
+		d->leftButtonPressed = true;
+
+		d->clickPos = e->pos();
+	}
+}
+
+void
+PageControl::mouseReleaseEvent( QMouseEvent * e )
+{
+	if( d->leftButtonPressed )
+	{
+		const QPoint pos = e->pos() - d->clickPos;
+
+		if( pos.manhattanLength() < 3 )
+		{
+			const int index = d->findButton( e->pos() );
+
+			if( index >= 0 )
+				setCurrentIndex( index );
+		}
+	}
 }
 
 } /* namespace QtMWidgets */

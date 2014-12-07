@@ -147,6 +147,16 @@ TextLabel::setTextOption( const QTextOption & textOption )
 	update();
 }
 
+void
+TextLabel::setFont( const QFont & font )
+{
+	QFrame::setFont( font );
+
+	d->staticText.prepare( QTransform(), font );
+
+	update();
+}
+
 int
 TextLabel::margin() const
 {

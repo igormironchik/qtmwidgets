@@ -116,7 +116,7 @@ PageControlPrivate::init()
 
 	radius = FingerGeometry::width() * 0.3 / 2;
 
-	buttonSize = radius / 4 + radius * 2;
+	buttonSize = radius * 3;
 }
 
 void
@@ -270,9 +270,11 @@ PageControl::setCurrentIndex( int index )
 {
 	if( d->currentIndex != index && index >= 0 && index < d->count )
 	{
+		const int prev = d->currentIndex;
+
 		d->currentIndex = index;
 
-		emit currentChanged( d->currentIndex );
+		emit currentChanged( d->currentIndex, prev );
 
 		update();
 	}
@@ -287,6 +289,8 @@ PageControl::setCount( int c )
 
 		d->updateButtonsInfo( rect().width() );
 
+		d->rectangles.clear();
+
 		if( d->count > 0 )
 		{
 			d->rectangles.reserve( d->count );
@@ -294,14 +298,17 @@ PageControl::setCount( int c )
 			d->rectangles.fill( QRect(), d->count );
 
 			d->updateButtonsGeometry();
+
+			if( d->currentIndex >= d->count )
+				setCurrentIndex( d->count - 1 );
 		}
 		else
 		{
-			d->rectangles.clear();
+			const int prev = d->currentIndex;
 
 			d->currentIndex = -1;
 
-			emit currentChanged( d->currentIndex );
+			emit currentChanged( d->currentIndex, prev );
 		}
 	}
 }

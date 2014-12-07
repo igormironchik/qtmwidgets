@@ -104,7 +104,7 @@ signals:
 		The parameter holds the \a index of the new current page, or -1
 		if there isn't a new one (for example, if there are no pages).
 	*/
-	void currentChanged( int index );
+	void currentChanged( int index, int prev );
 
 public:
 	PageControl( QWidget * parent = 0 );

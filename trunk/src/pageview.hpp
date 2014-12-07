@@ -195,6 +195,12 @@ public slots:
 	 */
 	void setCurrentWidget( QWidget * widget );
 
+protected:
+	virtual void resizeEvent( QResizeEvent * e );
+
+private slots:
+	void _q_currentIndexChanged( int index, int prev );
+
 private:
 	Q_DISABLE_COPY( PageView )
 

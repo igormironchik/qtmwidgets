@@ -15,4 +15,5 @@ SUBDIRS = picker \
           navigationbutton \
           navigationbar \
           toolbar \
-          stepper
+          stepper \
+          pageview

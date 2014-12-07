@@ -143,6 +143,9 @@ public:
 	//! Set text option.
 	void setTextOption( const QTextOption & textOption );
 
+	//! Set font.
+	void setFont( const QFont & font );
+
 	//! \return Margin.
 	int margin() const;
 	//! Set margin.

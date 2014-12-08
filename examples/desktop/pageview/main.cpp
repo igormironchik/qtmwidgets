@@ -49,8 +49,6 @@ public:
 
 		QtMWidgets::PageView * view = new QtMWidgets::PageView( this );
 
-		view->setFrameStyle( QFrame::StyledPanel | QFrame::Raised );
-
 		l->addWidget( view );
 
 		QtMWidgets::TextLabel * page1 = new QtMWidgets::TextLabel( view );
@@ -67,8 +65,6 @@ public:
 		page1->setText( QLatin1String( "1" ) );
 		view->addWidget( page1 );
 
-		page1->setFrameStyle( QFrame::StyledPanel | QFrame::Raised );
-
 		QtMWidgets::TextLabel * page2 = new QtMWidgets::TextLabel( view );
 
 		page2->setTextOption( opt );
@@ -76,16 +72,12 @@ public:
 		page2->setText( QLatin1String( "2" ) );
 		view->addWidget( page2 );
 
-		page2->setFrameStyle( QFrame::StyledPanel | QFrame::Raised );
-
 		QtMWidgets::TextLabel * page3 = new QtMWidgets::TextLabel( view );
 
 		page3->setTextOption( opt );
 		page3->setFont( f );
 		page3->setText( QLatin1String( "3" ) );
 		view->addWidget( page3 );
-
-		page3->setFrameStyle( QFrame::StyledPanel | QFrame::Raised );
 
 		resize( 320, 480 );
 	}

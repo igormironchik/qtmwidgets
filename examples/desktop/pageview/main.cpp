@@ -59,7 +59,7 @@ public:
 		opt.setAlignment( Qt::AlignCenter );
 
 		QFont f = page1->font();
-		f.setPointSize( 60 );
+		f.setPointSize( 150 );
 		f.setBold( true );
 
 		page1->setTextOption( opt );

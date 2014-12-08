@@ -642,12 +642,10 @@ AbstractScrollArea::mousePressEvent( QMouseEvent * e )
 		d->leftMouseButtonPressed = true;
 		d->stopScrollIndicatorsAnimation();
 	}
-
-	e->accept();
 }
 
 void
-AbstractScrollArea::mouseReleaseEvent( QMouseEvent * e )
+AbstractScrollArea::mouseReleaseEvent( QMouseEvent * )
 {
 	d->leftMouseButtonPressed = false;
 
@@ -657,8 +655,6 @@ AbstractScrollArea::mouseReleaseEvent( QMouseEvent * e )
 				d->animateScrollIndicators();
 	else
 		d->stopScrollIndicatorsAnimation();
-
-	e->accept();
 }
 
 void
@@ -675,8 +671,6 @@ AbstractScrollArea::mouseMoveEvent( QMouseEvent * e )
 
 		scrollContentsBy( dx, dy );
 	}
-
-	e->accept();
 }
 
 void
@@ -713,8 +707,6 @@ AbstractScrollArea::wheelEvent( QWheelEvent * e )
 			scrollContentsBy( 0, numDegrees.y() / 8 );
 		}
 	}
-
-	e->accept();
 
 	if( d->horIndicator->policy == ScrollIndicatorAsNeeded ||
 		d->vertIndicator->policy == ScrollIndicatorAsNeeded )

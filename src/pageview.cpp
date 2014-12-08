@@ -525,8 +525,6 @@ PageView::mousePressEvent( QMouseEvent * e )
 
 		d->pos = e->pos();
 	}
-
-	e->accept();
 }
 
 void
@@ -543,18 +541,14 @@ PageView::mouseMoveEvent( QMouseEvent * e )
 		else if( delta < 0 )
 			d->movePageLeft( qAbs( delta ) );
 	}
-
-	e->accept();
 }
 
 void
-PageView::mouseReleaseEvent( QMouseEvent * e )
+PageView::mouseReleaseEvent( QMouseEvent * )
 {
 	d->leftButtonPressed = false;
 
 	d->normalizePagePos();
-
-	e->accept();
 }
 
 void

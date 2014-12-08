@@ -51,12 +51,16 @@ public:
 		:	q( parent )
 		,	target( t )
 		,	minVelocity( 0 )
+		,	maxVelocity( 0 )
+		,	startDragDistance( 0 )
+		,	scrollingCurve( QEasingCurve::OutCirc )
 		,	scrollTime( 3000 )
 		,	xVelocity( 0.0 )
 		,	yVelocity( 0.0 )
 		,	mousePressed( false )
 		,	maxPause( 300 )
 		,	scrollAnimation( 0 )
+		,	distance( 0 )
 	{
 	}
 
@@ -65,6 +69,9 @@ public:
 	Scroller * q;
 	QObject * target;
 	uint minVelocity;
+	uint maxVelocity;
+	uint startDragDistance;
+	QEasingCurve scrollingCurve;
 	QElapsedTimer elapsed;
 	QPoint pos;
 	uint scrollTime;
@@ -73,17 +80,22 @@ public:
 	bool mousePressed;
 	qint64 maxPause;
 	QVariantAnimation * scrollAnimation;
+	int distance;
 }; // class ScrollerPrivate
 
 void
 ScrollerPrivate::init()
 {
-	minVelocity = qMax( FingerGeometry::height(), FingerGeometry::width() ) * 3;
+	const int finger = qMax( FingerGeometry::height(), FingerGeometry::width() );
+
+	minVelocity = finger * 3;
+	maxVelocity = finger * 2;
+	startDragDistance = finger;
 
 	target->installEventFilter( q );
 
 	scrollAnimation = new QVariantAnimation( q );
-	scrollAnimation->setEasingCurve( QEasingCurve::OutCirc );
+	scrollAnimation->setEasingCurve( scrollingCurve );
 	scrollAnimation->setDuration( scrollTime );
 }
 
@@ -121,6 +133,64 @@ Scroller::setMinRecognizedVelocity( uint v )
 	d->minVelocity = v;
 }
 
+uint
+Scroller::maxReachedVelocity() const
+{
+	return d->maxVelocity;
+}
+
+void
+Scroller::setMaxReachedVelocity( uint v )
+{
+	d->maxVelocity = v;
+}
+
+uint
+Scroller::dragStartDistance() const
+{
+	return d->startDragDistance;
+}
+
+void
+Scroller::setDragStartDistance( uint v )
+{
+	d->startDragDistance = v;
+}
+
+uint
+Scroller::scrollTime() const
+{
+	return d->scrollTime;
+}
+
+void
+Scroller::setScrollTime( uint v )
+{
+	if( v > 0 && d->scrollTime != v )
+	{
+		d->scrollTime = v;
+
+		d->scrollAnimation->setDuration( d->scrollTime );
+	}
+}
+
+const QEasingCurve &
+Scroller::scrollingCurve() const
+{
+	return d->scrollingCurve;
+}
+
+void
+Scroller::setScrollingCurve( const QEasingCurve & c )
+{
+	if( d->scrollingCurve != c )
+	{
+		d->scrollingCurve = c;
+
+		d->scrollAnimation->setEasingCurve( d->scrollingCurve );
+	}
+}
+
 bool
 Scroller::eventFilter( QObject * obj, QEvent * event )
 {
@@ -134,6 +204,7 @@ Scroller::eventFilter( QObject * obj, QEvent * event )
 			d->mousePressed = true;
 			d->xVelocity = 0.0;
 			d->yVelocity = 0.0;
+			d->distance = 0;
 
 			d->scrollAnimation->stop();
 
@@ -141,11 +212,31 @@ Scroller::eventFilter( QObject * obj, QEvent * event )
 		}
 		else if( event->type() == QEvent::MouseButtonRelease )
 		{
-			if( d->elapsed.elapsed() <= d->maxPause )
+			if( d->elapsed.elapsed() <= d->maxPause &&
+				(uint) qAbs( d->distance ) >= d->startDragDistance )
 			{
 				if( qAbs( d->xVelocity ) >= d->minVelocity ||
 					qAbs( d->yVelocity ) >= d->minVelocity )
 				{
+					if( d->maxVelocity > 0 )
+					{
+						if( qAbs( d->xVelocity ) > d->maxVelocity )
+						{
+							if( d->xVelocity > 0 )
+								d->xVelocity = (qreal) d->maxVelocity;
+							else
+								d->xVelocity = - (qreal) d->maxVelocity;
+						}
+
+						if( qAbs( d->yVelocity ) > d->maxVelocity )
+						{
+							if( d->yVelocity > 0 )
+								d->yVelocity = (qreal) d->maxVelocity;
+							else
+								d->yVelocity = - (qreal) d->maxVelocity;
+						}
+					}
+
 					const QPoint newPos = QPoint(
 						d->pos.x() + qRound( d->xVelocity * d->scrollTime / 1000 ),
 						d->pos.y() + qRound( d->yVelocity * d->scrollTime / 1000 ) );
@@ -171,6 +262,8 @@ Scroller::eventFilter( QObject * obj, QEvent * event )
 				const qreal time = (qreal) d->elapsed.elapsed() / 1000.0;
 
 				const QPoint p = e->pos() - d->pos;
+
+				d->distance += p.manhattanLength();
 
 				d->pos = e->pos();
 

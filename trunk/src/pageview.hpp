@@ -197,6 +197,9 @@ public slots:
 
 protected:
 	virtual void resizeEvent( QResizeEvent * e );
+	virtual void mousePressEvent( QMouseEvent * e );
+	virtual void mouseMoveEvent( QMouseEvent * e );
+	virtual void mouseReleaseEvent( QMouseEvent * e );
 
 private slots:
 	void _q_currentIndexChanged( int index, int prev );

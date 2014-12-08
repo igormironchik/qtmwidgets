@@ -54,6 +54,7 @@ public:
 		,	count( 0 )
 		,	currentIndex( -1 )
 		,	radius( 0 )
+		,	smallRadius( 0 )
 		,	buttonSize( 0 )
 		,	linesCount( 0 )
 		,	countInOneLine( 0 )
@@ -87,6 +88,8 @@ public:
 	QColor currentPageIndicatorColor;
 	//! Indicator radius.
 	int radius;
+	//! Small indicator radius.
+	int smallRadius;
 	//! Size of the button with indicator.
 	int buttonSize;
 	//! Count of lines.
@@ -115,6 +118,8 @@ PageControlPrivate::init()
 	pageIndicatorColor = lighterColor( currentPageIndicatorColor, 75 );
 
 	radius = FingerGeometry::width() * 0.3 / 2;
+
+	smallRadius = radius * 0.75;
 
 	buttonSize = radius * 3;
 }
@@ -323,11 +328,18 @@ PageControl::paintEvent( QPaintEvent * )
 	for( int i = 0; i < d->count; ++i )
 	{
 		if( i == d->currentIndex )
+		{
 			p.setBrush( d->currentPageIndicatorColor );
+
+			p.drawEllipse( d->rectangles[ i ].center(), d->radius, d->radius );
+		}
 		else
+		{
 			p.setBrush( d->pageIndicatorColor );
 
-		p.drawEllipse( d->rectangles[ i ].center(), d->radius, d->radius );
+			p.drawEllipse( d->rectangles[ i ].center(),
+				d->smallRadius, d->smallRadius );
+		}
 	}
 }
 

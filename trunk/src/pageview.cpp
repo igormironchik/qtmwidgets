@@ -48,9 +48,13 @@ class PageViewPrivate {
 public:
 	PageViewPrivate( PageView * parent )
 		:	q( parent )
+		,	viewport( 0 )
 		,	control( 0 )
 		,	showPageControl( true )
 		,	controlOffset( 0 )
+		,	leftButtonPressed( false )
+		,	pagesPrepared( false )
+		,	pagesOffset( 0 )
 	{
 		init();
 	}
@@ -67,9 +71,27 @@ public:
 	void layoutPage( QWidget * widget, const QRect & r );
 	//! Layout page control.
 	void layoutControl( const QRect & r );
+	//! Prepare pages for moving.
+	void preparePages( const QRect & r );
+	//! Invalidate pages.
+	void invalidatePages( const QRect & r );
+	//! Move page left.
+	void movePageLeft( int delta );
+	//! Move page right.
+	void movePageRight( int delta );
+	//! Move pages.
+	void movePages();
+	//! Normalize page position.
+	void normalizePagePos();
+	//! Double in right.
+	void doubleInRight( int delta );
+	//! Double in left.
+	void doubleInLeft( int delta );
 
 	//! Parent.
 	PageView * q;
+	//! Viewport.
+	QWidget * viewport;
 	//! Page control.
 	PageControl * control;
 	//! Is PageControl visible?
@@ -78,12 +100,22 @@ public:
 	QList< QWidget * > pages;
 	//! Bottom offset for the control.
 	int controlOffset;
+	//! Left mouse button pressed.
+	bool leftButtonPressed;
+	//! Current cursor position.
+	QPoint pos;
+	//! Is pages prepared for moving?
+	bool pagesPrepared;
+	//! Current offset for pages.
+	int pagesOffset;
 }; // class PageViewPrivate
 
 void
 PageViewPrivate::init()
 {
-	control = new PageControl( q );
+	viewport = new QWidget( q );
+
+	control = new PageControl( viewport );
 
 	controlOffset = FingerGeometry::height() / 2;
 }
@@ -94,8 +126,8 @@ PageViewPrivate::prepareWidget( QWidget * widget, const QRect & r )
 	if( !widget )
 		return;
 
-	if( widget->parent() != q )
-		widget->setParent( q );
+	if( widget->parent() != viewport )
+		widget->setParent( viewport );
 
 	layoutPage( widget, r );
 }
@@ -112,6 +144,10 @@ PageViewPrivate::showPage( int index )
 void
 PageViewPrivate::relayoutChildren( const QRect & r )
 {
+	viewport->resize( r.size() );
+
+	viewport->move( r.topLeft() );
+
 	for( int i = 0, iMax = pages.count(); i < iMax; ++i )
 		layoutPage( pages.at( i ), r );
 
@@ -137,6 +173,182 @@ PageViewPrivate::layoutControl( const QRect & r )
 	control->resize( controlSize );
 
 	control->move( r.topLeft().x(), y );
+}
+
+void
+PageViewPrivate::preparePages( const QRect & r )
+{
+	const int index = control->currentIndex();
+
+	if( index != 0 )
+	{
+		QWidget * w = pages.at( index - 1 );
+
+		QRect left = r;
+		left.moveLeft( r.x() - r.width() );
+
+		w->move( left.topLeft() );
+
+		w->show();
+	}
+
+	if( index < control->count() - 1 )
+	{
+		QWidget * w = pages.at( index + 1 );
+
+		QRect right = r;
+		right.moveRight( r.x() + r.width() );
+
+		w->move( right.topLeft() );
+
+		w->show();
+	}
+
+	control->raise();
+
+	pagesPrepared = true;
+}
+
+void
+PageViewPrivate::invalidatePages( const QRect & r )
+{
+	const int index = control->currentIndex();
+
+	if( index != 0 )
+	{
+		QWidget * w = pages.at( index - 1 );
+
+		w->move( r.topLeft() );
+
+		w->hide();
+	}
+
+	if( index < control->count() - 1 )
+	{
+		QWidget * w = pages.at( index + 1 );
+
+		w->move( r.topLeft() );
+
+		w->hide();
+	}
+
+	pages.at( index )->move( r.topLeft() );
+
+	control->raise();
+
+	pagesPrepared = false;
+
+	pagesOffset = 0;
+}
+
+void
+PageViewPrivate::movePageLeft( int delta )
+{
+	if( control->currentIndex() == control->count() - 1 )
+		doubleInRight( delta );
+	else
+	{
+		if( !pagesPrepared )
+			preparePages( viewport->rect() );
+
+		pagesOffset -= delta;
+
+		if( control->currentIndex() < control->count() - 1 )
+		{
+			if( qAbs( pagesOffset ) < viewport->width() )
+				movePages();
+			else
+			{
+				invalidatePages( viewport->rect() );
+
+				control->setCurrentIndex( control->currentIndex() + 1 );
+			}
+		}
+	}
+}
+
+void
+PageViewPrivate::movePageRight( int delta )
+{
+	if( control->currentIndex() == 0 )
+		doubleInLeft( delta );
+	else
+	{
+		if( !pagesPrepared )
+			preparePages( viewport->rect() );
+
+		pagesOffset += delta;
+
+		if( control->currentIndex() != 0 )
+		{
+			if( qAbs( pagesOffset ) < viewport->width() )
+				movePages();
+			else
+			{
+				invalidatePages( viewport->rect() );
+
+				control->setCurrentIndex( control->currentIndex() - 1 );
+			}
+		}
+	}
+}
+
+void
+PageViewPrivate::movePages()
+{
+	const int index = control->currentIndex();
+
+	if( index != 0 )
+	{
+		const QPoint p = viewport->rect().topLeft() -
+			QPoint( viewport->width(), 0 ) + QPoint( pagesOffset, 0 );
+
+		pages.at( index - 1 )->move( p );
+	}
+
+	if( index < control->count() - 1 )
+	{
+		const QPoint p = viewport->rect().topLeft() +
+			QPoint( viewport->width(), 0 ) + QPoint( pagesOffset, 0 );
+
+		pages.at( index + 1 )->move( p );
+	}
+
+	const QPoint p = viewport->rect().topLeft() +
+		QPoint( pagesOffset, 0 );
+
+	pages.at( index )->move( p );
+}
+
+void
+PageViewPrivate::normalizePagePos()
+{
+	int index = -1;
+
+	if( qAbs( pagesOffset ) > viewport->width() / 2 )
+	{
+		if( pagesOffset < 0 && control->currentIndex() < control->count() - 1 )
+			index = control->currentIndex() + 1;
+		else if( pagesOffset > 0 && control->currentIndex() != 0 )
+			index = control->currentIndex() - 1;
+	}
+
+	invalidatePages( viewport->rect() );
+
+	if( index != -1 )
+		control->setCurrentIndex( index );
+}
+
+void
+PageViewPrivate::doubleInRight( int delta )
+{
+	Q_UNUSED( delta )
+}
+
+void
+PageViewPrivate::doubleInLeft( int delta )
+{
+	Q_UNUSED( delta )
 }
 
 
@@ -305,12 +517,53 @@ PageView::resizeEvent( QResizeEvent * e )
 }
 
 void
+PageView::mousePressEvent( QMouseEvent * e )
+{
+	if( e->button() == Qt::LeftButton )
+	{
+		d->leftButtonPressed = true;
+
+		d->pos = e->pos();
+	}
+
+	e->accept();
+}
+
+void
+PageView::mouseMoveEvent( QMouseEvent * e )
+{
+	if( d->leftButtonPressed )
+	{
+		const int delta = ( e->pos() - d->pos ).x();
+
+		d->pos = e->pos();
+
+		if( delta > 0 )
+			d->movePageRight( delta );
+		else if( delta < 0 )
+			d->movePageLeft( qAbs( delta ) );
+	}
+
+	e->accept();
+}
+
+void
+PageView::mouseReleaseEvent( QMouseEvent * e )
+{
+	d->leftButtonPressed = false;
+
+	d->normalizePagePos();
+
+	e->accept();
+}
+
+void
 PageView::_q_currentIndexChanged( int index, int prev )
 {
-	if( prev != -1 )
+	if( prev >= 0 && prev < d->pages.count() )
 		d->pages.at( prev )->hide();
 
-	if( index >= 0 )
+	if( index >= 0 && index < d->pages.count() )
 		d->showPage( index );
 }
 

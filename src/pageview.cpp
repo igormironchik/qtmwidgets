@@ -36,6 +36,7 @@
 // Qt include.
 #include <QList>
 #include <QResizeEvent>
+#include <QVariantAnimation>
 
 
 namespace QtMWidgets {
@@ -55,6 +56,8 @@ public:
 		,	leftButtonPressed( false )
 		,	pagesPrepared( false )
 		,	pagesOffset( 0 )
+		,	normalizeAnimation( 0 )
+		,	indexAfterNormalizeAnimation( -1 )
 	{
 		init();
 	}
@@ -83,10 +86,6 @@ public:
 	void movePages();
 	//! Normalize page position.
 	void normalizePagePos();
-	//! Double in right.
-	void doubleInRight( int delta );
-	//! Double in left.
-	void doubleInLeft( int delta );
 
 	//! Parent.
 	PageView * q;
@@ -108,6 +107,10 @@ public:
 	bool pagesPrepared;
 	//! Current offset for pages.
 	int pagesOffset;
+	//! Normalize animation.
+	QVariantAnimation * normalizeAnimation;
+	//! Index after normalize animation.
+	int indexAfterNormalizeAnimation;
 }; // class PageViewPrivate
 
 void
@@ -118,6 +121,12 @@ PageViewPrivate::init()
 	control = new PageControl( viewport );
 
 	controlOffset = FingerGeometry::height() / 2;
+
+	normalizeAnimation = new QVariantAnimation( q );
+
+	normalizeAnimation->setDuration( 300 );
+
+	normalizeAnimation->setLoopCount( 1 );
 }
 
 void
@@ -196,8 +205,7 @@ PageViewPrivate::preparePages( const QRect & r )
 	{
 		QWidget * w = pages.at( index + 1 );
 
-		QRect right = r;
-		right.moveRight( r.x() + r.width() );
+		const QRect right( r.x() + r.width(), r.y(), r.width(), r.height() );
 
 		w->move( right.topLeft() );
 
@@ -244,25 +252,20 @@ PageViewPrivate::invalidatePages( const QRect & r )
 void
 PageViewPrivate::movePageLeft( int delta )
 {
-	if( control->currentIndex() == control->count() - 1 )
-		doubleInRight( delta );
-	else
-	{
-		if( !pagesPrepared )
-			preparePages( viewport->rect() );
+	if( !pagesPrepared )
+		preparePages( viewport->rect() );
 
+	if( control->currentIndex() < control->count() - 1 || pagesOffset > 0 )
+	{
 		pagesOffset -= delta;
 
-		if( control->currentIndex() < control->count() - 1 )
+		if( qAbs( pagesOffset ) < viewport->width() )
+			movePages();
+		else
 		{
-			if( qAbs( pagesOffset ) < viewport->width() )
-				movePages();
-			else
-			{
-				invalidatePages( viewport->rect() );
+			invalidatePages( viewport->rect() );
 
-				control->setCurrentIndex( control->currentIndex() + 1 );
-			}
+			control->setCurrentIndex( control->currentIndex() + 1 );
 		}
 	}
 }
@@ -270,25 +273,20 @@ PageViewPrivate::movePageLeft( int delta )
 void
 PageViewPrivate::movePageRight( int delta )
 {
-	if( control->currentIndex() == 0 )
-		doubleInLeft( delta );
-	else
-	{
-		if( !pagesPrepared )
-			preparePages( viewport->rect() );
+	if( !pagesPrepared )
+		preparePages( viewport->rect() );
 
+	if( control->currentIndex() != 0 || pagesOffset < 0 )
+	{
 		pagesOffset += delta;
 
-		if( control->currentIndex() != 0 )
+		if( qAbs( pagesOffset ) < viewport->width() )
+			movePages();
+		else
 		{
-			if( qAbs( pagesOffset ) < viewport->width() )
-				movePages();
-			else
-			{
-				invalidatePages( viewport->rect() );
+			invalidatePages( viewport->rect() );
 
-				control->setCurrentIndex( control->currentIndex() - 1 );
-			}
+			control->setCurrentIndex( control->currentIndex() - 1 );
 		}
 	}
 }
@@ -323,32 +321,30 @@ PageViewPrivate::movePages()
 void
 PageViewPrivate::normalizePagePos()
 {
-	int index = -1;
+	indexAfterNormalizeAnimation = -1;
+
+	int endPos = 0;
 
 	if( qAbs( pagesOffset ) > viewport->width() / 2 )
 	{
 		if( pagesOffset < 0 && control->currentIndex() < control->count() - 1 )
-			index = control->currentIndex() + 1;
+		{
+			indexAfterNormalizeAnimation = control->currentIndex() + 1;
+
+			endPos = - viewport->width();
+		}
 		else if( pagesOffset > 0 && control->currentIndex() != 0 )
-			index = control->currentIndex() - 1;
+		{
+			indexAfterNormalizeAnimation = control->currentIndex() - 1;
+
+			endPos = viewport->width();
+		}
 	}
 
-	invalidatePages( viewport->rect() );
+	normalizeAnimation->setStartValue( pagesOffset );
+	normalizeAnimation->setEndValue( endPos );
 
-	if( index != -1 )
-		control->setCurrentIndex( index );
-}
-
-void
-PageViewPrivate::doubleInRight( int delta )
-{
-	Q_UNUSED( delta )
-}
-
-void
-PageViewPrivate::doubleInLeft( int delta )
-{
-	Q_UNUSED( delta )
+	normalizeAnimation->start();
 }
 
 
@@ -362,6 +358,12 @@ PageView::PageView( QWidget * parent )
 {
 	connect( d->control, &PageControl::currentChanged,
 		this, &PageView::_q_currentIndexChanged );
+
+	connect( d->normalizeAnimation, &QVariantAnimation::valueChanged,
+		this, &PageView::_q_normalizePageAnimation );
+
+	connect( d->normalizeAnimation, &QVariantAnimation::finished,
+		this, &PageView::_q_normalizeAnimationFinished );
 
 	d->relayoutChildren( frameRect().adjusted( frameWidth(), frameWidth(),
 		-frameWidth(), -frameWidth() ) );
@@ -524,6 +526,8 @@ PageView::mousePressEvent( QMouseEvent * e )
 		d->leftButtonPressed = true;
 
 		d->pos = e->pos();
+
+		d->normalizeAnimation->stop();
 	}
 }
 
@@ -559,6 +563,23 @@ PageView::_q_currentIndexChanged( int index, int prev )
 
 	if( index >= 0 && index < d->pages.count() )
 		d->showPage( index );
+}
+
+void
+PageView::_q_normalizePageAnimation( const QVariant & v )
+{
+	d->pagesOffset = v.toInt();
+
+	d->movePages();
+}
+
+void
+PageView::_q_normalizeAnimationFinished()
+{
+	d->invalidatePages( d->viewport->rect() );
+
+	if( d->indexAfterNormalizeAnimation != -1 )
+		d->control->setCurrentIndex( d->indexAfterNormalizeAnimation );
 }
 
 } /* namespace QtMWidgets */

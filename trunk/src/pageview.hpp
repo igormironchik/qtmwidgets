@@ -203,6 +203,8 @@ protected:
 
 private slots:
 	void _q_currentIndexChanged( int index, int prev );
+	void _q_normalizePageAnimation( const QVariant & v );
+	void _q_normalizeAnimationFinished();
 
 private:
 	Q_DISABLE_COPY( PageView )

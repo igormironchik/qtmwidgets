@@ -70,6 +70,14 @@ class Slider
 		By default this color is QPalette::Highlight.
 	*/
 	Q_PROPERTY( QColor highlightColor READ highlightColor WRITE setHighlightColor )
+	/*!
+		\property grooveHeight
+
+		\brief Height (width) of the slider's groove
+
+		By default is 2px.
+	*/
+	Q_PROPERTY( int grooveHeight READ grooveHeight WRITE setGrooveHeight )
 
 public:
 	Slider( QWidget * parent = 0 );
@@ -86,6 +94,11 @@ public:
 	const QColor & highlightColor() const;
 	//! Set highlight color.
 	void setHighlightColor( const QColor & c );
+
+	//! \return Groove height.
+	int grooveHeight() const;
+	//! Set groove height.
+	void setGrooveHeight( int h );
 
 	virtual QSize sizeHint() const;
 	virtual QSize minimumSizeHint() const;

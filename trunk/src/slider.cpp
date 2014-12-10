@@ -51,7 +51,7 @@ public:
 	SliderPrivate( Slider * parent )
 		:	q( parent )
 		,	radius( 0 )
-		,	grooveHeight( 4 )
+		,	grooveHeight( 2 )
 		,	pressedControl( QStyle::SC_None )
 		,	clickOffset( 0 )
 	{
@@ -179,16 +179,16 @@ SliderPrivate::grooveHighlightedRect( const QRect & sh, const QRect & gr ) const
 		else
 			grhw = gr.width() - sh.x() - radius;
 
-		grh = gr.marginsRemoved( QMargins( 1, 1, grhw, grhh ) );
+		grh = gr.marginsRemoved( QMargins( 0, 0, grhw, grhh ) );
 	}
 	else
 	{
 		if( q->orientation() == Qt::Vertical )
 			grhh = sh.y() + radius;
 		else
-			grhw= sh.x() + radius;
+			grhw = sh.x() + radius;
 
-		grh = gr.marginsRemoved( QMargins( grhw + 1, grhh + 1, 0, 0 ) );
+		grh = gr.marginsRemoved( QMargins( grhw, grhh, 0, 0 ) );
 	}
 
 	return grh;
@@ -252,6 +252,23 @@ Slider::setHighlightColor( const QColor & c )
 	}
 }
 
+int
+Slider::grooveHeight() const
+{
+	return d->grooveHeight;
+}
+
+void
+Slider::setGrooveHeight( int h )
+{
+	if( h > 0 && h != d->grooveHeight )
+	{
+		d->grooveHeight = h;
+
+		update();
+	}
+}
+
 QSize
 Slider::sizeHint() const
 {
@@ -285,27 +302,22 @@ Slider::paintEvent( QPaintEvent * )
 
 	QPainter p( this );
 
-	const QColor borderColor = palette().color( QPalette::Shadow );
-	const QColor lightColor = palette().color( QPalette::Base );
+	const QColor grooveColor = palette().color( QPalette::Dark );
 
-	QLinearGradient g( QPointF( 0.0, 0.0 ), QPointF( 0.0, 1.0 ) );
-	g.setCoordinateMode( QGradient::ObjectBoundingMode );
-	g.setColorAt( 0.0, darkerColor( lightColor, 75 ) );
-	g.setColorAt( 0.1, darkerColor( lightColor, 25 ) );
-	g.setColorAt( 1.0, darkerColor( lightColor, 10 ) );
-
-	p.setPen( borderColor );
-	p.setBrush( g );
+	p.setPen( grooveColor );
+	p.setBrush( grooveColor );
 
 	p.drawRect( gr );
 
-	p.setPen( Qt::NoPen );
+	p.setPen( d->highlightColor );
 	p.setBrush( d->highlightColor );
 
 	p.drawRect( grh );
 
 	p.setRenderHint( QPainter::Antialiasing );
-	drawSliderHandle( &p, sh, d->radius, d->radius, borderColor, lightColor );
+	drawSliderHandle( &p, sh, d->radius, d->radius,
+		palette().color( QPalette::Shadow ),
+		palette().color( QPalette::Base ) );
 }
 
 void

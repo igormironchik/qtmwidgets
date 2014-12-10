@@ -982,7 +982,7 @@ Picker::paintEvent( QPaintEvent * )
 
 	QPainter p( this );
 
-	drawCylinder( &p, opt.rect );
+	drawCylinder( &p, opt.rect, palette().color( QPalette::Dark ) );
 
 	if( count() > 0 )
 	{

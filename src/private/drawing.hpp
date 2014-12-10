@@ -48,7 +48,7 @@ namespace QtMWidgets {
 //
 
 //! Draw cylinder with rect \a r.
-void drawCylinder( QPainter * p, const QRect & r,
+void drawCylinder( QPainter * p, const QRect & r, const QColor & baseColor,
 	bool roundLeftCorner = true, bool roundRightCorner = true );
 
 
@@ -56,6 +56,7 @@ void drawCylinder( QPainter * p, const QRect & r,
 // drawSliderHandle
 //
 
+//! Draw slider's handle.
 void drawSliderHandle( QPainter * p, const QRect & r,
 	int xRadius, int yRadius, const QColor & borderColor,
 	const QColor & lightColor );
@@ -65,6 +66,7 @@ void drawSliderHandle( QPainter * p, const QRect & r,
 // drawArrow
 //
 
+//! Draw horizontal arrow looks to the right.
 void drawArrow( QPainter * p, const QRect & r,
 	const QColor & color );
 
@@ -73,6 +75,7 @@ void drawArrow( QPainter * p, const QRect & r,
 // drawArrow2
 //
 
+//! Draw vertical arrow look to the bottom.
 void drawArrow2( QPainter * p, const QRect & r,
 	const QColor & color );
 

@@ -96,17 +96,17 @@ SliderPrivate::handleRect() const
 
 	if( q->orientation() == Qt::Vertical )
 	{
-		hx = cr.topLeft().x() + cr.width() / 2 - radius;
+		hx = cr.topLeft().x() + cr.width() / 2 - radius + 1;
 		hy = QStyle::sliderPositionFromValue( q->minimum(), q->maximum(),
-			q->sliderPosition(), cr.height() - radius * 2,
-			q->invertedAppearance() );
+			q->sliderPosition(), cr.height() - radius * 2 - 2,
+			q->invertedAppearance() ) + 1;
 	}
 	else
 	{
 		hx = QStyle::sliderPositionFromValue( q->minimum(), q->maximum(),
-			q->sliderPosition(), cr.width() - radius * 2,
-			q->invertedAppearance() );
-		hy = cr.topLeft().y() + cr.height() / 2 - radius;
+			q->sliderPosition(), cr.width() - radius * 2 - 2,
+			q->invertedAppearance() ) + 1;
+		hy = cr.topLeft().y() + cr.height() / 2 - radius + 1;
 	}
 
 	return QRect( hx, hy, radius * 2, radius * 2 );
@@ -150,15 +150,15 @@ SliderPrivate::grooveRect() const
 	if( q->orientation() == Qt::Vertical )
 	{
 		gx = cr.topLeft().x() + cr.width() / 2 - grooveHeight / 2;
-		gy = cr.topLeft().y();
+		gy = cr.topLeft().y() + 1;
 		gw = grooveHeight;
-		gh = cr.height() - 1;
+		gh = cr.height() - 2;
 	}
 	else
 	{
-		gx = cr.topLeft().x();
+		gx = cr.topLeft().x() + 1;
 		gy = cr.topLeft().y() + cr.height() / 2 - grooveHeight / 2;
-		gw = cr.width() - 1;
+		gw = cr.width() - 2;
 		gh = grooveHeight;
 	}
 
@@ -278,8 +278,8 @@ Slider::sizeHint() const
 QSize
 Slider::minimumSizeHint() const
 {
-	const int minWidth = d->radius * 10;
-	const int height = d->radius * 2;
+	const int minWidth = d->radius * 10 + 3;
+	const int height = d->radius * 2 + 3;
 
 	int w = minWidth;
 	int h = height;

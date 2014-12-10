@@ -149,7 +149,7 @@ SliderPrivate::grooveRect() const
 
 	if( q->orientation() == Qt::Vertical )
 	{
-		gx = cr.topLeft().x() + cr.width() / 2 - grooveHeight / 2;
+		gx = cr.topLeft().x() + ( cr.width() - grooveHeight ) / 2;
 		gy = cr.topLeft().y() + 1;
 		gw = grooveHeight;
 		gh = cr.height() - 2;
@@ -157,7 +157,7 @@ SliderPrivate::grooveRect() const
 	else
 	{
 		gx = cr.topLeft().x() + 1;
-		gy = cr.topLeft().y() + cr.height() / 2 - grooveHeight / 2;
+		gy = cr.topLeft().y() + ( cr.height() - grooveHeight ) / 2;
 		gw = cr.width() - 2;
 		gh = grooveHeight;
 	}

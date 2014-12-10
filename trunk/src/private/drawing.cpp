@@ -48,22 +48,22 @@ namespace QtMWidgets {
 //
 
 void
-drawCylinder( QPainter * p, const QRect & r,
+drawCylinder( QPainter * p, const QRect & r, const QColor & baseColor,
 	bool roundLeftCorner, bool roundRightCorner )
 {
 	QLinearGradient firstVertLineGradient( QPointF( 0.0, 0.0 ),
 		QPointF( 0.0, 1.0 ) );
 	firstVertLineGradient.setCoordinateMode( QGradient::ObjectBoundingMode );
-	firstVertLineGradient.setColorAt( 0.0, QColor( 50, 50, 60 ) );
-	firstVertLineGradient.setColorAt( 0.5, QColor( 140, 140, 150 ) );
-	firstVertLineGradient.setColorAt( 1.0, QColor( 50, 50, 60 ) );
+	firstVertLineGradient.setColorAt( 0.0, darkerColor( baseColor, 50 ) );
+	firstVertLineGradient.setColorAt( 0.5, lighterColor( baseColor, 25 ) );
+	firstVertLineGradient.setColorAt( 1.0, darkerColor( baseColor, 50 ) );
 
 	QLinearGradient secondVertLineGradient( QPointF( 0.0, 0.0 ),
 		QPointF( 0.0, 1.0 ) );
 	secondVertLineGradient.setCoordinateMode( QGradient::ObjectBoundingMode );
-	secondVertLineGradient.setColorAt( 0.0, QColor( 60, 60, 80 ) );
-	secondVertLineGradient.setColorAt( 0.5, QColor( 200, 205, 225 ) );
-	secondVertLineGradient.setColorAt( 1.0, QColor( 60, 60, 80 ) );
+	secondVertLineGradient.setColorAt( 0.0, darkerColor( baseColor, 40 ) );
+	secondVertLineGradient.setColorAt( 0.5, lighterColor( baseColor, 50 ) );
+	secondVertLineGradient.setColorAt( 1.0, darkerColor( baseColor, 40 ) );
 
 	p->setPen( Qt::NoPen );
 	p->setBrush( firstVertLineGradient );
@@ -87,11 +87,11 @@ drawCylinder( QPainter * p, const QRect & r,
 	QLinearGradient backgroundGradient( QPointF( 0.0, 0.0 ),
 		QPointF( 0.0, 1.0 ) );
 	backgroundGradient.setCoordinateMode( QGradient::ObjectBoundingMode );
-	backgroundGradient.setColorAt( 0.0, QColor( 80, 80, 80 ) );
-	backgroundGradient.setColorAt( 0.15, QColor( 215, 215, 220 ) );
-	backgroundGradient.setColorAt( 0.5, QColor( 255, 255, 255 ) );
-	backgroundGradient.setColorAt( 0.85, QColor( 215, 215, 220 ) );
-	backgroundGradient.setColorAt( 1.0, QColor( 80, 80, 80 ) );
+	backgroundGradient.setColorAt( 0.0, baseColor );
+	backgroundGradient.setColorAt( 0.15, lighterColor( baseColor, 75 ) );
+	backgroundGradient.setColorAt( 0.5, lighterColor( baseColor, 200 ) );
+	backgroundGradient.setColorAt( 0.85, lighterColor( baseColor, 75 ) );
+	backgroundGradient.setColorAt( 1.0, baseColor );
 
 	p->setPen( Qt::NoPen );
 	p->setBrush( backgroundGradient );

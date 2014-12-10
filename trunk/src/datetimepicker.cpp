@@ -391,26 +391,40 @@ DateTimePickerPrivate::drawWindow( QPainter * p, const QStyleOption & opt )
 	int yTop = currentItemY - windowOffset;
 	int yBottom = yTop + windowMiddleHeight * 2;
 
-	p->setPen( QColor( 130, 130, 140, alpha2 ) );
+	const QColor baseColor = q->palette().color( QPalette::Dark );
+
+	QColor c1 = baseColor;
+	c1.setAlpha( alpha2 );
+	p->setPen( c1 );
 
 	p->drawLine( 0, yTop, opt.rect.width(), yTop );
 	p->drawLine( 0, yBottom, opt.rect.width(), yBottom );
 
-	p->setPen( QColor( 240, 240, 250, alpha2 ) );
+	QColor c2 = lighterColor( baseColor, 110 );
+	c2.setAlpha( alpha2 );
+	p->setPen( c2 );
 
 	p->drawLine( 0, yTop + 1, opt.rect.width(), yTop + 2 );
 
 	QLinearGradient g( QPointF( 0.0, 0.0 ), QPointF( 0.0, 1.0 ) );
 	g.setCoordinateMode( QGradient::ObjectBoundingMode );
-	g.setColorAt( 0.0, QColor( 225, 225, 240, alpha ) );
-	g.setColorAt( 1.0, QColor( 180, 190, 220, alpha ) );
+
+	QColor c3 = lighterColor( baseColor, 95 );
+	c3.setAlpha( alpha );
+	g.setColorAt( 0.0, c3 );
+
+	QColor c4 = lighterColor( baseColor, 50 );
+	c4.setAlpha( alpha );
+	g.setColorAt( 1.0, c4 );
 
 	p->setPen( Qt::NoPen );
 	p->setBrush( g );
 
 	p->drawRect( 0, yTop + 2, opt.rect.width(), windowMiddleHeight - 2 );
 
-	p->setBrush( QColor( 165, 175, 205, alpha ) );
+	QColor c5 = lighterColor( baseColor, 35 );
+	c5.setAlpha( alpha );
+	p->setBrush( c5 );
 	p->drawRect( 0, yTop + windowMiddleHeight,
 		opt.rect.width(), windowMiddleHeight );
 }
@@ -1084,7 +1098,8 @@ DateTimePicker::paintEvent( QPaintEvent * )
 	{
 		const QRect r( x, 0, d->sections.at( i ).sectionWidth, d->widgetHeight );
 
-		drawCylinder( &p, r, ( i == 0 ), ( i == d->sections.size() - 1 ) );
+		drawCylinder( &p, r, palette().color( QPalette::Dark ),
+			( i == 0 ), ( i == d->sections.size() - 1 ) );
 
 		d->drawSectionItems( i, &p, opt );
 

@@ -17,4 +17,5 @@ SUBDIRS = picker \
           toolbar \
           stepper \
           pageview \
-          slider
+          slider \
+          progressbar

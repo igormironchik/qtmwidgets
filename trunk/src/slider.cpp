@@ -265,6 +265,7 @@ Slider::setGrooveHeight( int h )
 	{
 		d->grooveHeight = h;
 
+		updateGeometry();
 		update();
 	}
 }

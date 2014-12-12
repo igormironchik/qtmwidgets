@@ -32,6 +32,7 @@
 #include "progressbar.hpp"
 
 // Qt include.
+#include <QPainter>
 #ifndef QT_NO_ACCESSIBILITY
 #include <QAccessible>
 #endif
@@ -89,6 +90,12 @@ ProgressBarPrivate::init()
 {
 	highlightColor = q->palette().color( QPalette::Highlight );
 	grooveColor = q->palette().color( QPalette::Dark );
+
+	QSizePolicy sp( QSizePolicy::Expanding, QSizePolicy::Fixed );
+	if( orientation == Qt::Vertical )
+		sp.transpose();
+
+	q->setSizePolicy( sp );
 }
 
 bool
@@ -315,7 +322,47 @@ ProgressBar::setOrientation( Qt::Orientation orientation )
 void
 ProgressBar::paintEvent( QPaintEvent * )
 {
+	QPainter p( this );
 
+	d->lastPaintedValue = d->value;
+
+	if( d->value >= d->minimum && d->value <= d->maximum )
+	{
+		const QRect r = rect();
+
+		const int offset = (qreal) d->value / (qreal) ( d->maximum - d->minimum ) *
+			( d->orientation == Qt::Horizontal ? r.width() : r.height() );
+
+		const int x = ( ( d->orientation == Qt::Horizontal && d->invertedAppearance ) ?
+			r.x() + r.width() - offset - 1 : 0 );
+		const int y = ( ( d->orientation == Qt::Vertical && d->invertedAppearance ) ?
+			r.y() + r.height() - offset - 1 : 0 );
+		const int width = ( d->orientation == Qt::Horizontal ?
+			offset : d->grooveHeight );
+		const int height = ( d->orientation == Qt::Horizontal ?
+			d->grooveHeight : offset );
+
+		const QRect highlightedRect( x, y, width, height );
+		const QRect baseRect = r.adjusted(
+			( d->orientation == Qt::Horizontal && !d->invertedAppearance ?
+				  width : 0 ),
+			( d->orientation == Qt::Vertical && !d->invertedAppearance ?
+				  height : 0 ),
+			( d->orientation == Qt::Horizontal && d->invertedAppearance ?
+				  -width : 0 ),
+			( d->orientation == Qt::Vertical && d->invertedAppearance ?
+				  -height : 0 ) );
+
+		p.setPen( d->grooveColor );
+		p.setBrush( d->grooveColor );
+
+		p.drawRect( baseRect );
+
+		p.setPen( d->highlightColor );
+		p.setBrush( d->highlightColor );
+
+		p.drawRect( highlightedRect );
+	}
 }
 
 } /* namespace QtMWidgets */

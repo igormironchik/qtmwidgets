@@ -99,20 +99,13 @@ ProgressBarPrivate::repaintRequired() const
 
 	const int valueDifference = qAbs( value - lastPaintedValue );
 
-	int distance = 0;
-
-	if( minimum <= 0 && maximum <= 0 )
-		distance = qAbs( minimum - maximum );
-	else
-		distance = maximum - minimum;
-
 	const int grooveBlock = ( orientation == Qt::Horizontal ? q->rect().width() :
 		q->rect().height() );
 
 	// This expression is basically
-	// ( valueDifference / 1 > distance / grooveBlock )
+	// ( valueDifference / 1 > ( maximum - minimum ) / grooveBlock )
 	// transformed to avoid integer division.
-	return ( valueDifference * grooveBlock > distance );
+	return ( valueDifference * grooveBlock > ( maximum - minimum ) );
 }
 
 

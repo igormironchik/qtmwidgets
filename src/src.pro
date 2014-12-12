@@ -39,7 +39,8 @@ HEADERS += private/drawing.hpp \
            stepper.hpp \
            toolbar.hpp \
            pageview.hpp \
-           pagecontrol.hpp
+           pagecontrol.hpp \
+           progressbar.hpp
 
 SOURCES += private/drawing.cpp \
            private/datetimeparser.cpp \
@@ -67,4 +68,5 @@ SOURCES += private/drawing.cpp \
            stepper.cpp \
            toolbar.cpp \
            pageview.cpp \
-           pagecontrol.cpp
+           pagecontrol.cpp \
+           progressbar.cpp

@@ -128,7 +128,7 @@ class ProgressBar
 		\property grooveHeight
 		\brief Height for horizontal (width for vertical) of the groove.
 
-		By default, this property is 2 px.
+		By default, this property is 3 px.
 	*/
 	Q_PROPERTY( int grooveHeight READ grooveHeight WRITE setGrooveHeight )
 	/*!
@@ -209,6 +209,9 @@ public slots:
 
 protected:
 	virtual void paintEvent( QPaintEvent * );
+
+private slots:
+	void _q_animation( const QVariant & value );
 
 private:
 	Q_DISABLE_COPY( ProgressBar )

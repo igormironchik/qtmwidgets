@@ -33,6 +33,7 @@
 
 // Qt include.
 #include <QPainter>
+#include <QVariantAnimation>
 #ifndef QT_NO_ACCESSIBILITY
 #include <QAccessible>
 #endif
@@ -54,7 +55,9 @@ public:
 		,	lastPaintedValue( -1 )
 		,	orientation( Qt::Horizontal )
 		,	invertedAppearance( false )
-		,	grooveHeight( 2 )
+		,	grooveHeight( 3 )
+		,	animation( 0 )
+		,	animate( true )
 	{
 	}
 
@@ -62,6 +65,8 @@ public:
 	void init();
 	//! \return Is repaint required?
 	bool repaintRequired() const;
+	//! \return Groove rect.
+	QRect grooveRect() const;
 
 	//! Parent;
 	ProgressBar * q;
@@ -83,6 +88,12 @@ public:
 	QColor highlightColor;
 	//! Groove color.
 	QColor grooveColor;
+	//! Color used for painting animation.
+	QColor animationColor;
+	//! Busy animation.
+	QVariantAnimation * animation;
+	//! Need paint animation?
+	bool animate;
 }; // class ProgressBarPrivate
 
 void
@@ -90,12 +101,20 @@ ProgressBarPrivate::init()
 {
 	highlightColor = q->palette().color( QPalette::Highlight );
 	grooveColor = q->palette().color( QPalette::Dark );
+	animationColor = q->palette().color( QPalette::Base );
 
 	QSizePolicy sp( QSizePolicy::Expanding, QSizePolicy::Fixed );
 	if( orientation == Qt::Vertical )
 		sp.transpose();
 
 	q->setSizePolicy( sp );
+
+	animation = new QVariantAnimation( q );
+	animation->setDuration( 500 );
+	animation->setLoopCount( -1 );
+	animation->setStartValue( 0.0 );
+	animation->setEndValue( 1.0 );
+	animation->start();
 }
 
 bool
@@ -106,13 +125,19 @@ ProgressBarPrivate::repaintRequired() const
 
 	const int valueDifference = qAbs( value - lastPaintedValue );
 
-	const int grooveBlock = ( orientation == Qt::Horizontal ? q->rect().width() :
-		q->rect().height() );
+	const int grooveBlock = ( orientation == Qt::Horizontal ? grooveRect().width() :
+		grooveRect().height() );
 
 	// This expression is basically
 	// ( valueDifference / 1 > ( maximum - minimum ) / grooveBlock )
 	// transformed to avoid integer division.
 	return ( valueDifference * grooveBlock > ( maximum - minimum ) );
+}
+
+QRect
+ProgressBarPrivate::grooveRect() const
+{
+	return q->rect();
 }
 
 
@@ -125,6 +150,9 @@ ProgressBar::ProgressBar( QWidget * parent )
 	,	d( new ProgressBarPrivate( this ) )
 {
 	d->init();
+
+	connect( d->animation, &QVariantAnimation::valueChanged,
+		this, &ProgressBar::_q_animation );
 }
 
 ProgressBar::~ProgressBar()
@@ -249,6 +277,10 @@ ProgressBar::reset()
 	if( d->minimum == INT_MIN )
 		d->value = INT_MIN;
 
+	d->animate = true;
+
+	d->animation->start();
+
 	repaint();
 }
 
@@ -282,6 +314,13 @@ ProgressBar::setMaximum( int maximum )
 void
 ProgressBar::setValue( int value )
 {
+	if( value == d->minimum - 1 )
+	{
+		reset();
+
+		return;
+	}
+
 	if( d->value == value
 		|| ( ( value > d->maximum || value < d->minimum )
 			&& ( d->maximum != 0 || d->minimum != 0 ) ) )
@@ -301,6 +340,15 @@ ProgressBar::setValue( int value )
 
 	if( d->repaintRequired() )
 		repaint();
+
+	if( d->animate )
+	{
+		d->animate = false;
+
+		d->animation->stop();
+
+		repaint();
+	}
 }
 
 void
@@ -324,11 +372,11 @@ ProgressBar::paintEvent( QPaintEvent * )
 {
 	QPainter p( this );
 
-	d->lastPaintedValue = d->value;
+	const QRect r = d->grooveRect();
 
-	if( d->value >= d->minimum && d->value <= d->maximum )
+	if( !d->animate )
 	{
-		const QRect r = rect();
+		d->lastPaintedValue = d->value;
 
 		const int offset = (qreal) d->value / (qreal) ( d->maximum - d->minimum ) *
 			( d->orientation == Qt::Horizontal ? r.width() : r.height() );
@@ -363,6 +411,45 @@ ProgressBar::paintEvent( QPaintEvent * )
 
 		p.drawRect( highlightedRect );
 	}
+	else
+	{
+		const double value = d->animation->currentValue().toDouble();
+
+		p.setPen( d->highlightColor );
+		p.setBrush( d->highlightColor );
+
+		p.drawRect( r );
+
+		const QRect a1(
+			( d->orientation == Qt::Horizontal ?
+				r.x() + r.width() * value / 3.0 + d->grooveHeight :
+				r.x() ),
+			( d->orientation == Qt::Horizontal ? r.y() :
+				r.y() + r.height() * value / 3.0 + d->grooveHeight ),
+			d->grooveHeight, d->grooveHeight );
+
+		const QRect a2(
+			( d->orientation == Qt::Horizontal ?
+				r.x() + r.width() * value / 1.5 + r.width() / 3 :
+				r.x() ),
+			( d->orientation == Qt::Horizontal ? r.y() :
+				r.y() + r.height() * value / 1.5 + r.height() / 3 ),
+			d->grooveHeight, d->grooveHeight );
+
+		p.setPen( d->animationColor );
+		p.setBrush( d->animationColor );
+
+		p.drawRect( a1 );
+		p.drawRect( a2 );
+	}
+}
+
+void
+ProgressBar::_q_animation( const QVariant & value )
+{
+	Q_UNUSED( value )
+
+	update();
 }
 
 } /* namespace QtMWidgets */

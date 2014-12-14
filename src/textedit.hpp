@@ -78,7 +78,8 @@ private:
 class TextEditPrivate;
 
 /*!
-
+	\brief The TextEdit class provides a widget that is used to edit and
+	display both plain and rich text.
 */
 class TextEdit
 	:	public ScrollArea

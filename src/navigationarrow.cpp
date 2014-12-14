@@ -109,6 +109,24 @@ NavigationArrow::setDirection( Direction direct )
 	{
 		d->direction = direct;
 
+		updateGeometry();
+		update();
+	}
+}
+
+const QColor &
+NavigationArrow::color() const
+{
+	return d->baseColor;
+}
+
+void
+NavigationArrow::setColor( const QColor & color )
+{
+	if( d->baseColor != color )
+	{
+		d->baseColor = color;
+
 		update();
 	}
 }

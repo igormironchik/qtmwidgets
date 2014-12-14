@@ -63,6 +63,14 @@ class NavigationArrow
 		Direction of the arrow.
 	*/
 	Q_PROPERTY( Direction direction READ direction WRITE setDirection )
+	/*!
+		\property color
+
+		Color of the arrow.
+
+		By default, this property is QPalette::Highlight.
+	*/
+	Q_PROPERTY( QColor color READ color WRITE setColor )
 
 signals:
 	/*!
@@ -91,6 +99,11 @@ public:
 	Direction direction() const;
 	//! Set direction of the arrow.
 	void setDirection( Direction direct );
+
+	//! \return Color.
+	const QColor & color() const;
+	//! Set color.
+	void setColor( const QColor & color );
 
 	virtual QSize minimumSizeHint() const;
 	virtual QSize sizeHint() const;

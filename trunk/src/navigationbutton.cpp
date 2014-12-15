@@ -109,8 +109,10 @@ NavigationButton::NavigationButton( Direction direction, QWidget * parent )
 {
 	d->init();
 
-	connect( this, SIGNAL( pressed() ), this, SLOT( _q_pressed() ) );
-	connect( this, SIGNAL( released() ), this, SLOT( _q_released() ) );
+	connect( this, &QAbstractButton::pressed,
+		this, &NavigationButton::_q_pressed );
+	connect( this, &QAbstractButton::released,
+		this, &NavigationButton::_q_released );
 }
 
 NavigationButton::NavigationButton( Direction direction, const QString & text,
@@ -122,8 +124,10 @@ NavigationButton::NavigationButton( Direction direction, const QString & text,
 
 	setText( text );
 
-	connect( this, SIGNAL( pressed() ), this, SLOT( _q_pressed() ) );
-	connect( this, SIGNAL( released() ), this, SLOT( _q_released() ) );
+	connect( this, &QAbstractButton::pressed,
+		this, &NavigationButton::_q_pressed );
+	connect( this, &QAbstractButton::released,
+		this, &NavigationButton::_q_released );
 }
 
 NavigationButton::~NavigationButton()
@@ -181,6 +185,23 @@ NavigationButton::setTextColor( const QColor & c )
 	}
 }
 
+const QColor &
+NavigationButton::arrowColor() const
+{
+	return d->baseColor;
+}
+
+void
+NavigationButton::setArrowColor( const QColor & c )
+{
+	if( d->baseColor != c )
+	{
+		d->baseColor= c;
+
+		update();
+	}
+}
+
 QSize
 NavigationButton::minimumSizeHint() const
 {
@@ -211,25 +232,34 @@ NavigationButton::paintEvent( QPaintEvent * )
 
 	int flags = Qt::TextSingleLine | Qt::AlignVCenter;
 
-	if( d->direction == Left )
+	switch( d->direction )
 	{
-		arrowRect.setRect( r.width() - arrowWidth, r.y() + delta,
-			arrowWidth, arrowHeight );
+		case Left :
+		{
+			arrowRect.setRect( r.width() - arrowWidth, r.y() + delta,
+				arrowWidth, arrowHeight );
 
-		textRect.setRect( r.x() + arrowWidth + offset, r.y(),
-			r.width() - arrowWidth - offset, r.height() );
+			textRect.setRect( r.x() + arrowWidth + offset, r.y(),
+				r.width() - arrowWidth - offset, r.height() );
 
-		flags |= Qt::AlignLeft;
-	}
-	else
-	{
-		arrowRect.setRect( r.x() + r.width() - arrowWidth, r.y() + delta,
-			arrowWidth, arrowHeight );
+			flags |= Qt::AlignLeft;
+		}
+			break;
 
-		textRect.setRect( r.x(), r.y(),
-			r.width() - arrowWidth - offset, r.height() );
+		case Right :
+		{
+			arrowRect.setRect( r.x() + r.width() - arrowWidth, r.y() + delta,
+				arrowWidth, arrowHeight );
 
-		flags |= Qt::AlignRight;
+			textRect.setRect( r.x(), r.y(),
+				r.width() - arrowWidth - offset, r.height() );
+
+			flags |= Qt::AlignRight;
+		}
+			break;
+
+		default :
+			break;
 	}
 
 	QStyleOption opt;

@@ -72,6 +72,12 @@ class NavigationButton
 		Color of the text.
 	*/
 	Q_PROPERTY( QColor textColor READ textColor WRITE setTextColor )
+	/*!
+		\property arrowColor
+
+		Color of the arrow.
+	*/
+	Q_PROPERTY( QColor arrowColor READ arrowColor WRITE setArrowColor )
 
 public:
 	//! Direction of the button.
@@ -104,6 +110,11 @@ public:
 	const QColor & textColor() const;
 	//! Set text color.
 	void setTextColor( const QColor & c );
+
+	//! \return Arrow color.
+	const QColor & arrowColor() const;
+	//! Set arrow color.
+	void setArrowColor( const QColor & c );
 
 	virtual QSize minimumSizeHint() const;
 	virtual QSize sizeHint() const;

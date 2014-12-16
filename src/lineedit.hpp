@@ -68,6 +68,8 @@ private slots:
 	void _q_cursorShifterPosChanged( const QPoint & pos );
 
 private:
+	friend class LineEditPrivate;
+
 	Q_DISABLE_COPY( LineEdit )
 
 	QScopedPointer< LineEditPrivate > d;

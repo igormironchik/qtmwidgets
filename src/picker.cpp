@@ -463,8 +463,8 @@ Picker::Picker( QWidget * parent, Qt::WindowFlags f )
 Picker::~Picker()
 {
 	try {
-		disconnect( d->model, SIGNAL( destroyed() ),
-			this, SLOT( _q_modelDestroyed() ) );
+		disconnect( d->model, &QAbstractItemModel::destroyed,
+			this, &Picker::_q_modelDestroyed );
 	}
 	catch( ... )
 	{
@@ -532,22 +532,22 @@ Picker::setModel( QAbstractItemModel * model )
 
 	if( d->model )
 	{
-		disconnect( d->model, SIGNAL( dataChanged( QModelIndex, QModelIndex ) ),
-			this, SLOT( _q_dataChanged( QModelIndex, QModelIndex ) ) );
-		disconnect( d->model, SIGNAL( rowsAboutToBeInserted( QModelIndex, int, int ) ),
-			this, SLOT( _q_updateIndexBeforeChange() ) );
-		disconnect( d->model, SIGNAL( rowsInserted( QModelIndex, int, int ) ),
-			this, SLOT( _q_rowsInserted( QModelIndex, int, int ) ) );
-		disconnect( d->model, SIGNAL( rowsAboutToBeRemoved( QModelIndex, int, int ) ),
-			this, SLOT( _q_updateIndexBeforeChange() ) );
-		disconnect( d->model, SIGNAL( rowsRemoved( QModelIndex, int, int ) ),
-			this, SLOT( _q_rowsRemoved( QModelIndex, int, int ) ) );
-		disconnect( d->model, SIGNAL( destroyed() ),
-			this, SLOT( _q_modelDestroyed() ) );
-		disconnect( d->model, SIGNAL( modelAboutToBeReset() ),
-			this, SLOT( _q_updateIndexBeforeChange() ) );
-		disconnect( d->model, SIGNAL( modelReset() ),
-			this, SLOT( _q_modelReset() ) );
+		disconnect( d->model, &QAbstractItemModel::dataChanged,
+			this, &Picker::_q_dataChanged );
+		disconnect( d->model, &QAbstractItemModel::rowsAboutToBeInserted,
+			this, &Picker::_q_updateIndexBeforeChange );
+		disconnect( d->model, &QAbstractItemModel::rowsInserted,
+			this, &Picker::_q_rowsInserted );
+		disconnect( d->model, &QAbstractItemModel::rowsAboutToBeRemoved,
+			this, &Picker::_q_updateIndexBeforeChange );
+		disconnect( d->model, &QAbstractItemModel::rowsRemoved,
+			this, &Picker::_q_rowsRemoved );
+		disconnect( d->model, &QAbstractItemModel::destroyed,
+			this, &Picker::_q_modelDestroyed );
+		disconnect( d->model, &QAbstractItemModel::modelAboutToBeReset,
+			this, &Picker::_q_updateIndexBeforeChange );
+		disconnect( d->model, &QAbstractItemModel::modelReset,
+			this, &Picker::_q_modelReset );
 
 		if( d->model->QObject::parent() == this )
 			delete d->model;
@@ -555,22 +555,22 @@ Picker::setModel( QAbstractItemModel * model )
 
 	d->model = model;
 
-	connect( model, SIGNAL( dataChanged( QModelIndex, QModelIndex ) ),
-		this, SLOT( _q_dataChanged( QModelIndex, QModelIndex ) ) );
-	connect( model, SIGNAL( rowsAboutToBeInserted( QModelIndex, int, int ) ),
-		this, SLOT( _q_updateIndexBeforeChange() ) );
-	connect( model, SIGNAL( rowsInserted( QModelIndex, int, int ) ),
-		this, SLOT( _q_rowsInserted( QModelIndex, int, int ) ) );
-	connect( model, SIGNAL( rowsAboutToBeRemoved( QModelIndex, int, int ) ),
-		this, SLOT( _q_updateIndexBeforeChange() ) );
-	connect( model, SIGNAL( rowsRemoved( QModelIndex, int, int ) ),
-		this, SLOT( _q_rowsRemoved( QModelIndex, int, int ) ) );
-	connect( model, SIGNAL( destroyed() ),
-		this, SLOT( _q_modelDestroyed() ) );
-	connect( model, SIGNAL( modelAboutToBeReset() ),
-		this, SLOT( _q_updateIndexBeforeChange() ) );
-	connect( model, SIGNAL( modelReset() ),
-		this, SLOT( _q_modelReset() ) );
+	connect( model, &QAbstractItemModel::dataChanged,
+		this, &Picker::_q_dataChanged );
+	connect( model, &QAbstractItemModel::rowsAboutToBeInserted,
+		this, &Picker::_q_updateIndexBeforeChange );
+	connect( model, &QAbstractItemModel::rowsInserted,
+		this, &Picker::_q_rowsInserted );
+	connect( model, &QAbstractItemModel::rowsAboutToBeRemoved,
+		this, &Picker::_q_updateIndexBeforeChange );
+	connect( model, &QAbstractItemModel::rowsRemoved,
+		this, &Picker::_q_rowsRemoved );
+	connect( model, &QAbstractItemModel::destroyed,
+		this, &Picker::_q_modelDestroyed );
+	connect( model, &QAbstractItemModel::modelAboutToBeReset,
+		this, &Picker::_q_updateIndexBeforeChange );
+	connect( model, &QAbstractItemModel::modelReset,
+		this, &Picker::_q_modelReset );
 
 	bool currentReset = false;
 

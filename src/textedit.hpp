@@ -309,6 +309,8 @@ private slots:
 	void _q_cursorShifterPosChanged( const QPoint & pos );
 
 private:
+	friend class TextEditPrivate;
+
 	Q_DISABLE_COPY( TextEdit )
 
 	inline TextEditPrivate * d_func()

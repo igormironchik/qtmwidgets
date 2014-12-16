@@ -61,8 +61,8 @@ LineEditPrivate::init()
 {
 	shifter = new CursorShifter( q );
 
-	QObject::connect( shifter, SIGNAL( posChanged( const QPoint & ) ),
-		q, SLOT( _q_cursorShifterPosChanged( const QPoint & ) ) );
+	QObject::connect( shifter, &CursorShifter::posChanged,
+		q, &LineEdit::_q_cursorShifterPosChanged );
 }
 
 

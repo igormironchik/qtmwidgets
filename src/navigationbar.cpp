@@ -136,10 +136,10 @@ NavigationBarPrivate::init()
 	title = new TextLabel( q );
 	title->setColor( q->palette().color( QPalette::Highlight ) );
 
-	QObject::connect( left, SIGNAL( clicked() ),
-		q, SLOT( showPreviousScreen() ) );
-	QObject::connect( right, SIGNAL( clicked() ),
-		q, SLOT( showNextScreen() ) );
+	QObject::connect( left, &NavigationButton::clicked,
+		q, &NavigationBar::showPreviousScreen );
+	QObject::connect( right, &NavigationButton::clicked,
+		q, &NavigationBar::showNextScreen );
 
 	QTextOption opt = title->textOption();
 	opt.setAlignment( Qt::AlignCenter );

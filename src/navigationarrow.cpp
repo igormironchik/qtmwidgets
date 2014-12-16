@@ -62,8 +62,8 @@ public:
 		color = baseColor;
 		timer = new QTimer( q );
 
-		QObject::connect( timer, SIGNAL( timeout() ),
-			q, SLOT( _q_timer() ) );
+		QObject::connect( timer, &QTimer::timeout,
+			q, &NavigationArrow::_q_timer );
 
 		q->setSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed );
 

@@ -34,6 +34,7 @@
 // Qt include.
 #include <QWidget>
 #include <QScopedPointer>
+#include <QAction>
 
 
 namespace QtMWidgets {
@@ -192,6 +193,37 @@ public:
 	*/
 	QAction * addAction( const QIcon & icon,
 		const QObject * receiver, const char * member );
+	/*!
+		Creates a new action with the given \a icon. This
+		action is added to the end of the toolbar. The action's
+		QAction::triggered() signal is connected to \a
+		method in \a receiver.
+	*/
+	template <typename Func1>
+	inline QAction * addAction( const QIcon & icon,
+		const typename QtPrivate::FunctionPointer<Func1>::Object * receiver,
+		Func1 slot )
+	{
+		QAction * action = new QAction( icon, QString(), this );
+		QObject::connect( action, &QAction::triggered, receiver, slot );
+		addAction( action );
+		return action;
+	}
+
+	/*!
+		Creates a new action with the given \a icon. This
+		action is added to the end of the toolbar. The action's
+		QAction::triggered() signal is connected to \a
+		functor.
+	*/
+	template <typename Func1>
+	inline QAction * addAction( const QIcon & icon, Func1 functor )
+	{
+		QAction * action = new QAction( icon, QString(), this );
+		QObject::connect( action, &QAction::triggered, functor );
+		addAction( action );
+		return action;
+	}
 
 	/*!
 		Returns the geometry of the toolbar item associated with the given

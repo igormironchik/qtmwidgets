@@ -35,7 +35,6 @@
 
 // Qt include.
 #include <QActionEvent>
-#include <QAction>
 #include <QLayout>
 #include <QMouseEvent>
 #include <QPainter>

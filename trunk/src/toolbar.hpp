@@ -201,7 +201,7 @@ public:
 	*/
 	template <typename Func1>
 	inline QAction * addAction( const QIcon & icon,
-		const typename QtPrivate::FunctionPointer<Func1>::Object * receiver,
+		const typename QtPrivate::FunctionPointer< Func1 >::Object * receiver,
 		Func1 slot )
 	{
 		QAction * action = new QAction( icon, QString(), this );

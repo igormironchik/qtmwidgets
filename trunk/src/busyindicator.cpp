@@ -74,8 +74,8 @@ BusyIndicatorPrivate::init()
 	animation->setDuration( 1000 );
 	animation->setLoopCount( -1 );
 
-	QObject::connect( animation, SIGNAL( valueChanged( const QVariant & ) ),
-		q, SLOT( _q_update( const QVariant & ) ) );
+	QObject::connect( animation, &QVariantAnimation::valueChanged,
+		q, &BusyIndicator::_q_update );
 
 	color = q->palette().color( QPalette::Highlight );
 

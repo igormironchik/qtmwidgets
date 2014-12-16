@@ -267,13 +267,13 @@ TextEditPrivate::init()
 	cursorFlashTimer = new QTimer( q );
 	cursorFlashTimer->start( QApplication::cursorFlashTime() / 2 );
 
-	QObject::connect( cursorFlashTimer, SIGNAL( timeout() ),
-		q, SLOT( _q_cursorFlashTimer() ) );
+	QObject::connect( cursorFlashTimer, &QTimer::timeout,
+		q, &TextEdit::_q_cursorFlashTimer );
 
 	shifter = new CursorShifter( q );
 
-	QObject::connect( shifter, SIGNAL( posChanged( const QPoint & ) ),
-		q, SLOT( _q_cursorShifterPosChanged( const QPoint & ) ) );
+	QObject::connect( shifter, &CursorShifter::posChanged,
+		q, &TextEdit::_q_cursorShifterPosChanged );
 }
 
 QRectF

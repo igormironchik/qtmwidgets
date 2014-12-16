@@ -99,6 +99,8 @@ private slots:
 	void _q_update( const QVariant & );
 
 private:
+	friend class BusyIndicatorPrivate;
+
 	Q_DISABLE_COPY( BusyIndicator )
 
 	QScopedPointer< BusyIndicatorPrivate > d;

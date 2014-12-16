@@ -121,6 +121,8 @@ private slots:
 	void _q_timer();
 
 private:
+	friend class NavigationArrowPrivate;
+
 	Q_DISABLE_COPY( NavigationArrow )
 
 	QScopedPointer< NavigationArrowPrivate > d;

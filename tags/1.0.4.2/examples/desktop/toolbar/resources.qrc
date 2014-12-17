@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>img/address-book-new.png</file>
+        <file>img/application-exit.png</file>
+        <file>img/archive-extract.png</file>
+        <file>img/bookmark-new.png</file>
+        <file>img/call-start.png</file>
+    </qresource>
+</RCC>

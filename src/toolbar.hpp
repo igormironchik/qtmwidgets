@@ -197,7 +197,7 @@ public:
 		Creates a new action with the given \a icon. This
 		action is added to the end of the toolbar. The action's
 		QAction::triggered() signal is connected to \a
-		method in \a receiver.
+		slot in \a receiver.
 	*/
 	template <typename Func1>
 	inline QAction * addAction( const QIcon & icon,

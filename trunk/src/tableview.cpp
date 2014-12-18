@@ -38,6 +38,8 @@
 #include <QVBoxLayout>
 #include <QPainter>
 #include <QSpacerItem>
+#include <QMouseEvent>
+#include <QPainter>
 
 
 namespace QtMWidgets {
@@ -375,32 +377,28 @@ TableViewCellPrivate::init()
 	q->setBackgroundRole( QPalette::Base );
 	q->setAutoFillBackground( true );
 
+	highlightColor = q->palette().color( QPalette::Highlight );
+	highlightColor.setAlpha( 75 );
+
+
 	layout = new TableViewCellLayout( q );
 	layout->setContentsMargins( 3, 3, 3, 3 );
 
 	imageLabel = new MinimumSizeLabel( q );
-	imageLabel->setBackgroundRole( QPalette::Base );
-	imageLabel->setAutoFillBackground( true );
 	imageLabel->setAlignment( Qt::AlignCenter );
 	imageLabel->setWordWrap( true );
 	layout->setImageLabel( imageLabel );
 
 	textLabel = new TextLabel( q );
-	textLabel->setBackgroundRole( QPalette::Base );
-	textLabel->setAutoFillBackground( true );
 	layout->setTextLabel( textLabel );
 
 	detailedTextLabel = new TextLabel( q );
-	detailedTextLabel->setBackgroundRole( QPalette::Base );
-	detailedTextLabel->setAutoFillBackground( true );
 	QFont f = detailedTextLabel->font();
 	f.setPointSize( qMax( f.pointSize() - 1, 5 ) );
 	detailedTextLabel->setFont( f );
 	layout->setDetailedTextLabel( detailedTextLabel );
 
 	accessoryWidget = new QWidget( q );
-	accessoryWidget->setBackgroundRole( QPalette::Base );
-	accessoryWidget->setAutoFillBackground( true );
 	layout->setAccessoryWidget( accessoryWidget );
 }
 
@@ -502,6 +500,44 @@ QSize
 TableViewCell::sizeHint() const
 {
 	return minimumSizeHint();
+}
+
+void
+TableViewCell::paintEvent( QPaintEvent * e )
+{
+	QWidget::paintEvent( e );
+
+	if( d->clicked )
+	{
+		QPainter p( this );
+
+		p.setPen( d->highlightColor );
+		p.setBrush( d->highlightColor );
+
+		p.drawRect( rect().adjusted( 0, 0, -1, -1 ) );
+	}
+}
+
+void
+TableViewCell::mousePressEvent( QMouseEvent * e )
+{
+	if( e->button() == Qt::LeftButton )
+	{
+		d->clicked = true;
+
+		update();
+	}
+}
+
+void
+TableViewCell::mouseReleaseEvent( QMouseEvent * )
+{
+	if( d->clicked )
+	{
+		d->clicked = false;
+
+		update();
+	}
 }
 
 

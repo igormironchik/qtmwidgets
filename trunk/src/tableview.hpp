@@ -101,6 +101,11 @@ public:
 	virtual QSize sizeHint() const;
 
 protected:
+	virtual void paintEvent( QPaintEvent * e );
+	virtual void mousePressEvent( QMouseEvent * e );
+	virtual void mouseReleaseEvent( QMouseEvent * e );
+
+protected:
 	explicit TableViewCell( TableViewCellPrivate * dd, QWidget * parent = 0 );
 
 	friend class TableViewCellPrivate;

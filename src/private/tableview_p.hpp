@@ -61,6 +61,7 @@ public:
 		,	detailedTextLabel( 0 )
 		,	accessoryWidget( 0 )
 		,	layout( 0 )
+		,	clicked( false )
 	{
 	}
 
@@ -76,6 +77,8 @@ public:
 	TextLabel * detailedTextLabel;
 	QWidget * accessoryWidget;
 	TableViewCellLayout * layout;
+	QColor highlightColor;
+	bool clicked;
 }; // class TableViewCellPrivate
 
 class RowsSeparator;

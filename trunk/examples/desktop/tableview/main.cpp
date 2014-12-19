@@ -49,6 +49,7 @@ public:
 		QVBoxLayout * l = new QVBoxLayout( this );
 		QtMWidgets::TableView * view =
 			new QtMWidgets::TableView( this );
+		view->setHighlightCellOnClick( true );
 
 		QtMWidgets::TableViewSection * ringerAndAlerts =
 			new QtMWidgets::TableViewSection( view );

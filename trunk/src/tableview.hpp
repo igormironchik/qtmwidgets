@@ -63,23 +63,21 @@ class TableViewCellPrivate;
 
 	Accessory widget can be any QWidget. For example, you can
 	set it to Switch.
-
-	\note If you want to have eccessory widget expanded to whole
-	cell then you should change text label's size policy to
-	QSizePolicy::Fixed, and maybe you will want to set layout
-	spacing to 0. For example:
-
-	\code
-	TableViewCell * cell = new TableViewCell();
-	cell->textLabel()->setSizePolicy( QSizePolicy::Fixed,
-		QSizePolicy::Fixed );
-	cell->layout()->setSpacing( 0 );
-	\endcode
 */
 class TableViewCell
 	:	public QWidget
 {
 	Q_OBJECT
+
+	/*!
+		\property highlightOnClick
+
+		\brief Enables/disables highlighting of the cell on click.
+
+		By default, this property is false.
+	*/
+	Q_PROPERTY( bool highlightOnClick READ highlightOnClick
+		WRITE setHighlightOnClick )
 
 public:
 	TableViewCell( QWidget * parent = 0 );
@@ -96,6 +94,11 @@ public:
 	QWidget * accessoryWidget() const;
 	//! Set accessory widget.
 	void setAccessoryWidget( QWidget * accessory );
+
+	//! \return Is highlighting of the cell on click enabled?
+	bool highlightOnClick() const;
+	//! Enable/disable highlighting of the cell on click.
+	void setHighlightOnClick( bool on );
 
 	virtual QSize minimumSizeHint() const;
 	virtual QSize sizeHint() const;
@@ -131,6 +134,16 @@ class TableViewSection
 	:	public QWidget
 {
 	Q_OBJECT
+
+	/*!
+		\property highlightCellOnClick
+
+		\brief Enables/disables highlighting of the cell on click.
+
+		By default, this property is false.
+	*/
+	Q_PROPERTY( bool highlightCellOnClick READ highlightCellOnClick
+		WRITE setHighlightCellOnClick )
 
 public:
 	TableViewSection( QWidget * parent = 0 );
@@ -173,6 +186,11 @@ public:
 	//! \return Cell for the given \a index position.
 	TableViewCell * cellAt( int index );
 
+	//! \return Is highlighting of the cell on click enabled?
+	bool highlightCellOnClick() const;
+	//! Enable/disable highlighting of the cell on click.
+	void setHighlightCellOnClick( bool on );
+
 private:
 	friend class TableViewSectionPrivate;
 
@@ -199,6 +217,16 @@ class TableView
 	:	public ScrollArea
 {
 	Q_OBJECT
+
+	/*!
+		\property highlightCellOnClick
+
+		\brief Enables/disables highlighting of the cell on click.
+
+		By default, this property is false.
+	*/
+	Q_PROPERTY( bool highlightCellOnClick READ highlightCellOnClick
+		WRITE setHighlightCellOnClick )
 
 public:
 	TableView( QWidget * parent = 0 );
@@ -235,6 +263,11 @@ public:
 
 	//! \return Section for the given \a index position.
 	TableViewSection * sectionAt( int index );
+
+	//! \return Is highlighting of the cell on click enabled?
+	bool highlightCellOnClick() const;
+	//! Enable/disable highlighting of the cell on click.
+	void setHighlightCellOnClick( bool on );
 
 private:
 	Q_DISABLE_COPY( TableView )

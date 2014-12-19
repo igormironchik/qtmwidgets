@@ -157,11 +157,17 @@ public:
 	/*!
 		Add new cell to the bottom.
 		Parent of the cell will be set to this section.
+
+		\note highlightOnClick property of the \a cell
+		will be overriden.
 	*/
 	void addCell( TableViewCell * cell );
 	/*!
 		Insert new cell at the given position.
 		Parent of the cell will be set to this section.
+
+		\note highlightOnClick property of the \a cell
+		will be overriden.
 	*/
 	void insertCell( int index, TableViewCell * cell );
 
@@ -235,11 +241,17 @@ public:
 	/*!
 		Add new section to the bottom.
 		Parent of the section will be set to this view.
+
+		\note highlightCellOnClick property of the \a section
+		will be overriden.
 	*/
 	void addSection( TableViewSection * section );
 	/*!
 		Insert new section at the given position.
 		Parent of the section will be set to this view.
+
+		\note highlightCellOnClick property of the \a section
+		will be overriden.
 	*/
 	void insertSection( int index, TableViewSection * section );
 

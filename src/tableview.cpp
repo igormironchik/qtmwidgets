@@ -466,6 +466,18 @@ TableViewCell::setAccessoryWidget( QWidget * accessory )
 	updateGeometry();
 }
 
+bool
+TableViewCell::highlightOnClick() const
+{
+	return d->highlightOnClick;
+}
+
+void
+TableViewCell::setHighlightOnClick( bool on )
+{
+	d->highlightOnClick = on;
+}
+
 QSize
 TableViewCell::minimumSizeHint() const
 {
@@ -507,7 +519,7 @@ TableViewCell::paintEvent( QPaintEvent * e )
 {
 	QWidget::paintEvent( e );
 
-	if( d->clicked )
+	if( d->clicked && d->highlightOnClick )
 	{
 		QPainter p( this );
 
@@ -525,7 +537,8 @@ TableViewCell::mousePressEvent( QMouseEvent * e )
 	{
 		d->clicked = true;
 
-		update();
+		if( d->highlightOnClick )
+			update();
 	}
 }
 
@@ -536,7 +549,8 @@ TableViewCell::mouseReleaseEvent( QMouseEvent * )
 	{
 		d->clicked = false;
 
-		update();
+		if( d->highlightOnClick )
+			update();
 	}
 }
 
@@ -665,6 +679,7 @@ TableViewSection::insertCell( int index, TableViewCell * cell )
 		cell->setParent( this );
 	d->layout->insertWidget( actualIndex, cell );
 	d->cells.insert( index, cell );
+	cell->setHighlightOnClick( d->highlightCellOnClick );
 	cell->show();
 }
 
@@ -715,6 +730,24 @@ TableViewSection::cellAt( int index )
 		return d->cells.at( index );
 	else
 		return 0;
+}
+
+bool
+TableViewSection::highlightCellOnClick() const
+{
+	return d->highlightCellOnClick;
+}
+
+void
+TableViewSection::setHighlightCellOnClick( bool on )
+{
+	if( d->highlightCellOnClick != on )
+	{
+		d->highlightCellOnClick = on;
+
+		foreach( TableViewCell * cell, d->cells )
+			cell->setHighlightOnClick( on );
+	}
 }
 
 
@@ -785,6 +818,7 @@ TableView::insertSection( int index, TableViewSection * section )
 		section->setParent( d->widget );
 	d->layout->insertWidget( index, section );
 	d->sections.insert( index, section );
+	section->setHighlightCellOnClick( d->highlightCellOnClick );
 	section->show();
 }
 
@@ -835,6 +869,28 @@ TableView::sectionAt( int index )
 		return d->sections.at( index );
 	else
 		return 0;
+}
+
+bool
+TableView::highlightCellOnClick() const
+{
+	const TableViewPrivate * d = d_func();
+
+	return d->highlightCellOnClick;
+}
+
+void
+TableView::setHighlightCellOnClick( bool on )
+{
+	TableViewPrivate * d = d_func();
+
+	if( d->highlightCellOnClick != on )
+	{
+		d->highlightCellOnClick = on;
+
+		foreach( TableViewSection * sect, d->sections )
+			sect->setHighlightCellOnClick( on );
+	}
 }
 
 } /* namespace QtMWidgets */

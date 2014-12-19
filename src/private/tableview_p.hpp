@@ -62,6 +62,7 @@ public:
 		,	accessoryWidget( 0 )
 		,	layout( 0 )
 		,	clicked( false )
+		,	highlightOnClick( false )
 	{
 	}
 
@@ -79,6 +80,7 @@ public:
 	TableViewCellLayout * layout;
 	QColor highlightColor;
 	bool clicked;
+	bool highlightOnClick;
 }; // class TableViewCellPrivate
 
 class RowsSeparator;
@@ -94,6 +96,7 @@ public:
 		,	header( 0 )
 		,	footer( 0 )
 		,	layout( 0 )
+		,	highlightCellOnClick( false )
 	{
 	}
 
@@ -109,6 +112,7 @@ public:
 	QList< TableViewCell* > cells;
 	QVBoxLayout * layout;
 	QList< RowsSeparator* > separators;
+	bool highlightCellOnClick;
 }; // class TableViewSectionPrivate
 
 
@@ -124,6 +128,7 @@ public:
 		:	ScrollAreaPrivate( parent )
 		,	layout( 0 )
 		,	widget( 0 )
+		,	highlightCellOnClick( false )
 	{
 	}
 
@@ -139,6 +144,7 @@ public:
 	QVBoxLayout * layout;
 	QList< TableViewSection* > sections;
 	QWidget * widget;
+	bool highlightCellOnClick;
 }; // class TableViewPrivate
 
 } /* namespace QtMWidgets */

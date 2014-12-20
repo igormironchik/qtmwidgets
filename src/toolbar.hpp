@@ -107,7 +107,7 @@ class ToolBarPrivate;
 
 /*!
 	The ToolBar class provides a panel that contains a
-	set of controls.
+	set of ToolButton.
 */
 class ToolBar
 	:	public QWidget
@@ -130,6 +130,21 @@ class ToolBar
 	*/
 	Q_PROPERTY( QSize iconSize READ iconSize WRITE setIconSize
 		NOTIFY iconSizeChanged )
+	/*!
+		\property alignment
+
+		\brief Alignment of the tool bar.
+
+		alignment has the meaning only if width (height) of the
+		tool bar is greater then space needed to place all tool
+		buttons. Only Qt::AlignLeft, Qt::AlignRight, Qt::AlignHCenter,
+		Qt::AlignVCenter, Qt::AlignCenter, Qt::AlignTop, Qt::AlignBottom
+		has the meaning, all other values are ignored.
+
+		By default, this property is Qt::AlignLeft.
+	*/
+	Q_PROPERTY( Qt::Alignment alignment READ alignment
+		WRITE setAlignment )
 
 signals:
 	/*!
@@ -161,8 +176,6 @@ public:
 	explicit ToolBar( QWidget * parent = 0 );
 	virtual ~ToolBar();
 
-	//! Set orientation of the ToolBar.
-	void setOrientation( Qt::Orientation orientation );
 	//! \return Orientation of the ToolBar.
 	Qt::Orientation orientation() const;
 
@@ -249,12 +262,19 @@ public:
 	//! \return Icon size of the ToolBar.
 	QSize iconSize() const;
 
+	//! \return Alignment.
+	Qt::Alignment alignment() const;
+
 	virtual QSize minimumSizeHint() const;
 	virtual QSize sizeHint() const;
 
 public slots:
-	//! Set icn's size of the ToolBar.
+	//! Set icon's size of the ToolBar.
 	void setIconSize( const QSize & iconSize );
+	//! Set alignment.
+	void setAlignment( Qt::Alignment align );
+	//! Set orientation of the ToolBar.
+	void setOrientation( Qt::Orientation orientation );
 
 protected:
 	virtual void actionEvent( QActionEvent * event );

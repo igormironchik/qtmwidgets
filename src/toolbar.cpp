@@ -168,6 +168,8 @@ public:
 	explicit ToolBarLayout( QWidget * parent );
 	virtual ~ToolBarLayout();
 
+	int spaceNeeded() const;
+
 	using QLayout::indexOf;
 	int indexOf( QAction * action ) const;
 
@@ -175,7 +177,12 @@ public:
 	void setRightArrow( NavigationArrow * a );
 	void addButton( ToolButton * b );
 
+	Qt::Orientation orientation() const;
 	void setOrientation( Qt::Orientation o );
+
+	Qt::Alignment alignment() const;
+	void setAlignment( Qt::Alignment align );
+
 	void setOffset( int delta );
 	void setIconSize( const QSize & s );
 
@@ -193,7 +200,8 @@ private:
 	QWidgetItem * left;
 	QWidgetItem * right;
 	QList< QLayoutItem* > buttons;
-	Qt::Orientation orientation;
+	Qt::Orientation orient;
+	Qt::Alignment align;
 	int offset;
 }; // class ToolBarLayout
 
@@ -201,13 +209,31 @@ ToolBarLayout::ToolBarLayout( QWidget * parent )
 	:	QLayout( parent )
 	,	left( 0 )
 	,	right( 0 )
-	,	orientation( Qt::Horizontal )
+	,	orient( Qt::Horizontal )
+	,	align( Qt::AlignLeft )
 	,	offset( 0 )
 {
 }
 
 ToolBarLayout::~ToolBarLayout()
 {
+}
+
+int
+ToolBarLayout::spaceNeeded() const
+{
+	QSize size( 0, 0 );
+
+	foreach( QLayoutItem * item, buttons )
+	{
+		size += item->sizeHint();
+		size += QSize( spacing(), spacing() );
+	}
+
+	if( orient == Qt::Horizontal )
+		return size.width();
+	else
+		return size.height();
 }
 
 int
@@ -251,14 +277,42 @@ ToolBarLayout::addButton( ToolButton * b )
 	update();
 }
 
+Qt::Orientation
+ToolBarLayout::orientation() const
+{
+	return orient;
+}
+
 void
 ToolBarLayout::setOrientation( Qt::Orientation o )
 {
-	if( orientation != o )
+	if( orient != o )
 	{
-		orientation = o;
+		orient = o;
 
 		update();
+	}
+}
+
+Qt::Alignment
+ToolBarLayout::alignment() const
+{
+	return align;
+}
+
+void
+ToolBarLayout::setAlignment( Qt::Alignment a )
+{
+	if( a & ( Qt::AlignLeft | Qt::AlignRight | Qt::AlignCenter
+				| Qt::AlignTop | Qt::AlignBottom ) )
+	{
+		if( align != a )
+		{
+			align = a & ( Qt::AlignLeft | Qt::AlignRight | Qt::AlignCenter
+				| Qt::AlignTop | Qt::AlignBottom );
+
+			update();
+		}
 	}
 }
 
@@ -281,12 +335,16 @@ ToolBarLayout::setIconSize( const QSize & s )
 		if( b )
 			b->setIconSize( s );
 	}
+
+	update();
 }
 
 void
 ToolBarLayout::addItem( QLayoutItem * item )
 {
 	buttons.append( item );
+
+	update();
 }
 
 int
@@ -330,7 +388,7 @@ ToolBarLayout::setGeometry( const QRect & rect )
 		QSize leftSize = left->sizeHint();
 		const QSize rightSize = right->sizeHint();
 
-		if( orientation == Qt::Horizontal )
+		if( orient == Qt::Horizontal )
 			y = r.y() + ( r.height() - leftSize.height() ) / 2;
 		else
 			x = r.x() + ( r.width() - leftSize.width() ) / 2;
@@ -344,7 +402,7 @@ ToolBarLayout::setGeometry( const QRect & rect )
 
 			left->setGeometry( QRect( x, y, leftSize.width(), leftSize.height() ) );
 
-			if( orientation == Qt::Horizontal )
+			if( orient == Qt::Horizontal )
 				x += leftSize.width() + spacing();
 			else
 				y += leftSize.height() + spacing();
@@ -359,7 +417,7 @@ ToolBarLayout::setGeometry( const QRect & rect )
 		}
 
 		const QSize buttonSize = buttons.at( 0 )->sizeHint();
-		const int dim = ( orientation == Qt::Horizontal ?
+		const int dim = ( orient == Qt::Horizontal ?
 			buttonSize.width() : buttonSize.height() ) + spacing();
 		int i = 0;
 		int tmpOffset = offset;
@@ -376,7 +434,7 @@ ToolBarLayout::setGeometry( const QRect & rect )
 		int stop = 0;
 
 		// Show visible buttons.
-		if( orientation == Qt::Horizontal )
+		if( orient == Qt::Horizontal )
 		{
 			x += offset % dim;
 			tmpOffset = x;
@@ -391,14 +449,35 @@ ToolBarLayout::setGeometry( const QRect & rect )
 			x = r.x() + ( r.width() - buttonSize.width() ) / 2;
 		}
 
-		int space = 0;
+		int space = spaceNeeded();
+
+		if( space < ( orient == Qt::Horizontal ? r.width() : r.height() ) )
+		{
+			if( ( ( align & Qt::AlignRight ) && orient == Qt::Horizontal )
+				| ( ( align & Qt::AlignBottom ) && orient == Qt::Vertical  ) )
+			{
+				if( orient == Qt::Horizontal )
+					x += r.width() - space;
+				else
+					y += r.height() - space;
+			}
+			else if( align & Qt::AlignCenter )
+			{
+				if( orient == Qt::Horizontal )
+					x += ( r.width() - space ) / 2;
+				else
+					y += ( r.height() - space ) / 2;
+			}
+		}
+
+		space = 0;
 
 		while( tmpOffset < stop && i < buttons.size() )
 		{
 			buttons.at( i )->setGeometry( QRect( x, y,
 				buttonSize.width(), buttonSize.height() ) );
 
-			if( orientation == Qt::Horizontal )
+			if( orient == Qt::Horizontal )
 			{
 				x += dim;
 				space = x;
@@ -418,7 +497,7 @@ ToolBarLayout::setGeometry( const QRect & rect )
 
 		if( i < buttons.size() )
 		{
-			if( orientation == Qt::Horizontal )
+			if( orient == Qt::Horizontal )
 			{
 				x = r.width() - rightSize.width() + r.x();
 				y = r.y() + ( r.height() - rightSize.height() ) / 2;
@@ -455,7 +534,7 @@ ToolBarLayout::setGeometry( const QRect & rect )
 		}
 		else if( offset > 0 && leftArrowShown &&
 			!rightArrowShown &&
-			space + dim / 2 <= ( orientation == Qt::Horizontal ? r.width() : r.height() ) )
+			space + dim / 2 <= ( orient == Qt::Horizontal ? r.width() : r.height() ) )
 		{
 			offset = 0;
 			setGeometry( rect );
@@ -516,7 +595,7 @@ ToolBarLayout::minimumSize() const
 
 	const QMargins m = contentsMargins();
 
-	if( orientation == Qt::Horizontal )
+	if( orient == Qt::Horizontal )
 	{
 		width = arrowSize.width() * 2 + buttonSize.width() * 2 + m.left() +
 			m.right();
@@ -549,7 +628,6 @@ class ToolBarPrivate {
 public:
 	explicit ToolBarPrivate( ToolBar * parent )
 		:	q( parent )
-		,	orientation( Qt::Horizontal )
 		,	layout( 0 )
 		,	left( 0 )
 		,	right( 0 )
@@ -559,7 +637,6 @@ public:
 	void init();
 
 	ToolBar * q;
-	Qt::Orientation orientation;
 	QSize iconSize;
 	ToolBarLayout * layout;
 	NavigationArrow * left;
@@ -571,12 +648,12 @@ ToolBarPrivate::init()
 {
 	layout = new ToolBarLayout( q );
 
-	if( orientation == Qt::Horizontal )
+	if( layout->orientation() == Qt::Horizontal )
 		left = new NavigationArrow( NavigationArrow::Left, q );
 	else
 		left = new NavigationArrow( NavigationArrow::Top, q );
 
-	if( orientation == Qt::Horizontal )
+	if( layout->orientation() == Qt::Horizontal )
 		right = new NavigationArrow( NavigationArrow::Right, q );
 	else
 		right = new NavigationArrow( NavigationArrow::Bottom, q );
@@ -617,14 +694,12 @@ ToolBar::~ToolBar()
 void
 ToolBar::setOrientation( Qt::Orientation orientation )
 {
-	if( d->orientation != orientation )
+	if( d->layout->orientation() != orientation )
 	{
-		d->orientation = orientation;
-
 		d->left->deleteLater();
 		d->right->deleteLater();
 
-		if( d->orientation == Qt::Vertical )
+		if( orientation == Qt::Vertical )
 		{
 			d->left = new NavigationArrow( NavigationArrow::Top, this );
 			d->right = new NavigationArrow( NavigationArrow::Bottom, this );
@@ -650,16 +725,30 @@ ToolBar::setOrientation( Qt::Orientation orientation )
 		connect( d->right, &NavigationArrow::clicked,
 			this, &ToolBar::_q_rightArrowClicked );
 
-		d->layout->setOrientation( d->orientation );
+		d->layout->setOrientation( orientation );
 
-		emit orientationChanged( d->orientation );
+		updateGeometry();
+
+		emit orientationChanged( orientation );
 	}
 }
 
 Qt::Orientation
 ToolBar::orientation() const
 {
-	return d->orientation;
+	return d->layout->orientation();
+}
+
+Qt::Alignment
+ToolBar::alignment() const
+{
+	return d->layout->alignment();
+}
+
+void
+ToolBar::setAlignment( Qt::Alignment align )
+{
+	d->layout->setAlignment( align );
 }
 
 void
@@ -794,7 +883,7 @@ ToolBar::_q_leftArrowClicked()
 {
 	int delta = 0;
 
-	if( d->orientation == Qt::Horizontal )
+	if( d->layout->orientation() == Qt::Horizontal )
 		delta = - d->iconSize.width() - d->layout->spacing();
 	else
 		delta = - d->iconSize.height() - d->layout->spacing();
@@ -809,7 +898,7 @@ ToolBar::_q_rightArrowClicked()
 {
 	int delta = 0;
 
-	if( d->orientation == Qt::Horizontal )
+	if( d->layout->orientation() == Qt::Horizontal )
 		delta = d->iconSize.width() + d->layout->spacing();
 	else
 		delta = d->iconSize.height() + d->layout->spacing();

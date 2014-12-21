@@ -99,7 +99,6 @@ public:
 	NavigationBarPrivate( NavigationBar * parent )
 		:	q( parent )
 		,	stack( 0 )
-		,	root( 0 )
 		,	left( 0 )
 		,	right( 0 )
 		,	title( 0 )
@@ -112,7 +111,7 @@ public:
 
 	NavigationBar * q;
 	QStackedWidget * stack;
-	QSharedPointer< NavigationItem > root;
+	QList< QSharedPointer< NavigationItem > > rootItems;
 	QMap< int, QSharedPointer< NavigationItem > > itemsMap;
 	NavigationButton * left;
 	NavigationButton * right;
@@ -212,19 +211,12 @@ NavigationBar::setMainWidget( const QString & title,
 {
 	const int index = d->stack->addWidget( widget );
 
-	if( d->root )
-	{
-		foreach( int index, d->itemsMap.keys() )
-			d->stack->removeWidget( d->stack->widget( index ) );
+	d->rootItems.append(
+		QSharedPointer< NavigationItem > ( new NavigationItem ) );
+	d->itemsMap[ index ] = d->rootItems.back();
 
-		d->itemsMap.clear();
-	}
-
-	d->root = QSharedPointer< NavigationItem > ( new NavigationItem );
-	d->itemsMap[ index ] = d->root;
-
-	d->root->index = index;
-	d->root->title = title;
+	d->rootItems.back()->index = index;
+	d->rootItems.back()->title = title;
 
 	d->stack->setCurrentIndex( index );
 	d->title->setText( title );

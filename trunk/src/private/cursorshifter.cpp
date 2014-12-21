@@ -78,8 +78,6 @@ CursorShifterPrivate::init()
 	light = lighterColor( color, 75 );
 	basicSize = qRound( (qreal) FingerGeometry::width() * 0.2 );
 	timer = new QTimer( q );
-	q->setAttribute( Qt::WA_TranslucentBackground );
-	q->setAttribute( Qt::WA_NoSystemBackground );
 	q->setWindowModality( Qt::NonModal );
 
 	QObject::connect( timer, SIGNAL( timeout() ),

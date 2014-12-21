@@ -69,8 +69,7 @@ public:
 
 		\return Index of the screen.
 
-		\note If you set main widget twise then all previous
-		hierarchy will be lost.
+		Main widgets can be more than one.
 	*/
 	int setMainWidget( const QString & title,
 		QWidget * widget );

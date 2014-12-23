@@ -493,19 +493,26 @@ Stepper::mousePressEvent( QMouseEvent * event )
 
 		if( d->autorepeat )
 			d->timer->start( d->timeout );
-	}
 
-	event->accept();
+		event->accept();
+	}
+	else
+		event->ignore();
 }
 
 void
 Stepper::mouseReleaseEvent( QMouseEvent * event )
 {
-	d->button = StepperPrivate::NoButton;
+	if( event->button() == Qt::LeftButton )
+	{
+		d->button = StepperPrivate::NoButton;
 
-	d->timer->stop();
+		d->timer->stop();
 
-	event->accept();
+		event->accept();
+	}
+	else
+		event->ignore();
 }
 
 void

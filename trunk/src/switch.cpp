@@ -386,75 +386,82 @@ Switch::mousePressEvent( QMouseEvent * event )
 		d->mousePos = event->pos();
 		d->leftMouseButtonPressed = true;
 		d->mouseMoveDelta = 0;
-	}
 
-	event->accept();
+		event->accept();
+	}
+	else
+		event->ignore();
 }
 
 void
 Switch::mouseReleaseEvent( QMouseEvent * event )
 {
-	event->accept();
-
-	d->leftMouseButtonPressed = false;
-
-	const int distance = rect().width() - d->radius * 2;
-
-	if( d->mouseMoveDelta < 3 )
+	if( event->button() == Qt::LeftButton )
 	{
-		switch( d->state )
+		event->accept();
+
+		d->leftMouseButtonPressed = false;
+
+		const int distance = rect().width() - d->radius * 2;
+
+		if( d->mouseMoveDelta < 3 )
 		{
-			case NotAcceptedCheck :
-			case AcceptedCheck :
-				d->setState( NotAcceptedUncheck );
-			break;
-
-			case NotAcceptedUncheck :
-			case AcceptedUncheck :
-				d->setState( NotAcceptedCheck );
-			break;
-
-			default :
+			switch( d->state )
+			{
+				case NotAcceptedCheck :
+				case AcceptedCheck :
+					d->setState( NotAcceptedUncheck );
 				break;
+
+				case NotAcceptedUncheck :
+				case AcceptedUncheck :
+					d->setState( NotAcceptedCheck );
+				break;
+
+				default :
+					break;
+			}
+
+			return;
 		}
 
-		return;
-	}
-
-	if( d->offset <= distance / 2 )
-	{
-		switch( d->state )
+		if( d->offset <= distance / 2 )
 		{
-			case NotAcceptedCheck :
-			case AcceptedCheck :
-				d->setState( NotAcceptedUncheck );
-			break;
-
-			default :
+			switch( d->state )
 			{
-				d->initOffset( rect() );
-				update();
+				case NotAcceptedCheck :
+				case AcceptedCheck :
+					d->setState( NotAcceptedUncheck );
+				break;
+
+				default :
+				{
+					d->initOffset( rect() );
+					update();
+				}
+				break;
 			}
-			break;
+		}
+		else
+		{
+			switch( d->state )
+			{
+				case NotAcceptedUncheck :
+				case AcceptedUncheck :
+					d->setState( NotAcceptedCheck );
+				break;
+
+				default :
+				{
+					d->initOffset( rect() );
+					update();
+				}
+				break;
+			}
 		}
 	}
 	else
-	{
-		switch( d->state )
-		{
-			case NotAcceptedUncheck :
-			case AcceptedUncheck :
-				d->setState( NotAcceptedCheck );
-			break;
-
-			default :
-			{
-				d->initOffset( rect() );
-				update();
-			}
-			break;
-		}
-	}
+		event->ignore();
 }
 
 void

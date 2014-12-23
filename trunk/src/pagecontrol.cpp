@@ -363,24 +363,35 @@ PageControl::mousePressEvent( QMouseEvent * e )
 		d->leftButtonPressed = true;
 
 		d->clickPos = e->pos();
+
+		e->accept();
 	}
+	else
+		e->ignore();
 }
 
 void
 PageControl::mouseReleaseEvent( QMouseEvent * e )
 {
-	if( d->leftButtonPressed )
+	if( e->button() == Qt::LeftButton )
 	{
-		const QPoint pos = e->pos() - d->clickPos;
-
-		if( pos.manhattanLength() < 3 )
+		if( d->leftButtonPressed )
 		{
-			const int index = d->findButton( e->pos() );
+			const QPoint pos = e->pos() - d->clickPos;
 
-			if( index >= 0 )
-				setCurrentIndex( index );
+			if( pos.manhattanLength() < 3 )
+			{
+				const int index = d->findButton( e->pos() );
+
+				if( index >= 0 )
+					setCurrentIndex( index );
+			}
 		}
+
+		e->accept();
 	}
+	else
+		e->ignore();
 }
 
 } /* namespace QtMWidgets */

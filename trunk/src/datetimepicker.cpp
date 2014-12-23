@@ -1054,9 +1054,11 @@ DateTimePicker::mousePressEvent( QMouseEvent * event )
 		d->mousePos = event->pos();
 		d->leftMouseButtonPressed = true;
 		d->findMovableSection( event->pos() );
-	}
 
-	event->accept();
+		event->accept();
+	}
+	else
+		event->ignore();
 }
 
 void
@@ -1068,18 +1070,25 @@ DateTimePicker::mouseMoveEvent( QMouseEvent * event )
 		d->updateOffset( delta );
 		d->mousePos = event->pos();
 		update();
-	}
 
-	event->accept();
+		event->accept();
+	}
+	else
+		event->ignore();
 }
 
 void
 DateTimePicker::mouseReleaseEvent( QMouseEvent * event )
 {
-	if( d->leftMouseButtonPressed && !d->scrolling )
-		d->releaseScrolling();
+	if( event->button() == Qt::LeftButton )
+	{
+		if( d->leftMouseButtonPressed && !d->scrolling )
+			d->releaseScrolling();
 
-	event->accept();
+		event->accept();
+	}
+	else
+		event->ignore();
 }
 
 void

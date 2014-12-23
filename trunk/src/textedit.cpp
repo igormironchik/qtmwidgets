@@ -182,6 +182,7 @@ public:
 		,	cursorShown( true )
 		,	hasFocus( false )
 		,	shifter( 0 )
+		,	mouseMoveDelta( 0 )
 	{
 	}
 
@@ -240,6 +241,7 @@ public:
 	bool cursorShown;
 	bool hasFocus;
 	CursorShifter * shifter;
+	int mouseMoveDelta;
 }; // class TextEditPrivate
 
 void
@@ -1442,41 +1444,66 @@ TextEdit::eventFilter( QObject * obj, QEvent * e )
 
 void
 TextEdit::mousePressEvent( QMouseEvent * e )
-{
-	TextEditPrivate * d = d_func();
-
-	const QTextCursor oldSelection = d->cursor;
-
-	const QTextCursor c = cursorForPosition( e->pos() );
-
-	setTextCursor( c );
-
-	if( !isReadOnly() && !d->doc->isEmpty() )
-	{
-		const QRect cr = cursorRect();
-
-		const QPoint pos = mapToGlobal( d->mapFromContents(
-			QPoint( cr.center().x(), cr.y() + cr.height() ) ) );
-
-		d->shifter->setCursorPos( pos );
-		d->shifter->popup();
-	}
-
+{	
 #ifdef QT_KEYPAD_NAVIGATION
 	if( !isReadOnly() && !hasEditFocus() &&
 		QApplication::keypadNavigationEnabled() )
 			setEditFocus( true );
 #endif
 
-	d->repaintOldAndNewSelection( oldSelection );
+	e->accept();
 
 	AbstractScrollArea::mousePressEvent( e );
 }
 
 void
+TextEdit::mouseMoveEvent( QMouseEvent * e )
+{
+	TextEditPrivate * d = d_func();
+
+	if( d->leftMouseButtonPressed )
+		d->mouseMoveDelta += ( d->mousePos - e->pos() ).manhattanLength();
+
+	e->accept();
+
+	AbstractScrollArea::mouseMoveEvent( e );
+}
+
+void
 TextEdit::mouseReleaseEvent( QMouseEvent * e )
 {
-	qApp->inputMethod()->show();
+	if( e->button() == Qt::LeftButton )
+	{
+		TextEditPrivate * d = d_func();
+
+		if( d->leftMouseButtonPressed && d->mouseMoveDelta < 3 )
+		{
+			const QTextCursor oldSelection = d->cursor;
+
+			const QTextCursor c = cursorForPosition( e->pos() );
+
+			setTextCursor( c );
+
+			if( !isReadOnly() && !d->doc->isEmpty() )
+			{
+				const QRect cr = cursorRect();
+
+				const QPoint pos = mapToGlobal( d->mapFromContents(
+					QPoint( cr.center().x(), cr.y() + cr.height() ) ) );
+
+				d->shifter->setCursorPos( pos );
+				d->shifter->popup();
+			}
+
+			d->repaintOldAndNewSelection( oldSelection );
+		}
+
+		d->mouseMoveDelta = 0;
+
+		qApp->inputMethod()->show();
+	}
+
+	e->accept();
 
 	AbstractScrollArea::mouseReleaseEvent( e );
 }

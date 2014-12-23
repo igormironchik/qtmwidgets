@@ -139,21 +139,30 @@ void
 ToolButton::mousePressEvent( QMouseEvent * e )
 {
 	if( e->button() == Qt::LeftButton )
+	{
 		d->leftButtonPressed = true;
 
-	e->accept();
+		e->accept();
+	}
+	else
+		e->ignore();
 }
 
 void
 ToolButton::mouseReleaseEvent( QMouseEvent * e )
 {
-	if( d->leftButtonPressed )
+	if( e->button() == Qt::LeftButton )
 	{
-		d->leftButtonPressed = false;
-		d->action->trigger();
-	}
+		if( d->leftButtonPressed )
+		{
+			d->leftButtonPressed = false;
+			d->action->trigger();
+		}
 
-	e->accept();
+		e->accept();
+	}
+	else
+		e->ignore();
 }
 
 

@@ -297,6 +297,7 @@ protected:
 	virtual void resizeEvent( QResizeEvent * e );
 	virtual bool eventFilter( QObject * obj, QEvent * e );
 	virtual void mousePressEvent( QMouseEvent * e );
+	virtual void mouseMoveEvent( QMouseEvent * e );
 	virtual void mouseReleaseEvent( QMouseEvent * e );
 	virtual void focusInEvent( QFocusEvent * e );
 	virtual void focusOutEvent( QFocusEvent * e );

@@ -1046,20 +1046,27 @@ Picker::mousePressEvent( QMouseEvent * event )
 		d->mouseMoveDelta = 0;
 		d->mousePos = event->pos();
 		d->leftMouseButtonPressed = true;
-	}
 
-	event->accept();
+		event->accept();
+	}
+	else
+		event->ignore();
 }
 
 void
 Picker::mouseReleaseEvent( QMouseEvent * event )
 {
-	d->leftMouseButtonPressed = false;
+	if( event->button() == Qt::LeftButton )
+	{
+		d->leftMouseButtonPressed = false;
 
-	if( !d->mouseWasMoved || d->mouseMoveDelta < 3 )
-		d->setCurrentIndex( event->pos() );
+		if( !d->mouseWasMoved || d->mouseMoveDelta < 3 )
+			d->setCurrentIndex( event->pos() );
 
-	event->accept();
+		event->accept();
+	}
+	else
+		event->ignore();
 }
 
 void

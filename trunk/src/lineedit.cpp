@@ -47,6 +47,7 @@ public:
 	LineEditPrivate( LineEdit * parent )
 		:	q( parent )
 		,	shifter( 0 )
+		,	mousePressed( false )
 	{
 	}
 
@@ -54,6 +55,7 @@ public:
 
 	LineEdit * q;
 	CursorShifter * shifter;
+	bool mousePressed;
 }; // class LineEditPrivate
 
 void
@@ -99,24 +101,32 @@ LineEdit::keyPressEvent( QKeyEvent * e )
 void
 LineEdit::mousePressEvent( QMouseEvent * e )
 {
+	if( e->button() == Qt::LeftButton )
+		d->mousePressed = true;
+
 	QLineEdit::mousePressEvent( e );
-
-	if( !isReadOnly() && !text().isEmpty() )
-	{
-		const QRect cr = cursorRect();
-
-		const QPoint pos = mapToGlobal( QPoint( cr.center().x(),
-			cr.y() + cr.height() ) );
-
-		d->shifter->setCursorPos( pos );
-		d->shifter->popup();
-	}
 }
 
 void
-LineEdit::mouseMoveEvent( QMouseEvent * e )
+LineEdit::mouseReleaseEvent( QMouseEvent * e )
 {
-	e->ignore();
+	if( e->button() == Qt::LeftButton )
+	{
+		if( d->mousePressed && !isReadOnly() && !text().isEmpty() )
+		{
+			const QRect cr = cursorRect();
+
+			const QPoint pos = mapToGlobal( QPoint( cr.center().x(),
+				cr.y() + cr.height() ) );
+
+			d->shifter->setCursorPos( pos );
+			d->shifter->popup();
+		}
+
+		d->mousePressed = false;
+	}
+
+	QLineEdit::mouseReleaseEvent( e );
 }
 
 void

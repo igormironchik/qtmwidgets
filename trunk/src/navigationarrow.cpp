@@ -192,22 +192,31 @@ void
 NavigationArrow::mousePressEvent( QMouseEvent * e )
 {
 	if( e->button() == Qt::LeftButton )
+	{
 		d->leftButtonPressed = true;
 
-	e->accept();
+		e->accept();
+	}
+	else
+		e->ignore();
 }
 
 void
 NavigationArrow::mouseReleaseEvent( QMouseEvent * e )
 {
-	if( d->leftButtonPressed )
+	if( e->button() == Qt::LeftButton )
 	{
-		d->leftButtonPressed = false;
+		if( d->leftButtonPressed )
+		{
+			d->leftButtonPressed = false;
 
-		emit clicked();
+			emit clicked();
+		}
+
+		e->accept();
 	}
-
-	e->accept();
+	else
+		e->ignore();
 }
 
 void

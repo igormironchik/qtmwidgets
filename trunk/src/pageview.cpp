@@ -548,11 +548,14 @@ PageView::mouseMoveEvent( QMouseEvent * e )
 }
 
 void
-PageView::mouseReleaseEvent( QMouseEvent * )
+PageView::mouseReleaseEvent( QMouseEvent * e )
 {
-	d->leftButtonPressed = false;
+	if( e->button() == Qt::LeftButton )
+	{
+		d->leftButtonPressed = false;
 
-	d->normalizePagePos();
+		d->normalizePagePos();
+	}
 }
 
 void

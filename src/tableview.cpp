@@ -543,9 +543,9 @@ TableViewCell::mousePressEvent( QMouseEvent * e )
 }
 
 void
-TableViewCell::mouseReleaseEvent( QMouseEvent * )
+TableViewCell::mouseReleaseEvent( QMouseEvent * e )
 {
-	if( d->clicked )
+	if( e->button() == Qt::LeftButton && d->clicked )
 	{
 		d->clicked = false;
 

@@ -645,16 +645,19 @@ AbstractScrollArea::mousePressEvent( QMouseEvent * e )
 }
 
 void
-AbstractScrollArea::mouseReleaseEvent( QMouseEvent * )
+AbstractScrollArea::mouseReleaseEvent( QMouseEvent * e )
 {
-	d->leftMouseButtonPressed = false;
+	if( e->button() == Qt::LeftButton )
+	{
+		d->leftMouseButtonPressed = false;
 
-	if( ( d->horIndicator->shown || d->vertIndicator->shown ) &&
-		( d->horIndicator->policy == ScrollIndicatorAsNeeded ||
-			d->vertIndicator->policy == ScrollIndicatorAsNeeded ) )
-				d->animateScrollIndicators();
-	else
-		d->stopScrollIndicatorsAnimation();
+		if( ( d->horIndicator->shown || d->vertIndicator->shown ) &&
+			( d->horIndicator->policy == ScrollIndicatorAsNeeded ||
+				d->vertIndicator->policy == ScrollIndicatorAsNeeded ) )
+					d->animateScrollIndicators();
+		else
+			d->stopScrollIndicatorsAnimation();
+	}
 }
 
 void

@@ -308,10 +308,13 @@ NavigationBar::showScreen( int index )
 		QSharedPointer< NavigationItem > nextItem = d->itemsMap[ index ];
 		QSharedPointer< NavigationItem > currentItem = d->itemsMap[ currentIndex() ];
 
-		d->backStack.push( currentIndex() );
+		if( d->backStack.back() != currentIndex() )
+		{
+			d->backStack.push( currentIndex() );
 
-		d->left->setText( currentItem->title );
-		d->left->show();
+			d->left->setText( currentItem->title );
+			d->left->show();
+		}
 
 		d->title->setText( nextItem->title );
 
@@ -328,12 +331,15 @@ NavigationBar::showPreviousScreen()
 		QSharedPointer< NavigationItem > prevItem = d->itemsMap[ prevIndex ];
 		QSharedPointer< NavigationItem > currentItem = d->itemsMap[ currentIndex() ];
 
-		d->forwardStack.push( currentIndex() );
+		if( d->forwardStack.back() != currentIndex() )
+		{
+			d->forwardStack.push( currentIndex() );
+
+			d->right->setText( currentItem->title );
+			d->right->show();
+		}
 
 		d->title->setText( prevItem->title );
-
-		d->right->setText( currentItem->title );
-		d->right->show();
 
 		d->stack->setCurrentIndex( prevIndex );
 

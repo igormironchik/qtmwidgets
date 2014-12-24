@@ -529,6 +529,8 @@ PageView::mousePressEvent( QMouseEvent * e )
 
 		d->normalizeAnimation->stop();
 	}
+
+	e->ignore();
 }
 
 void
@@ -545,6 +547,8 @@ PageView::mouseMoveEvent( QMouseEvent * e )
 		else if( delta < 0 )
 			d->movePageLeft( qAbs( delta ) );
 	}
+
+	e->ignore();
 }
 
 void
@@ -556,6 +560,8 @@ PageView::mouseReleaseEvent( QMouseEvent * e )
 
 		d->normalizePagePos();
 	}
+
+	e->ignore();
 }
 
 void

@@ -32,6 +32,7 @@
 #include "abstractscrollarea.hpp"
 #include "private/abstractscrollarea_p.hpp"
 #include "scroller.hpp"
+#include "fingergeometry.hpp"
 
 // Qt include.
 #include <QStyleOption>
@@ -40,6 +41,8 @@
 #include <QResizeEvent>
 #include <QWheelEvent>
 #include <QTimer>
+#include <QLinearGradient>
+#include <QVariantAnimation>
 
 
 namespace QtMWidgets {
@@ -129,6 +132,104 @@ ScrollIndicator::drawIndicator( QPainter * p, const QColor & c )
 
 
 //
+// BlurEffect
+//
+
+BlurEffect::BlurEffect( const QColor & c, Qt::Orientation o, QWidget * parent )
+	:	QWidget( parent )
+	,	policy( AbstractScrollArea::BlurAlwaysOff )
+	,	orientation( o )
+	,	color( c )
+	,	pressure( 0 )
+	,	darkBlurWidth( 4 )
+	,	maxPressure( 20.0 )
+{
+}
+
+QSize
+BlurEffect::minimumSizeHint() const
+{
+	static const QSize size( FingerGeometry::width(),
+		FingerGeometry::height() );
+
+	return ( orientation == Qt::Horizontal ? size : size.transposed() );
+}
+
+QSize
+BlurEffect::sizeHint() const
+{
+	return minimumSizeHint();
+}
+
+void
+BlurEffect::paintEvent( QPaintEvent * )
+{
+	QPainter p( this );
+	p.setRenderHint( QPainter::Antialiasing );
+
+	switch( policy )
+	{
+		case AbstractScrollArea::BlurAlwaysOff :
+			return;
+
+		case AbstractScrollArea::BlurHorizontalOnly :
+		{
+			if( orientation == Qt::Vertical )
+				drawBlur( &p, color );
+		}
+			break;
+
+		case AbstractScrollArea::BlurVerticalOnly :
+		{
+			if( orientation == Qt::Horizontal )
+				drawBlur( &p, color );
+		}
+			break;
+
+		case AbstractScrollArea::BlurBothDirections :
+			drawBlur( &p, color );
+			break;
+
+		default :
+			break;
+	}
+}
+
+void
+BlurEffect::drawBlur( QPainter * p, const QColor & c )
+{
+	const QRect r = rect();
+
+	const qreal realPressure = qMin(
+		(qreal) qAbs( pressure ) / maxPressure, 1.0 );
+
+	QColor c1 = c;
+	c1.setAlpha( 255 * realPressure );
+
+	QColor c2 = c;
+	c2.setAlpha( 50 * realPressure );
+
+	QColor c3 = c;
+	c3.setAlpha( 0 );
+
+	QLinearGradient g(
+		QPointF( 0.0, 0.0 ),
+		( orientation == Qt::Horizontal ?
+			QPointF( 0.0, 1.0 ) : QPointF( 1.0, 0.0 ) ) );
+	g.setColorAt( 0.0, c3 );
+	g.setColorAt( 0.45, c2 );
+	g.setColorAt( 0.5, c1 );
+	g.setColorAt( 0.55, c2 );
+	g.setColorAt( 1.0, c3 );
+	g.setCoordinateMode( QGradient::ObjectBoundingMode );
+
+	p->setPen( Qt::NoPen );
+	p->setBrush( g );
+	p->drawEllipse( r );
+}
+
+
+//
 // AbstractScrollAreaPrivate
 //
 
@@ -148,6 +249,17 @@ AbstractScrollAreaPrivate::init()
 
 	horIndicator = new ScrollIndicator( ic, Qt::Horizontal, viewport );
 	vertIndicator = new ScrollIndicator( ic, Qt::Vertical, viewport );
+
+	horBlur = new BlurEffect( ic, Qt::Vertical, viewport );
+	vertBlur = new BlurEffect( ic, Qt::Horizontal, viewport );
+
+	horBlurAnim = new QVariantAnimation( q );
+	horBlurAnim->setDuration( 300 );
+	horBlurAnim->setLoopCount( 1 );
+
+	vertBlurAnim = new QVariantAnimation( q );
+	vertBlurAnim->setDuration( 300 );
+	vertBlurAnim->setLoopCount( 1 );
 
 	animationTimer = new QTimer( q );
 	scroller = new Scroller( q, q );
@@ -171,6 +283,9 @@ AbstractScrollAreaPrivate::layoutChildren( const QStyleOption & opt )
 
 	viewport->setGeometry( QStyle::visualRect( opt.direction, opt.rect,
 		viewportRect ) );
+
+	horBlur->resize( horBlur->sizeHint().width(), viewportRect.height() );
+	vertBlur->resize( viewportRect.width(), vertBlur->sizeHint().height() );
 }
 
 void
@@ -321,7 +436,7 @@ AbstractScrollAreaPrivate::scrollContentsBy( int dx, int dy )
 {
 	topLeftCorner -= QPoint( dx, dy );
 
-	normalizePosition();
+	makeBlurEffectIfNeeded();
 
 	if( dx != 0 )
 	{
@@ -342,6 +457,134 @@ AbstractScrollAreaPrivate::scrollContentsBy( int dx, int dy )
 	q->update();
 	horIndicator->update();
 	vertIndicator->update();
+}
+
+void
+AbstractScrollAreaPrivate::makeBlurEffectIfNeeded()
+{
+	if( horBlur->policy != AbstractScrollArea::BlurAlwaysOff )
+	{
+		const QRect r = viewport->rect();
+
+		const QPoint p = topLeftCorner;
+
+		normalizePosition();
+
+		const QSize s = viewport->size();
+
+		const QPoint maxPos = QPoint( scrolledAreaSize.width() - s.width(),
+			scrolledAreaSize.height() - s.height() );
+
+		if( p.x() < 0 || ( horBlur->pressure < 0 && maxPos.x() >= p.x() ) )
+		{
+			if( horBlur->pressure <= 0 && horBlur->pressure + p.x() > 0 )
+				horBlur->pressure = 0;
+			else if( qAbs( horBlur->pressure + p.x() ) > horBlur->maxPressure )
+				horBlur->pressure = ( horBlur->pressure < 0 ?
+					- horBlur->maxPressure : horBlur->maxPressure );
+			else
+				horBlur->pressure += p.x();
+
+			horBlur->move(
+				( horBlur->parent() == viewport ? r.x() : topLeftCorner.x() )
+					- horBlur->width() / 2,
+				( horBlur->parent() == viewport ? r.y() : topLeftCorner.y() )
+					+ ( r.height() - horBlur->height() ) / 2 );
+		}
+
+		if( p.y() < 0 || ( vertBlur->pressure < 0 && maxPos.y() >= p.y() ) )
+		{
+			if( vertBlur->pressure <= 0 && vertBlur->pressure + p.y() > 0 )
+				vertBlur->pressure = 0;
+			else if( qAbs( vertBlur->pressure + p.y() ) > vertBlur->maxPressure )
+				vertBlur->pressure = ( vertBlur->pressure < 0 ?
+					- vertBlur->maxPressure : vertBlur->maxPressure );
+			else
+				vertBlur->pressure += p.y();
+
+			vertBlur->move(
+				( vertBlur->parent() == viewport ? r.x() : topLeftCorner.x() )
+					+ ( r.width() - vertBlur->width() ) / 2,
+				( vertBlur->parent() == viewport ? r.y() : topLeftCorner.y() )
+					- vertBlur->height() / 2 );
+		}
+
+		if( maxPos.x() < p.x() || ( horBlur->pressure > 0 && p.x() > 0 ) )
+		{
+			if( horBlur->pressure >= 0 &&
+				horBlur->pressure + p.x() - maxPos.x() < 0 )
+					horBlur->pressure = 0;
+			else if( qAbs( horBlur->pressure + p.x() - maxPos.x() ) > horBlur->maxPressure )
+				horBlur->pressure = ( horBlur->pressure < 0 ?
+					- horBlur->maxPressure : horBlur->maxPressure );
+			else
+				horBlur->pressure += ( p.x() - maxPos.x() );
+
+			horBlur->move(
+				( horBlur->parent() == viewport ? r.x() : topLeftCorner.x() )
+					+ r.width() - horBlur->width() / 2,
+				( horBlur->parent() == viewport ? r.y() : topLeftCorner.y() )
+					+ ( r.height() - horBlur->height() ) / 2 );
+		}
+
+		if( maxPos.y() < p.y() || ( vertBlur->pressure > 0 && p.y() > 0 ) )
+		{
+			if( vertBlur->pressure >= 0 &&
+				vertBlur->pressure + p.y() - maxPos.y() < 0 )
+					vertBlur->pressure = 0;
+			else if( qAbs( vertBlur->pressure + p.y() - maxPos.y() ) > vertBlur->maxPressure )
+				vertBlur->pressure = ( vertBlur->pressure < 0 ?
+					- vertBlur->maxPressure : vertBlur->maxPressure );
+			else
+				vertBlur->pressure += ( p.y() - maxPos.y() );
+
+			vertBlur->move(
+				( vertBlur->parent() == viewport ? r.x() : topLeftCorner.x() )
+					+ ( r.width() - vertBlur->width() ) / 2,
+				( vertBlur->parent() == viewport ? r.y() : topLeftCorner.y() )
+					+ r.height() - vertBlur->height() / 2 );
+		}
+
+		if( horBlur->pressure != 0 )
+		{
+			horBlur->raise();
+			horBlur->show();
+			horBlur->update();
+		}
+		else
+			horBlur->hide();
+
+		if( vertBlur->pressure != 0 )
+		{
+			vertBlur->raise();
+			vertBlur->show();
+			vertBlur->update();
+		}
+		else
+			vertBlur->hide();
+	}
+}
+
+void
+AbstractScrollAreaPrivate::animateHiddingBlurEffect()
+{
+	horBlurAnim->setStartValue( horBlur->pressure );
+	horBlurAnim->setEndValue( 0 );
+	vertBlurAnim->setStartValue( vertBlur->pressure );
+	vertBlurAnim->setEndValue( 0 );
+
+	if( horBlur->pressure != 0 )
+		horBlurAnim->start();
+
+	if( vertBlur->pressure != 0 )
+		vertBlurAnim->start();
+}
+
+void
+AbstractScrollAreaPrivate::stopAnimatingBlurEffect()
+{
+	horBlurAnim->stop();
+	vertBlurAnim->stop();
 }
 
 void
@@ -401,6 +644,18 @@ AbstractScrollArea::AbstractScrollArea( QWidget * parent )
 
 	connect( d->scroller, &Scroller::finished,
 		this, &AbstractScrollArea::_q_kineticScrollingFinished );
+
+	connect( d->horBlurAnim, &QVariantAnimation::valueChanged,
+		this, &AbstractScrollArea::_q_horBlurAnim );
+
+	connect( d->horBlurAnim, &QVariantAnimation::finished,
+		this, &AbstractScrollArea::_q_horBlurAnimFinished );
+
+	connect( d->vertBlurAnim, &QVariantAnimation::valueChanged,
+		this, &AbstractScrollArea::_q_vertBlurAnim );
+
+	connect( d->vertBlurAnim, &QVariantAnimation::finished,
+		this, &AbstractScrollArea::_q_vertBlurAnimFinished );
 }
 
 AbstractScrollArea::AbstractScrollArea( AbstractScrollAreaPrivate * dd,
@@ -421,6 +676,18 @@ AbstractScrollArea::AbstractScrollArea( AbstractScrollAreaPrivate * dd,
 
 	connect( d->scroller, &Scroller::finished,
 		this, &AbstractScrollArea::_q_kineticScrollingFinished );
+
+	connect( d->horBlurAnim, &QVariantAnimation::valueChanged,
+		this, &AbstractScrollArea::_q_horBlurAnim );
+
+	connect( d->horBlurAnim, &QVariantAnimation::finished,
+		this, &AbstractScrollArea::_q_horBlurAnimFinished );
+
+	connect( d->vertBlurAnim, &QVariantAnimation::valueChanged,
+		this, &AbstractScrollArea::_q_vertBlurAnim );
+
+	connect( d->vertBlurAnim, &QVariantAnimation::finished,
+		this, &AbstractScrollArea::_q_vertBlurAnimFinished );
 }
 
 AbstractScrollArea::~AbstractScrollArea()
@@ -448,6 +715,8 @@ AbstractScrollArea::setViewport( QWidget * widget )
 		d->viewport->setFocusProxy( this );
 		d->horIndicator->setParent( d->viewport );
 		d->vertIndicator->setParent( d->viewport );
+		d->horBlur->setParent( d->viewport );
+		d->vertBlur->setParent( d->viewport );
 
 		QStyleOption opt;
 		opt.initFrom( this );
@@ -512,6 +781,38 @@ AbstractScrollArea::setHorizontalScrollIndicatorPolicy(
 	d->horIndicator->policy = policy;
 
 	d->horIndicator->update();
+}
+
+const QColor &
+AbstractScrollArea::blurColor() const
+{
+	return d->horBlur->color;
+}
+
+void
+AbstractScrollArea::setBlurColor( const QColor & c )
+{
+	if( d->horBlur->color != c )
+	{
+		d->horBlur->color = c;
+		d->vertBlur->color = c;
+	}
+}
+
+AbstractScrollArea::BlurPolicy
+AbstractScrollArea::blurPolicy() const
+{
+	return d->horBlur->policy;
+}
+
+void
+AbstractScrollArea::setBlurPolicy( BlurPolicy policy )
+{
+	if( d->horBlur->policy != policy )
+	{
+		d->horBlur->policy = policy;
+		d->vertBlur->policy = policy;
+	}
 }
 
 QSize
@@ -642,6 +943,8 @@ AbstractScrollArea::mousePressEvent( QMouseEvent * e )
 		d->leftMouseButtonPressed = true;
 		d->stopScrollIndicatorsAnimation();
 	}
+
+	e->ignore();
 }
 
 void
@@ -657,7 +960,11 @@ AbstractScrollArea::mouseReleaseEvent( QMouseEvent * e )
 					d->animateScrollIndicators();
 		else
 			d->stopScrollIndicatorsAnimation();
+
+		d->animateHiddingBlurEffect();
 	}
+
+	e->ignore();
 }
 
 void
@@ -674,6 +981,8 @@ AbstractScrollArea::mouseMoveEvent( QMouseEvent * e )
 
 		scrollContentsBy( dx, dy );
 	}
+
+	e->ignore();
 }
 
 void
@@ -714,6 +1023,8 @@ AbstractScrollArea::wheelEvent( QWheelEvent * e )
 	if( d->horIndicator->policy == ScrollIndicatorAsNeeded ||
 		d->vertIndicator->policy == ScrollIndicatorAsNeeded )
 			d->animateScrollIndicators();
+
+	d->animateHiddingBlurEffect();
 }
 
 void
@@ -745,6 +1056,7 @@ void
 AbstractScrollArea::_q_kineticScrollingAboutToStart()
 {
 	d->stopScrollIndicatorsAnimation();
+	d->stopAnimatingBlurEffect();
 }
 
 void
@@ -753,6 +1065,34 @@ AbstractScrollArea::_q_kineticScrollingFinished()
 	if( d->horIndicator->policy == ScrollIndicatorAsNeeded ||
 		d->vertIndicator->policy == ScrollIndicatorAsNeeded )
 			d->animateScrollIndicators();
+
+	d->animateHiddingBlurEffect();
+}
+
+void
+AbstractScrollArea::_q_horBlurAnim( const QVariant & value )
+{
+	d->horBlur->pressure = value.toInt();
+	d->horBlur->update();
+}
+
+void
+AbstractScrollArea::_q_horBlurAnimFinished()
+{
+	d->horBlur->hide();
+}
+
+void
+AbstractScrollArea::_q_vertBlurAnim( const QVariant & value )
+{
+	d->vertBlur->pressure = value.toInt();
+	d->vertBlur->update();
+}
+
+void
+AbstractScrollArea::_q_vertBlurAnimFinished()
+{
+	d->vertBlur->hide();
 }
 
 } /* namespace QtMWidgets */

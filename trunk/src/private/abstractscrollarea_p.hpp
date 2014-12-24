@@ -40,6 +40,7 @@
 QT_BEGIN_NAMESPACE
 class QStyleOption;
 class QTimer;
+class QVariantAnimation;
 QT_END_NAMESPACE
 
 
@@ -82,6 +83,38 @@ protected:
 }; // class ScrollIndicator
 
 
+//
+// BlurEffect
+//
+
+class BlurEffect
+	:	public QWidget
+{
+public:
+	BlurEffect( const QColor & c, Qt::Orientation o, QWidget * parent );
+
+	QSize minimumSizeHint() const;
+	QSize sizeHint() const;
+
+protected:
+	virtual void paintEvent( QPaintEvent * );
+
+private:
+	void drawBlur( QPainter * p, const QColor & c );
+
+protected:
+	friend class AbstractScrollAreaPrivate;
+	friend class AbstractScrollArea;
+
+	AbstractScrollArea::BlurPolicy policy;
+	Qt::Orientation orientation;
+	QColor color;
+	int pressure;
+	int darkBlurWidth;
+	qreal maxPressure;
+}; // class BlurEffect
+
+
 class Scroller;
 
 //
@@ -106,6 +139,10 @@ public:
 		,	animationTimeout( 100 )
 		,	animationAlphaDelta( 25 )
 		,	scroller( 0 )
+		,	horBlur( 0 )
+		,	vertBlur( 0 )
+		,	horBlurAnim( 0 )
+		,	vertBlurAnim( 0 )
 	{
 	}
 
@@ -117,6 +154,9 @@ public:
 		int minSize, int width, bool & needPaint,
 		int & indicatorSize, QPoint & indicatorPos );
 	void scrollContentsBy( int dx, int dy );
+	void makeBlurEffectIfNeeded();
+	void animateHiddingBlurEffect();
+	void stopAnimatingBlurEffect();
 	void animateScrollIndicators();
 	void stopScrollIndicatorsAnimation();
 
@@ -141,6 +181,10 @@ public:
 	int animationTimeout;
 	int animationAlphaDelta;
 	Scroller * scroller;
+	BlurEffect * horBlur;
+	BlurEffect * vertBlur;
+	QVariantAnimation * horBlurAnim;
+	QVariantAnimation * vertBlurAnim;
 }; // class AbstractScrollAreaPrivate
 
 } /* namespace QtMWidgets */

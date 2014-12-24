@@ -540,6 +540,8 @@ TableViewCell::mousePressEvent( QMouseEvent * e )
 		if( d->highlightOnClick )
 			update();
 	}
+
+	e->ignore();
 }
 
 void
@@ -552,6 +554,8 @@ TableViewCell::mouseReleaseEvent( QMouseEvent * e )
 		if( d->highlightOnClick )
 			update();
 	}
+
+	e->ignore();
 }
 
 

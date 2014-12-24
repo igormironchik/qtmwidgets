@@ -133,6 +133,8 @@ ScrollArea::setWidget( QWidget * widget )
 
 	d->horIndicator->setParent( 0 );
 	d->vertIndicator->setParent( 0 );
+	d->horBlur->setParent( 0 );
+	d->vertBlur->setParent( 0 );
 	delete d->widget;
 	d->widget = 0;
 	if( widget->parentWidget() != d->viewport )
@@ -144,6 +146,8 @@ ScrollArea::setWidget( QWidget * widget )
 	d->horIndicator->raise();
 	d->vertIndicator->setParent( d->widget );
 	d->vertIndicator->raise();
+	d->horBlur->setParent( d->widget );
+	d->vertBlur->setParent( d->widget );
 	d->widget->setAutoFillBackground( true );
 	widget->installEventFilter( this );
 	d->updateScrolledSize();
@@ -158,6 +162,8 @@ ScrollArea::takeWidget()
 	w->removeEventFilter( this );
 	d->horIndicator->setParent( d->viewport );
 	d->vertIndicator->setParent( d->viewport );
+	d->horBlur->setParent( d->viewport );
+	d->vertBlur->setParent( d->viewport );
 	d->widget = 0;
 	if( w )
 		w->setParent( 0 );

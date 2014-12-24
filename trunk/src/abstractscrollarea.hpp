@@ -83,6 +83,7 @@ class AbstractScrollArea
 	Q_OBJECT
 
 	Q_ENUMS( ScrollIndicatorPolicy )
+	Q_ENUMS( BlurPolicy )
 
 	/*!
 		\property indicatorColor
@@ -112,6 +113,22 @@ class AbstractScrollArea
 	Q_PROPERTY( ScrollIndicatorPolicy horizontalScrollIndicatorPolicy
 		READ horizontalScrollIndicatorPolicy
 		WRITE setHorizontalScrollIndicatorPolicy )
+	/*!
+		\property blurColor
+
+		\brief Color of the blur effect.
+
+		By default, this property is QPalette::Highlight.
+	*/
+	Q_PROPERTY( QColor blurColor READ blurColor WRITE setBlurColor )
+	/*!
+		\property blurPolicy
+
+		\brief Policy of the blur effect.
+
+		By default, this property is BlurAlwaysOff.
+	*/
+	Q_PROPERTY( BlurPolicy blurPolicy READ blurPolicy WRITE setBlurPolicy )
 
 public:
 	/*!
@@ -128,6 +145,23 @@ public:
 		//! AbstractScrollArea always shows scroll indicators.
 		ScrollIndicatorAlwaysOn = 2
 	}; // enum ScrollIndicatorPolicy
+
+	/*!
+		This enum describes the various modes of blur effect.
+
+		Blur effect shows when scrolling reached the end, that
+		indicates that scrolling in this direction not more possible.
+	*/
+	enum BlurPolicy {
+		//! Blur both scrolling directions.
+		BlurBothDirections = 0,
+		//! Blur horizontal scrolling only.
+		BlurHorizontalOnly = 1,
+		//! Blur vertical scrolling only.
+		BlurVerticalOnly = 2,
+		//! Blur always off.
+		BlurAlwaysOff = 3
+	}; // enum BlurPolicy
 
 public:
 	AbstractScrollArea( QWidget * parent = 0 );
@@ -161,6 +195,16 @@ public:
 	ScrollIndicatorPolicy horizontalScrollIndicatorPolicy() const;
 	//! Set horizontal scroll indicator policy.
 	void setHorizontalScrollIndicatorPolicy( ScrollIndicatorPolicy policy );
+
+	//! \return Blur color.
+	const QColor & blurColor() const;
+	//! Set blur color.
+	void setBlurColor( const QColor & c );
+
+	//! \return Blur policy.
+	BlurPolicy blurPolicy() const;
+	//! Set blur policy.
+	void setBlurPolicy( BlurPolicy policy );
 
 	virtual QSize minimumSizeHint() const;
 	virtual QSize sizeHint() const;
@@ -208,6 +252,10 @@ private slots:
 	void _q_kineticScrolling( int dx, int dy );
 	void _q_kineticScrollingAboutToStart();
 	void _q_kineticScrollingFinished();
+	void _q_horBlurAnim( const QVariant & value );
+	void _q_horBlurAnimFinished();
+	void _q_vertBlurAnim( const QVariant & value );
+	void _q_vertBlurAnimFinished();
 
 private:
 	Q_DISABLE_COPY( AbstractScrollArea )

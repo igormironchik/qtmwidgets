@@ -47,8 +47,6 @@
 #include <QStyle>
 #include <QStyleOption>
 
-#include <QDebug>
-
 // C++ include.
 #include <algorithm>
 

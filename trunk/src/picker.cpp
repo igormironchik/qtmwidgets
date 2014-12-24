@@ -1072,18 +1072,20 @@ Picker::mouseReleaseEvent( QMouseEvent * event )
 void
 Picker::mouseMoveEvent( QMouseEvent * event )
 {
-	d->mouseWasMoved = true;
-
 	if( d->leftMouseButtonPressed )
 	{
+		d->mouseWasMoved = true;
+
 		const int delta = event->pos().y() - d->mousePos.y();
 		d->mouseMoveDelta += qAbs( delta );
 		d->drawItemOffset += delta;
 		d->mousePos = event->pos();
 		update();
-	}
 
-	event->accept();
+		event->accept();
+	}
+	else
+		event->ignore();
 }
 
 } /* namespace QtMWidgets */

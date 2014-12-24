@@ -55,6 +55,8 @@ public:
 
 		scrollArea->setBackgroundRole( QPalette::Dark );
 		scrollArea->setWidget( imageLabel );
+		scrollArea->setBlurPolicy(
+			QtMWidgets::AbstractScrollArea::BlurBothDirections );
 
 		l->addWidget( scrollArea );
 

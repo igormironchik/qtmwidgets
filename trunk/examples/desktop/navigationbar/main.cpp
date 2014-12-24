@@ -79,6 +79,8 @@ public:
 		bar = new QtMWidgets::NavigationBar( this );
 
 		QtMWidgets::TableView * mainScreen = createMainScreen( bar );
+		mainScreen->setBlurPolicy(
+			QtMWidgets::AbstractScrollArea::BlurVerticalOnly );
 
 		const int mainScreenIndex = bar->setMainWidget(
 			QLatin1String( "Sounds" ), mainScreen );

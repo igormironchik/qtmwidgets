@@ -149,8 +149,8 @@ BlurEffect::BlurEffect( const QColor & c, Qt::Orientation o, QWidget * parent )
 QSize
 BlurEffect::minimumSizeHint() const
 {
-	static const QSize size( FingerGeometry::width(),
-		FingerGeometry::height() );
+	static const QSize size( FingerGeometry::width() / 2,
+		FingerGeometry::height() / 2 );
 
 	return ( orientation == Qt::Horizontal ? size : size.transposed() );
 }
@@ -284,8 +284,11 @@ AbstractScrollAreaPrivate::layoutChildren( const QStyleOption & opt )
 	viewport->setGeometry( QStyle::visualRect( opt.direction, opt.rect,
 		viewportRect ) );
 
-	horBlur->resize( horBlur->sizeHint().width(), viewportRect.height() );
-	vertBlur->resize( viewportRect.width(), vertBlur->sizeHint().height() );
+	horBlur->resize( horBlur->sizeHint().width(),
+		viewportRect.height() * 0.75 );
+
+	vertBlur->resize( viewportRect.width() * 0.75,
+		vertBlur->sizeHint().height() );
 }
 
 void
@@ -522,7 +525,7 @@ AbstractScrollAreaPrivate::makeBlurEffectIfNeeded()
 
 			horBlur->move(
 				( horBlur->parent() == viewport ? r.x() : topLeftCorner.x() )
-					+ r.width() - horBlur->width() / 2,
+					+ r.width() - horBlur->width() / 2 - 1,
 				( horBlur->parent() == viewport ? r.y() : topLeftCorner.y() )
 					+ ( r.height() - horBlur->height() ) / 2 );
 		}
@@ -542,7 +545,7 @@ AbstractScrollAreaPrivate::makeBlurEffectIfNeeded()
 				( vertBlur->parent() == viewport ? r.x() : topLeftCorner.x() )
 					+ ( r.width() - vertBlur->width() ) / 2,
 				( vertBlur->parent() == viewport ? r.y() : topLeftCorner.y() )
-					+ r.height() - vertBlur->height() / 2 );
+					+ r.height() - vertBlur->height() / 2 - 1 );
 		}
 
 		if( horBlur->pressure != 0 )

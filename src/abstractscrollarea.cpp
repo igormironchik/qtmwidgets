@@ -212,20 +212,29 @@ BlurEffect::drawBlur( QPainter * p, const QColor & c )
 	QColor c3 = c;
 	c3.setAlpha( 0 );
 
+	const QRect dark(
+		( orientation == Qt::Vertical ? r.x() + r.width() / 2 - 2 : r.x() ),
+		( orientation == Qt::Horizontal ? r.y() + r.height() / 2 - 2 : r.y() ),
+		( orientation == Qt::Vertical ? 4 : r.width() ),
+		( orientation == Qt::Horizontal ? 4 : r.height() ) );
+
+	p->setPen( Qt::NoPen );
+	p->setBrush( c1 );
+	p->drawEllipse( dark );
+
 	QLinearGradient g(
 		QPointF( 0.0, 0.0 ),
 		( orientation == Qt::Horizontal ?
 			QPointF( 0.0, 1.0 ) : QPointF( 1.0, 0.0 ) ) );
 	g.setColorAt( 0.0, c3 );
-	g.setColorAt( 0.45, c2 );
-	g.setColorAt( 0.5, c1 );
-	g.setColorAt( 0.55, c2 );
+	g.setColorAt( 0.5, c2 );
 	g.setColorAt( 1.0, c3 );
 	g.setCoordinateMode( QGradient::ObjectBoundingMode );
 
-	p->setPen( Qt::NoPen );
 	p->setBrush( g );
-	p->drawEllipse( r );
+	p->drawRoundedRect( r,
+		( orientation == Qt::Horizontal ? r.height() / 2 : r.width() / 2 ),
+		( orientation == Qt::Horizontal ? r.height() / 2 : r.width() / 2 ) );
 }
 
 
@@ -525,7 +534,7 @@ AbstractScrollAreaPrivate::makeBlurEffectIfNeeded()
 
 			horBlur->move(
 				( horBlur->parent() == viewport ? r.x() : topLeftCorner.x() )
-					+ r.width() - horBlur->width() / 2 - 1,
+					+ r.width() - horBlur->width() / 2,
 				( horBlur->parent() == viewport ? r.y() : topLeftCorner.y() )
 					+ ( r.height() - horBlur->height() ) / 2 );
 		}
@@ -545,7 +554,7 @@ AbstractScrollAreaPrivate::makeBlurEffectIfNeeded()
 				( vertBlur->parent() == viewport ? r.x() : topLeftCorner.x() )
 					+ ( r.width() - vertBlur->width() ) / 2,
 				( vertBlur->parent() == viewport ? r.y() : topLeftCorner.y() )
-					+ r.height() - vertBlur->height() / 2 - 1 );
+					+ r.height() - vertBlur->height() / 2 );
 		}
 
 		if( horBlur->pressure != 0 )

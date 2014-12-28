@@ -40,7 +40,11 @@ HEADERS += private/drawing.hpp \
            toolbar.hpp \
            pageview.hpp \
            pagecontrol.hpp \
-           progressbar.hpp
+           progressbar.hpp \
+           listmodel.hpp \
+           abstractlistview.hpp \
+           private/listmodel_p.hpp \
+           abstractlistmodel.hpp
 
 SOURCES += private/drawing.cpp \
            private/datetimeparser.cpp \
@@ -69,4 +73,5 @@ SOURCES += private/drawing.cpp \
            toolbar.cpp \
            pageview.cpp \
            pagecontrol.cpp \
-           progressbar.cpp
+           progressbar.cpp \
+           abstractlistview.cpp

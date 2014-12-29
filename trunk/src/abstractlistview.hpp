@@ -85,6 +85,7 @@ public:
 	ListModel< T > * model;
 }; // class AbstractListViewPrivate
 
+
 //
 // AbstractListViewBase
 //
@@ -197,7 +198,7 @@ protected:
 	{
 	}
 
-	//! Draw row in this list view.
+	//! Draw row in the list view.
 	virtual void drawRow( QPainter * painter,
 		const QRect & rect, int row ) = 0;
 

@@ -31,12 +31,36 @@
 // Qt include.
 #include <QApplication>
 #include <QWidget>
-#include <QTimer>
-#include <QChar>
-#include <QDebug>
+#include <QColor>
+#include <QPainter>
+#include <QVBoxLayout>
 
 // QtMWidgets include.
-#include <QtMWidgets/ListModel>
+#include <QtMWidgets/AbstractListView>
+#include <QtMWidgets/AbstractListModel>
+
+
+class ListView
+	:	public QtMWidgets::AbstractListView< QColor >
+{
+public:
+	ListView( QWidget * parent )
+		:	QtMWidgets::AbstractListView< QColor > ( parent )
+	{
+	}
+
+protected:
+	void drawRow( QPainter * painter,
+		const QRect & rect, int row )
+	{
+		const QColor & c = model()->data( row );
+
+		painter->setPen( c );
+		painter->setBrush( c );
+
+		painter->drawRect( rect );
+	}
+};
 
 
 class Widget
@@ -47,42 +71,29 @@ class Widget
 public:
 	Widget()
 	{
-	}
+		QVBoxLayout * l = new QVBoxLayout( this );
 
-public slots:
-	void start()
-	{
-		QtMWidgets::ListModel< QChar > model;
+		ListView * list = new ListView( this );
 
-		model.insertRow( 0 );
-		model.setData( 0, QChar( 'A' ) );
+		l->addWidget( list );
 
-		print( model );
+		list->model()->appendRow( Qt::blue );
+		list->model()->appendRow( Qt::red );
+		list->model()->appendRow( Qt::green );
+		list->model()->appendRow( Qt::cyan );
+		list->model()->appendRow( Qt::magenta );
+		list->model()->appendRow( Qt::gray );
+		list->model()->appendRow( Qt::yellow );
+		list->model()->appendRow( Qt::white );
 
-		model.insertRows( 1, 2 );
-		model.setData( 1, QChar( 'B' ) );
-		model.setData( 2, QChar( 'C' ) );
-
-		print( model );
-
-		model.moveRow( 1, 2 );
-
-		print( model );
-
-		model.sort();
-
-		print( model );
-	}
-
-private:
-	void print( const QtMWidgets::ListModel< QChar > & m )
-	{
-		qDebug() << "--------------------";
-
-		for( int i = 0; i < m.rowCount(); ++i )
-			qDebug() << m.data( i );
-
-		qDebug() << "--------------------";
+		list->model()->appendRow( Qt::blue );
+		list->model()->appendRow( Qt::red );
+		list->model()->appendRow( Qt::green );
+		list->model()->appendRow( Qt::cyan );
+		list->model()->appendRow( Qt::magenta );
+		list->model()->appendRow( Qt::gray );
+		list->model()->appendRow( Qt::yellow );
+		list->model()->appendRow( Qt::white );
 	}
 };
 
@@ -94,8 +105,6 @@ int main( int argc, char ** argv )
 	Widget w;
 
 	w.show();
-
-	QTimer::singleShot( 0, &w, &Widget::start );
 
 	return app.exec();
 }

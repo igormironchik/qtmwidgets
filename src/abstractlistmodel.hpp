@@ -61,12 +61,13 @@ signals:
 	void rowsMoved( int sourceStart, int sourceEnd, int destinationRow );
 
 public:
-	AbstractListModel( QObject * parent = 0 )
-		:	QObject( parent )
+	virtual ~AbstractListModel()
 	{
 	}
 
-	virtual ~AbstractListModel()
+protected:
+	AbstractListModel( QObject * parent = 0 )
+		:	QObject( parent )
 	{
 	}
 

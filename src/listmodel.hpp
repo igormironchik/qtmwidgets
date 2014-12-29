@@ -40,19 +40,12 @@
 #include "private/listmodel_p.hpp"
 #include "fingergeometry.hpp"
 
-// C++ include.
-#include <algorithm>
-#include <functional>
-
 
 namespace QtMWidgets {
 
 //
 // ListModel
 //
-
-template< typename T >
-class ListModelPrivate;
 
 /*!
 	ListModel is a model used with ListView.
@@ -77,6 +70,25 @@ public:
 	virtual const T & data( int row ) const
 	{
 		return d->data.at( row );
+	}
+
+	//! Insert new row at the given \a row position with \a value value.
+	bool insertRow( int row, const T & value )
+	{
+		if( row > d->data.count() )
+			return false;
+
+		d->data.insert( row, value );
+
+		emit rowsInserted( row, row );
+
+		return true;
+	}
+
+	//! Append new row with the given \a value.
+	bool appendRow( const T & value )
+	{
+		return insertRow( d->data.count(), value );
 	}
 
 	//! Insert new row at the given \a row position.
@@ -161,13 +173,14 @@ public:
 		return true;
 	}
 
-	//! Sort data in the model in \a order order.
+	/*!
+		Sort data in the model in \a order order.
+
+		If you want sort capability you need to implement this method.
+	*/
 	virtual void sort( Qt::SortOrder order = Qt::AscendingOrder )
 	{
-		if( order == Qt::AscendingOrder )
-			std::sort( d->data.begin(), d->data.end() );
-		else
-			std::sort( d->data.begin(), d->data.end(), std::greater< T > () );
+		Q_UNUSED( order )
 	}
 
 	//! \return Height for the given \a row row for the \a width width.

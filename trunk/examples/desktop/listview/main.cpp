@@ -47,6 +47,7 @@ public:
 	ListView( QWidget * parent )
 		:	QtMWidgets::AbstractListView< QColor > ( parent )
 	{
+		setModel( new QtMWidgets::ListModel< QColor > () );
 	}
 
 protected:
@@ -66,8 +67,6 @@ protected:
 class Widget
 	:	public QWidget
 {
-	Q_OBJECT
-
 public:
 	Widget()
 	{
@@ -108,5 +107,3 @@ int main( int argc, char ** argv )
 
 	return app.exec();
 }
-
-#include "main.moc"

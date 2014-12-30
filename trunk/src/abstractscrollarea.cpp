@@ -575,6 +575,8 @@ AbstractScrollAreaPrivate::makeBlurEffectIfNeeded()
 		else
 			vertBlur->hide();
 	}
+	else
+		normalizePosition();
 }
 
 void

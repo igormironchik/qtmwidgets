@@ -40,7 +40,7 @@ namespace QtMWidgets {
 
 AbstractListViewBasePrivate::AbstractListViewBasePrivate(
 	AbstractListViewBase * parent )
-	:	ScrollAreaPrivate( parent )
+	:	AbstractScrollAreaPrivate( parent )
 	,	spacing( 0 )
 {
 }
@@ -68,7 +68,7 @@ AbstractListViewBasePrivate::q_func() const
 
 AbstractListViewBase::AbstractListViewBase(
 	AbstractListViewBasePrivate * dd, QWidget * parent )
-	:	ScrollArea( dd, parent )
+	:	AbstractScrollArea( dd, parent )
 {
 }
 
@@ -93,6 +93,8 @@ AbstractListViewBase::setSpacing( int s )
 	if( d->spacing != s )
 	{
 		d->spacing = s;
+
+		recalculateSize();
 
 		update();
 	}

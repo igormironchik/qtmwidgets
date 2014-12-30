@@ -230,7 +230,12 @@ protected:
 
 	//! \return Top-left corner of the shown scrolled area.
 	const QPoint & topLeftPointShownArea() const;
-	//! Set top-left corner of the shown scrolled area.
+	/*!
+		Set top-left corner of the shown scrolled area.
+
+		Do not call this method inside scrollContentsBy(),
+		because it leads to the recursion.
+	*/
 	void setTopLeftPointShownArea( const QPoint & p );
 
 	//! Start animation of fading scroll indicators.

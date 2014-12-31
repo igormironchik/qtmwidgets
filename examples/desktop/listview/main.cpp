@@ -33,7 +33,7 @@
 #include <QWidget>
 #include <QColor>
 #include <QPainter>
-#include <QVBoxLayout>
+#include <QHBoxLayout>
 
 // QtMWidgets include.
 #include <QtMWidgets/AbstractListView>
@@ -56,10 +56,15 @@ protected:
 	{
 		const QColor & c = model()->data( row );
 
-		painter->setPen( c );
+		painter->setPen( Qt::black );
 		painter->setBrush( c );
 
 		painter->drawRect( rect );
+
+		QTextOption opt;
+		opt.setAlignment( Qt::AlignCenter );
+
+		painter->drawText( rect, QString::number( row ), opt );
 	}
 };
 
@@ -70,9 +75,10 @@ class Widget
 public:
 	Widget()
 	{
-		QVBoxLayout * l = new QVBoxLayout( this );
+		QHBoxLayout * l = new QHBoxLayout( this );
 
 		ListView * list = new ListView( this );
+		list->setSpacing( 5 );
 
 		l->addWidget( list );
 

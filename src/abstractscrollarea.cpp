@@ -255,6 +255,7 @@ AbstractScrollAreaPrivate::init()
 	viewport->setBackgroundRole( QPalette::Base );
 	viewport->setAutoFillBackground( true );
 	viewport->setFocusProxy( q );
+	viewport->setContentsMargins( 0, 0, 0, 0 );
 
 	horIndicator = new ScrollIndicator( ic, Qt::Horizontal, viewport );
 	vertIndicator = new ScrollIndicator( ic, Qt::Vertical, viewport );

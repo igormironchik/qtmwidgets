@@ -82,6 +82,14 @@ public:
 	AbstractListViewPrivate( AbstractListView< T > * parent );
 	virtual ~AbstractListViewPrivate();
 
+	int maxOffset() const;
+	int calculateScroll( int row, int expectedOffset ) const;
+	bool canScrollDown( int row ) const;
+	void normalizeOffset( int & row, int & offset );
+	QSize calcScrolledAreaSize() const;
+	bool updateIfNeeded( int firstRow, int lastRow );
+	void init();
+
 	inline AbstractListView< T > * q_func();
 	inline const AbstractListView< T > * q_func() const;
 
@@ -108,6 +116,7 @@ public:
 	Viewport( QWidget * parent )
 		:	QWidget( parent )
 	{
+		setContentsMargins( 0, 0, 0, 0 );
 	}
 
 	void setData( AbstractListViewPrivate< T > * d )
@@ -130,7 +139,7 @@ private:
 		const int spacing = data->spacing;
 		const QRect r = rect();
 		const int x = spacing;
-		int y = data->offset;
+		int y = data->offset + spacing;
 
 		if( row >= 0 )
 			while( y < r.y() + r.height() && row < data->model->rowCount() )
@@ -248,7 +257,9 @@ public:
 		:	AbstractListViewBase(
 				new AbstractListViewPrivate< T > ( this ), parent )
 	{
-		init();
+		AbstractListViewPrivate< T > * d = d_func();
+
+		d->init();
 	}
 
 	virtual ~AbstractListView()
@@ -331,10 +342,10 @@ public:
 	*/
 	void scrollTo( int row, ScrollHint hint = EnsureVisible )
 	{
+		AbstractListViewPrivate< T > * d = d_func();
+
 		if( row >= 0 && row < d->model->rowCount() )
 		{
-			AbstractListViewPrivate< T > * d = d_func();
-
 			switch( hint )
 			{
 				case EnsureVisible :
@@ -343,18 +354,26 @@ public:
 						return;
 					else
 					{
-						d->firstVisibleRow = row;
-						d->offset = 0;
-						d->viewport->update();
+						const int offset = 0;
+
+						const int delta = d->calculateScroll( row, offset );
+
+						QPoint p = topLeftPointShownArea();
+						p.setY( p.y() + delta );
+						setTopLeftPointShownArea( p );
 					}
 				}
 					break;
 
 				case PositionAtTop :
 				{
-					d->firstVisibleRow = row;
-					d->offset = 0;
-					d->viewport->update();
+					const int offset = 0;
+
+					const int delta = d->calculateScroll( row, offset );
+
+					QPoint p = topLeftPointShownArea();
+					p.setY( p.y() + delta );
+					setTopLeftPointShownArea( p );
 				}
 					break;
 
@@ -362,14 +381,15 @@ public:
 				{
 					const QRect r = d->viewport->rect();
 
-					d->firstVisibleRow = row;
-					d->offset = r.y() + r.height() -
+					const int offset = r.y() + r.height() -
 						d->model->heightForWidth( row,
 							r.width() - d->spacing * 2 );
 
-					normalizeOffset();
+					const int delta = d->calculateScroll( row, offset );
 
-					d->viewport->update();
+					QPoint p = topLeftPointShownArea();
+					p.setY( p.y() + delta );
+					setTopLeftPointShownArea( p );
 				}
 					break;
 
@@ -377,14 +397,15 @@ public:
 				{
 					const QRect r = d->viewport->rect();
 
-					d->firstVisibleRow = row;
-					d->offset = r.y() + r.height() / 2 -
+					const int offset = r.y() + r.height() / 2 -
 						d->model->heightForWidth( row,
 							r.width() - d->spacing * 2 ) / 2;
 
-					normalizeOffset();
+					const int delta = d->calculateScroll( row, offset );
 
-					d->viewport->update();
+					QPoint p = topLeftPointShownArea();
+					p.setY( p.y() + delta );
+					setTopLeftPointShownArea( p );
 				}
 					break;
 
@@ -438,7 +459,9 @@ protected:
 		QWidget * parent = 0 )
 		:	AbstractListViewBase( dd, parent )
 	{
-		init();
+		AbstractListViewPrivate< T > * d = d_func();
+
+		d->init();
 	}
 
 	//! Draw row in the list view.
@@ -453,12 +476,14 @@ protected:
 
 		d->offset += dy;
 
-		normalizeOffset();
+		d->normalizeOffset( d->firstVisibleRow, d->offset );
 	}
 
 	virtual void dataChanged( int first, int last )
 	{
-		updateIfNeeded( first, last );
+		AbstractListViewPrivate< T > * d = d_func();
+
+		d->updateIfNeeded( first, last );
 	}
 
 	virtual void modelReset()
@@ -467,6 +492,8 @@ protected:
 
 		d->firstVisibleRow = -1;
 		d->offset = 0;
+
+		recalculateSize();
 
 		d->viewport->update();
 	}
@@ -478,7 +505,9 @@ protected:
 		if( d->firstVisibleRow == -1 )
 			d->firstVisibleRow = 0;
 
-		updateIfNeeded( first, last );
+		recalculateSize();
+
+		d->updateIfNeeded( first, last );
 	}
 
 	virtual void rowsRemoved( int first, int last )
@@ -503,7 +532,9 @@ protected:
 			}
 		}
 
-		updateIfNeeded( first, last )	;
+		recalculateSize();
+
+		d->updateIfNeeded( first, last )	;
 	}
 
 	virtual void rowsMoved( int sourceStart,
@@ -518,14 +549,16 @@ protected:
 						+ sourceEnd - sourceStart ) )
 			d->offset = 0;
 
-		if( !updateIfNeeded( sourceStart, sourceEnd ) )
-			updateIfNeeded( destinationRow,
+		if( !d->updateIfNeeded( sourceStart, sourceEnd ) )
+			d->updateIfNeeded( destinationRow,
 				destinationRow + sourceEnd - sourceStart );
 	}
 
 	virtual void recalculateSize()
 	{
-		setScrolledAreaSize( calcScrolledAreaSize() );
+		AbstractListViewPrivate< T > * d = d_func();
+
+		setScrolledAreaSize( d->calcScrolledAreaSize() );
 	}
 
 protected:
@@ -549,111 +582,15 @@ protected:
 		AbstractListViewBase::resizeEvent( e );
 
 		recalculateSize();
+
+		AbstractListViewPrivate< T > * d = d_func();
+
+		if( scrolledAreaSize().height() - topLeftPointShownArea().y() <=
+			d->viewport->height() )
+				scrollTo( d->model->rowCount() - 1, PositionAtBottom );
 	}
 
 private:
-	bool canScrollDown() const
-	{
-		return false;
-	}
-
-	void normalizeOffset()
-	{
-		AbstractListViewPrivate< T > * d = d_func();
-
-		if( d->offset > 0 )
-		{
-			if( d->firstVisibleRow > 0 )
-			{
-				const int width = d->viewport->rect().width() - d->spacing * 2;
-
-				while( d->offset > 0 )
-				{
-					d->offset -= d->model->heightForWidth( d->firstVisibleRow,
-						width );
-
-					if( d->firstVisibleRow != 0 )
-						--d->firstVisibleRow;
-					else
-					{
-						d->offset = 0;
-						break;
-					}
-				}
-			}
-			else
-				d->offset = 0;
-		}
-		else if( d->offset < 0 )
-		{
-			if( canScrollDown() )
-			{
-				const int width = d->viewport->rect().width() - d->spacing * 2;
-				int height = d->model->heightForWidth( d->firstVisibleRow, width );
-
-				while( qAbs( d->offset ) > height )
-				{
-					d->offset += height;
-
-					if( d->firstVisibleRow < d->model->rowCount() - 1 )
-					{
-						++d->firstVisibleRow;
-						height = d->model->heightForWidth( d->firstVisibleRow, width );
-					}
-					else
-					{
-						d->offset = 0;
-						break;
-					}
-				}
-			}
-			else
-				d->offset = 0;
-		}
-	}
-
-	QSize calcScrolledAreaSize() const
-	{
-		const AbstractListViewPrivate< T > * d = d_func();
-
-		const int width = d->viewport->rect().width();
-		const int spacing = d->spacing;
-		const int rowWidth = width - spacing * 2;
-		int height = 0;
-
-		for( int i = 0, last = d->model->rowCount(); i < last; ++i )
-			height += d->model->heightForWidth( i, rowWidth ) + spacing;
-
-		height -= spacing;
-
-		return QSize( width, height );
-	}
-
-	bool updateIfNeeded( int firstRow, int lastRow )
-	{
-		for( int i = firstRow; i <= lastRow; ++i )
-		{
-			if( !visualRect( i ).isNull() )
-			{
-				AbstractListViewPrivate< T > * d = d_func();
-
-				d->viewport->update();
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	void init()
-	{
-		Private::Viewport< T > * viewport = new Private::Viewport< T >( this );
-		viewport->setData( d_func() );
-
-		setViewport( viewport );
-	}
-
 	friend class AbstractListViewPrivate< T >;
 	friend class Private::Viewport< T >;
 
@@ -687,6 +624,197 @@ template< typename T >
 inline
 AbstractListViewPrivate< T >::~AbstractListViewPrivate()
 {
+}
+
+template< typename T >
+inline
+int
+AbstractListViewPrivate< T >::maxOffset() const
+{
+	const QRect r = viewport->rect();
+	const int width = r.width() - spacing * 2;
+	int row = model->rowCount() - 1;
+	int y = 0;
+
+	while( y < r.height() && row >= 0 )
+	{
+		y += model->heightForWidth( row, width ) + spacing;
+		--row;
+	}
+
+	if( y > r.height() && row > 0 )
+		return r.height() - y - 1;
+	else
+		return 0;
+}
+
+template< typename T >
+inline
+int
+AbstractListViewPrivate< T >::calculateScroll( int row,
+	int expectedOffset ) const
+{
+	const int width = viewport->width() - spacing * 2;
+
+	int delta = - offset + expectedOffset;
+
+	int tmpRow = firstVisibleRow;
+
+	if( tmpRow > row )
+	{
+		--tmpRow;
+
+		while( tmpRow >= row )
+		{
+			delta += spacing + model->heightForWidth( tmpRow, width );
+			--tmpRow;
+		}
+	}
+	else if( tmpRow < row )
+	{
+		while( tmpRow < row )
+		{
+			delta -= ( model->heightForWidth( tmpRow, width ) + spacing );
+			++tmpRow;
+		}
+	}
+
+	return delta;
+}
+
+template< typename T >
+inline
+bool
+AbstractListViewPrivate< T >::canScrollDown( int row ) const
+{
+	if( row == -1 )
+		return false;
+
+	const QRect r = viewport->rect();
+	int y = r.y() + spacing;
+	const int width = r.width() - spacing * 2;
+
+	while( y < r.y() + r.height() && row < model->rowCount() )
+	{
+		y += model->heightForWidth( row, width ) + spacing;
+		++row;
+	}
+
+	if( row < model->rowCount() )
+		return true;
+	else
+		return false;
+}
+
+template< typename T >
+inline
+void
+AbstractListViewPrivate< T >::normalizeOffset( int & row, int & offset )
+{
+	if( offset > 0 )
+	{
+		if( row > 0 )
+		{
+			const int width = viewport->rect().width() - spacing * 2;
+
+			while( offset > 0 )
+			{
+				const int delta = model->heightForWidth( row,
+					width ) + spacing;
+				offset -= delta;
+
+				if( row != 0 )
+					--row;
+				else
+				{
+					offset = 0;
+					break;
+				}
+			}
+		}
+		else
+			offset = 0;
+	}
+	else if( offset < 0 )
+	{
+		if( canScrollDown( row ) )
+		{
+			const int width = viewport->rect().width() - spacing * 2;
+			int height = model->heightForWidth( row, width );
+
+			while( qAbs( offset ) > height + spacing )
+			{
+				const int delta = height + spacing;
+				offset += delta;
+
+				if( row < model->rowCount() - 1 )
+				{
+					++row;
+					height = model->heightForWidth( row, width );
+				}
+				else
+				{
+					offset = 0;
+					break;
+				}
+			}
+		}
+		else
+		{
+			const int max = maxOffset();
+
+			if( offset < max )
+				offset = max;
+		}
+	}
+}
+
+template< typename T >
+inline
+QSize
+AbstractListViewPrivate< T >::calcScrolledAreaSize() const
+{
+	const int width = viewport->rect().width();
+	const int rowWidth = width - spacing * 2;
+	int height = spacing;
+
+	for( int i = 0, last = model->rowCount(); i < last; ++i )
+		height += model->heightForWidth( i, rowWidth ) + spacing;
+
+	return QSize( width, height );
+}
+
+template< typename T >
+inline
+bool
+AbstractListViewPrivate< T >::updateIfNeeded( int firstRow, int lastRow )
+{
+	AbstractListView< T > * q = q_func();
+
+	for( int i = firstRow; i <= lastRow; ++i )
+	{
+		if( !q->visualRect( i ).isNull() )
+		{
+			viewport->update();
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+template< typename T >
+inline
+void
+AbstractListViewPrivate< T >::init()
+{
+	AbstractListView< T > * q = q_func();
+
+	Private::Viewport< T > * viewport = new Private::Viewport< T >( q );
+	viewport->setData( this );
+
+	q->setViewport( viewport );
 }
 
 template< typename T >

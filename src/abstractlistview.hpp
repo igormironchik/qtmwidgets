@@ -354,7 +354,7 @@ public:
 						return;
 					else
 					{
-						const int offset = 0;
+						const int offset = -1;
 
 						const int delta = d->calculateScroll( row, offset );
 
@@ -367,7 +367,7 @@ public:
 
 				case PositionAtTop :
 				{
-					const int offset = 0;
+					const int offset = -1;
 
 					const int delta = d->calculateScroll( row, offset );
 
@@ -383,7 +383,7 @@ public:
 
 					const int offset = r.y() + r.height() -
 						d->model->heightForWidth( row,
-							r.width() - d->spacing * 2 );
+							r.width() - d->spacing * 2 ) - d->spacing - 1;
 
 					const int delta = d->calculateScroll( row, offset );
 
@@ -642,7 +642,7 @@ AbstractListViewPrivate< T >::maxOffset() const
 		--row;
 	}
 
-	if( y > r.height() && row > 0 )
+	if( y > r.height() )
 		return r.height() - y - 1;
 	else
 		return 0;

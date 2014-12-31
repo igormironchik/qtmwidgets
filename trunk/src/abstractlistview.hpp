@@ -39,6 +39,8 @@
 // Qt include.
 #include <QWidget>
 #include <QMouseEvent>
+#include <QTimer>
+#include <QElapsedTimer>
 
 
 namespace QtMWidgets {
@@ -99,6 +101,14 @@ public:
 	int firstVisibleRow;
 	//! Offset in drawing.
 	int offset;
+	//! Mouse move delta.
+	int mouseMoveDelta;
+	//! Click count;
+	int clickCount;
+	//! Timer.
+	QTimer * timer;
+	//! Elapsed timer.
+	QElapsedTimer elapsedTimer;
 }; // class AbstractListViewPrivate
 
 
@@ -229,6 +239,7 @@ protected slots:
 	virtual void rowsRemoved( int first, int last ) = 0;
 	virtual void rowsMoved( int sourceStart,
 		int sourceEnd, int destinationRow ) = 0;
+	virtual void timerElapsed() = 0;
 
 private:
 	friend class AbstractListViewBasePrivate;
@@ -301,13 +312,13 @@ public:
 	*/
 	int rowAt( const QPoint & p ) const
 	{
-		AbstractListViewPrivate< T > * d = d_func();
+		const AbstractListViewPrivate< T > * d = d_func();
 
 		int row = d->firstVisibleRow;
 		const int spacing = d->spacing;
 		const int x = spacing;
 		int y = d->offset;
-		const int width = r.width() - spacing * 2;
+		const int width = d->viewport->width() - spacing * 2;
 
 		if( p.x() < x || p.x() > x + width )
 			return -1;
@@ -554,6 +565,15 @@ protected:
 				destinationRow + sourceEnd - sourceStart );
 	}
 
+	virtual void timerElapsed()
+	{
+		AbstractListViewPrivate< T > * d = d_func();
+
+		d->timer->stop();
+
+		emit rowLongTouched( rowAt( d->mousePos ) );
+	}
+
 	virtual void recalculateSize()
 	{
 		AbstractListViewPrivate< T > * d = d_func();
@@ -565,16 +585,56 @@ protected:
 	virtual void mousePressEvent( QMouseEvent * e )
 	{
 		AbstractListViewBase::mousePressEvent( e );
+
+		AbstractListViewPrivate< T > * d = d_func();
+
+		if( e->button() == Qt::LeftButton )
+		{
+			if( d->elapsedTimer.elapsed() > 500 )
+				d->clickCount = 0;
+
+			d->mouseMoveDelta = 0;
+			d->timer->start( 2000 );
+			d->elapsedTimer.start();
+		}
 	}
 
 	virtual void mouseMoveEvent( QMouseEvent * e )
 	{
 		AbstractListViewBase::mouseMoveEvent( e );
+
+		AbstractListViewPrivate< T > * d = d_func();
+
+		d->mouseMoveDelta += ( d->mousePos - e->pos() ).manhattanLength();
+
+		if( d->mouseMoveDelta > 3 )
+			d->timer->stop();
 	}
 
 	virtual void mouseReleaseEvent( QMouseEvent * e )
 	{
 		AbstractListViewBase::mouseReleaseEvent( e );
+
+		AbstractListViewPrivate< T > * d = d_func();
+
+		d->timer->stop();
+
+		if( e->button() == Qt::LeftButton && d->mouseMoveDelta <= 3 )
+		{
+			const int row = rowAt( e->pos() );
+
+			emit rowTouched( row );
+
+			if( d->elapsedTimer.elapsed() <= 500 )
+				++d->clickCount;
+			else
+				d->clickCount = 0;
+
+			d->elapsedTimer.start();
+
+			if( d->clickCount == 2 )
+				emit rowDoubleTouched( row );
+		}
 	}
 
 	virtual void resizeEvent( QResizeEvent * e )
@@ -617,6 +677,9 @@ AbstractListViewPrivate< T >::AbstractListViewPrivate(
 	,	model( 0 )
 	,	firstVisibleRow( -1 )
 	,	offset( 0 )
+	,	mouseMoveDelta( 0 )
+	,	clickCount( 0 )
+	,	timer( 0 )
 {
 }
 
@@ -814,7 +877,12 @@ AbstractListViewPrivate< T >::init()
 	Private::Viewport< T > * viewport = new Private::Viewport< T >( q );
 	viewport->setData( this );
 
+	timer = new QTimer( q );
+
 	q->setViewport( viewport );
+
+	QObject::connect( timer, &QTimer::timeout,
+		q, &AbstractListView< T >::timerElapsed );
 }
 
 template< typename T >

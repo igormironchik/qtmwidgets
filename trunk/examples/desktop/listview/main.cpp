@@ -34,6 +34,7 @@
 #include <QColor>
 #include <QPainter>
 #include <QHBoxLayout>
+#include <QMessageBox>
 
 // QtMWidgets include.
 #include <QtMWidgets/AbstractListView>
@@ -72,6 +73,8 @@ protected:
 class Widget
 	:	public QWidget
 {
+	Q_OBJECT
+
 public:
 	Widget()
 	{
@@ -99,6 +102,25 @@ public:
 		list->model()->appendRow( Qt::gray );
 		list->model()->appendRow( Qt::yellow );
 		list->model()->appendRow( Qt::white );
+
+		connect( list, &ListView::rowLongTouched,
+			this, &Widget::longTouched );
+
+		connect( list, &ListView::rowDoubleTouched,
+			this, &Widget::doubleTouched );
+	}
+
+private slots:
+	void longTouched( int row )
+	{
+		QMessageBox::information( this, tr( "Long Touch..." ),
+			tr( "Row %1 was long touched." ).arg( QString::number( row ) ) );
+	}
+
+	void doubleTouched( int row )
+	{
+		QMessageBox::information( this, tr( "Double Touch..." ),
+			tr( "Row %1 was double touched." ).arg( QString::number( row ) ) );
 	}
 };
 
@@ -113,3 +135,5 @@ int main( int argc, char ** argv )
 
 	return app.exec();
 }
+
+#include "main.moc"

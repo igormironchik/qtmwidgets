@@ -44,7 +44,8 @@ HEADERS += private/drawing.hpp \
            listmodel.hpp \
            abstractlistview.hpp \
            private/listmodel_p.hpp \
-           abstractlistmodel.hpp
+           abstractlistmodel.hpp \
+           messagebox.hpp
 
 SOURCES += private/drawing.cpp \
            private/datetimeparser.cpp \
@@ -74,4 +75,5 @@ SOURCES += private/drawing.cpp \
            pageview.cpp \
            pagecontrol.cpp \
            progressbar.cpp \
-           abstractlistview.cpp
+           abstractlistview.cpp \
+           messagebox.cpp

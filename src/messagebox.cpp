@@ -40,8 +40,6 @@
 #include <QHBoxLayout>
 #include <QResizeEvent>
 
-#include <QDebug>
-
 // QtMWidgets include.
 #include "messagebox.hpp"
 #include "fingergeometry.hpp"

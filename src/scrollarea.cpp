@@ -80,7 +80,7 @@ ScrollAreaPrivate::updateScrolledSize()
 	{
 		if( ( widget->layout() ? widget->layout()->hasHeightForWidth() : widget->sizePolicy().hasHeightForWidth() ) )
 		{
-			QSize p_hfw = p.expandedTo( min ).boundedTo( max );
+			QSize p_hfw = p.boundedTo( max );
 			int h = widget->heightForWidth( p_hfw.width() );
 			min = QSize( p_hfw.width(), qMax( p.height(), h ) );
 		}

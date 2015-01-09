@@ -19,4 +19,5 @@ SUBDIRS = picker \
           pageview \
           slider \
           progressbar \
-          listview
+          listview \
+          messagebox

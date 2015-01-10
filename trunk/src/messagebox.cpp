@@ -39,6 +39,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QResizeEvent>
+#include <QFrame>
 
 // QtMWidgets include.
 #include "messagebox.hpp"
@@ -60,6 +61,7 @@ public:
 	MsgBoxButtonPrivate( const QString & t, MsgBoxButton * parent )
 		:	q( parent )
 		,	text( t )
+		,	pressed( false )
 	{
 	}
 
@@ -67,6 +69,7 @@ public:
 
 	MsgBoxButton * q;
 	QString text;
+	bool pressed;
 }; // class MsgBoxButtonPrivate
 
 
@@ -77,12 +80,20 @@ public:
 class MsgBoxButton
 	:	public QAbstractButton
 {
+	Q_OBJECT
+
 public:
 	explicit MsgBoxButton( const QString & text, QWidget * parent = 0 )
 		:	QAbstractButton( parent )
 		,	d( new MsgBoxButtonPrivate( text, this ) )
 	{
 		d->init();
+
+		connect( this, &QAbstractButton::pressed,
+			this, &MsgBoxButton::_q_pressed );
+
+		connect( this, &QAbstractButton::released,
+			this, &MsgBoxButton::_q_released );
 	}
 
 	virtual ~MsgBoxButton()
@@ -115,6 +126,31 @@ protected:
 		p.setPen( palette().color( QPalette::WindowText ) );
 
 		p.drawText( rect(), d->text, QTextOption( Qt::AlignCenter ) );
+
+		if( d->pressed )
+		{
+			QColor c = palette().color( QPalette::Highlight );
+			c.setAlpha( 75 );
+
+			p.setPen( Qt::NoPen );
+			p.setBrush( c );
+			p.drawRect( rect() );
+		}
+	}
+
+private slots:
+	void _q_pressed()
+	{
+		d->pressed = true;
+
+		update();
+	}
+
+	void _q_released()
+	{
+		d->pressed = false;
+
+		update();
 	}
 
 private:
@@ -252,6 +288,7 @@ public:
 	MessageBoxPrivate( const QString & titl,
 		const QString & txt, MessageBox * parent, QWidget * w )
 		:	q( parent )
+		,	frame( 0 )
 		,	vbox( 0 )
 		,	hbox( 0 )
 		,	title( 0 )
@@ -270,6 +307,7 @@ public:
 
 	MessageBox * q;
 	QMap< QAbstractButton*, MessageBox::ButtonRole > buttonsMap;
+	QFrame * frame;
 	QVBoxLayout * vbox;
 	QHBoxLayout * hbox;
 	MsgBoxTitle * title;
@@ -288,21 +326,24 @@ MessageBoxPrivate::init( const QString & titl, const QString & txt )
 {
 	q->setModal( true );
 
-	vbox = new QVBoxLayout( q );
+	frame = new QFrame( q );
+	frame->setFrameStyle( QFrame::StyledPanel | QFrame::Sunken );
+
+	vbox = new QVBoxLayout( frame );
 	vbox->setSpacing( 0 );
 	vbox->setContentsMargins( 3, 3, 3, 3 );
 
-	title = new MsgBoxTitle( titl, q );
+	title = new MsgBoxTitle( titl, frame );
 	vbox->addWidget( title );
 
-	QFrame * h1 = new QFrame( q );
+	QFrame * h1 = new QFrame( frame );
 	h1->setFrameStyle( QFrame::HLine | QFrame::Sunken );
 	vbox->addWidget( h1 );
 
-	scrollArea = new ScrollArea( q );
+	scrollArea = new ScrollArea( frame );
 	scrollArea->setWidgetResizable( true );
 
-	textLabel = new TextLabel( q );
+	textLabel = new TextLabel( frame );
 	textLabel->setBackgroundRole( QPalette::Window );
 	textLabel->setAutoFillBackground( true );
 	textLabel->setText( txt );
@@ -310,7 +351,7 @@ MessageBoxPrivate::init( const QString & titl, const QString & txt )
 
 	vbox->addWidget( scrollArea );
 
-	QFrame * h2 = new QFrame( q );
+	QFrame * h2 = new QFrame( frame );
 	h2->setFrameStyle( QFrame::HLine | QFrame::Sunken );
 	vbox->addWidget( h2 );
 
@@ -318,12 +359,14 @@ MessageBoxPrivate::init( const QString & titl, const QString & txt )
 	hbox->setSpacing( 0 );
 	hbox->setContentsMargins( 0, 0, 0, 0 );
 
-	okButton = new MsgBoxButton( QObject::tr( "OK" ), q );
+	okButton = new MsgBoxButton( QObject::tr( "OK" ), frame );
 	buttonsMap.insert( okButton, MessageBox::AcceptRole );
 	buttons.append( okButton );
 	hbox->addWidget( okButton );
 
 	vbox->addLayout( hbox );
+
+	q->resize( vbox->sizeHint() );
 }
 
 void
@@ -374,7 +417,7 @@ MessageBox::addButton( QAbstractButton * button, ButtonRole role )
 {
 	if( !d->buttonsMap.contains( button ) )
 	{
-		QFrame * line = new QFrame( this );
+		QFrame * line = new QFrame( d->frame );
 		line->setFrameStyle( QFrame::VLine | QFrame::Sunken );
 
 		d->buttonSeparators.append( line );
@@ -386,13 +429,15 @@ MessageBox::addButton( QAbstractButton * button, ButtonRole role )
 
 		connect( button, &QAbstractButton::clicked,
 			this, &MessageBox::_q_clicked );
+
+		resize( d->vbox->sizeHint() );
 	}
 }
 
 QAbstractButton *
 MessageBox::addButton( const QString & text, ButtonRole role )
 {
-	MsgBoxButton * button = new MsgBoxButton( text, this );
+	MsgBoxButton * button = new MsgBoxButton( text, d->frame );
 
 	addButton( button, role );
 
@@ -459,6 +504,8 @@ MessageBox::removeButton( QAbstractButton * button )
 			d->buttonSeparators.removeAt( index - 1 );
 
 			disconnect( button, 0, this, 0 );
+
+			resize( d->vbox->sizeHint() );
 		}
 	}
 }
@@ -492,6 +539,8 @@ MessageBox::setTextFormat( Qt::TextFormat fmt )
 void
 MessageBox::resizeEvent( QResizeEvent * e )
 {
+	d->frame->resize( e->size() );
+
 	d->adjustSize();
 
 	e->accept();
@@ -522,3 +571,5 @@ MessageBox::_q_clicked()
 }
 
 } /* namespace QtMWidgets */
+
+#include "messagebox.moc"

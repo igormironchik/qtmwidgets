@@ -286,6 +286,8 @@ public:
 void
 MessageBoxPrivate::init( const QString & titl, const QString & txt )
 {
+	q->setModal( true );
+
 	vbox = new QVBoxLayout( q );
 	vbox->setSpacing( 0 );
 	vbox->setContentsMargins( 3, 3, 3, 3 );

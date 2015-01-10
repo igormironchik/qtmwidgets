@@ -74,6 +74,14 @@ class BusyIndicator
 		By default this color is QPalette::Highlight.
 	*/
 	Q_PROPERTY( QColor color READ color WRITE setColor )
+	/*!
+		\property radius
+
+		\brief radius of the busy indicator.
+
+		By default, this property is 10.
+	*/
+	Q_PROPERTY( int radius READ radius WRITE setRadius )
 
 public:
 	BusyIndicator( QWidget * parent = 0 );
@@ -88,6 +96,11 @@ public:
 	const QColor & color() const;
 	//! Set color used to paint indicator.
 	void setColor( const QColor & c );
+
+	//! \return Radius.
+	int radius() const;
+	//! Set radius.
+	void setRadius( int r );
 
 	virtual QSize minimumSizeHint() const;
 	virtual QSize sizeHint() const;

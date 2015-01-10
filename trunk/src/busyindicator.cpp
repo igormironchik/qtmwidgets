@@ -141,6 +141,25 @@ BusyIndicator::setColor( const QColor & c )
 	}
 }
 
+int
+BusyIndicator::radius() const
+{
+	return d->outerRadius;
+}
+
+void
+BusyIndicator::setRadius( int r )
+{
+	if( d->outerRadius != r )
+	{
+		d->outerRadius = r;
+		d->innerRadius = d->outerRadius * 0.6;
+		d->size = QSize( d->outerRadius * 2, d->outerRadius * 2 );
+
+		updateGeometry();
+	}
+}
+
 QSize
 BusyIndicator::minimumSizeHint() const
 {

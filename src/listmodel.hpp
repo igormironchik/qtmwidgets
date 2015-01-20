@@ -38,7 +38,6 @@
 // QtMWidgets include.
 #include "abstractlistmodel.hpp"
 #include "private/listmodel_p.hpp"
-#include "fingergeometry.hpp"
 
 
 namespace QtMWidgets {
@@ -154,7 +153,7 @@ public:
 		return true;
 	}
 
-	//! \return COunt of rows.
+	//! \return Count of rows.
 	virtual int rowCount() const
 	{
 		return d->data.count();
@@ -183,13 +182,12 @@ public:
 		Q_UNUSED( order )
 	}
 
-	//! \return Height for the given \a row row for the \a width width.
-	virtual int heightForWidth( int row, int width ) const
+	//! Reset model.
+	virtual void reset()
 	{
-		Q_UNUSED( row )
-		Q_UNUSED( width )
+		d->data.clear();
 
-		return FingerGeometry::height();
+		emit modelReset();
 	}
 
 protected:

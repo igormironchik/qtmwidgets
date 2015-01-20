@@ -35,6 +35,7 @@
 #include "abstractscrollarea.hpp"
 #include "private/abstractscrollarea_p.hpp"
 #include "listmodel.hpp"
+#include "fingergeometry.hpp"
 
 // Qt include.
 #include <QWidget>
@@ -155,7 +156,8 @@ private:
 			while( y < r.y() + r.height() && row < data->model->rowCount() )
 			{
 				const int width = r.width() - spacing * 2;
-				const int height = data->model->heightForWidth( row, width );
+				const int height =
+					data->q_func()->rowHeightForWidth( row, width );
 
 				const QRect rowRect( x, y, width, height );
 
@@ -325,7 +327,7 @@ public:
 
 		while( row >= 0 && row < d->model->rowCount() )
 		{
-			int height = d->model->heightForWidth( row, width );
+			int height = rowHeightForWidth( row, width );
 
 			const QRect r( x, y, width, height );
 
@@ -393,7 +395,7 @@ public:
 					const QRect r = d->viewport->rect();
 
 					const int offset = r.y() + r.height() -
-						d->model->heightForWidth( row,
+						rowHeightForWidth( row,
 							r.width() - d->spacing * 2 ) - d->spacing - 1;
 
 					const int delta = d->calculateScroll( row, offset );
@@ -409,7 +411,7 @@ public:
 					const QRect r = d->viewport->rect();
 
 					const int offset = r.y() + r.height() / 2 -
-						d->model->heightForWidth( row,
+						rowHeightForWidth( row,
 							r.width() - d->spacing * 2 ) / 2;
 
 					const int delta = d->calculateScroll( row, offset );
@@ -446,7 +448,7 @@ public:
 			const int x = r.x() + spacing;
 			int y = r.y() + d->offset;
 			const int width = r.width() - spacing * 2;
-			int height = d->model->heightForWidth( tmpRow, width );
+			int height = rowHeightForWidth( tmpRow, width );
 
 			while( tmpRow < row )
 			{
@@ -456,7 +458,7 @@ public:
 					return QRect();
 
 				++tmpRow;
-				height = d->model->heightForWidth( tmpRow, width );
+				height = rowHeightForWidth( tmpRow, width );
 			}
 
 			return r.intersected( QRect( x, y, width, height ) );
@@ -478,6 +480,15 @@ protected:
 	//! Draw row in the list view.
 	virtual void drawRow( QPainter * painter,
 		const QRect & rect, int row ) = 0;
+
+	//! \return Height of the given \a row row for the given \a width width.
+	virtual int rowHeightForWidth( int row, int width ) const
+	{
+		Q_UNUSED( row )
+		Q_UNUSED( width )
+
+		return FingerGeometry::height();
+	}
 
 	virtual void scrollContentsBy( int dx, int dy )
 	{
@@ -699,9 +710,11 @@ AbstractListViewPrivate< T >::maxOffset() const
 	int row = model->rowCount() - 1;
 	int y = 0;
 
+	const AbstractListView< T > * q = q_func();
+
 	while( y < r.height() && row >= 0 )
 	{
-		y += model->heightForWidth( row, width ) + spacing;
+		y += q->rowHeightForWidth( row, width ) + spacing;
 		--row;
 	}
 
@@ -723,13 +736,15 @@ AbstractListViewPrivate< T >::calculateScroll( int row,
 
 	int tmpRow = firstVisibleRow;
 
+	const AbstractListView< T > * q = q_func();
+
 	if( tmpRow > row )
 	{
 		--tmpRow;
 
 		while( tmpRow >= row )
 		{
-			delta += spacing + model->heightForWidth( tmpRow, width );
+			delta += spacing + q->rowHeightForWidth( tmpRow, width );
 			--tmpRow;
 		}
 	}
@@ -737,7 +752,7 @@ AbstractListViewPrivate< T >::calculateScroll( int row,
 	{
 		while( tmpRow < row )
 		{
-			delta -= ( model->heightForWidth( tmpRow, width ) + spacing );
+			delta -= ( q->rowHeightForWidth( tmpRow, width ) + spacing );
 			++tmpRow;
 		}
 	}
@@ -757,9 +772,11 @@ AbstractListViewPrivate< T >::canScrollDown( int row ) const
 	int y = r.y() + spacing;
 	const int width = r.width() - spacing * 2;
 
+	const AbstractListView< T > * q = q_func();
+
 	while( y < r.y() + r.height() && row < model->rowCount() )
 	{
-		y += model->heightForWidth( row, width ) + spacing;
+		y += q->rowHeightForWidth( row, width ) + spacing;
 		++row;
 	}
 
@@ -774,6 +791,8 @@ inline
 void
 AbstractListViewPrivate< T >::normalizeOffset( int & row, int & offset )
 {
+	AbstractListView< T > * q = q_func();
+
 	if( offset > 0 )
 	{
 		if( row > 0 )
@@ -782,7 +801,7 @@ AbstractListViewPrivate< T >::normalizeOffset( int & row, int & offset )
 
 			while( offset > 0 )
 			{
-				const int delta = model->heightForWidth( row,
+				const int delta = q->rowHeightForWidth( row,
 					width ) + spacing;
 				offset -= delta;
 
@@ -803,7 +822,7 @@ AbstractListViewPrivate< T >::normalizeOffset( int & row, int & offset )
 		if( canScrollDown( row ) )
 		{
 			const int width = viewport->rect().width() - spacing * 2;
-			int height = model->heightForWidth( row, width );
+			int height = q->rowHeightForWidth( row, width );
 
 			while( qAbs( offset ) > height + spacing )
 			{
@@ -813,7 +832,7 @@ AbstractListViewPrivate< T >::normalizeOffset( int & row, int & offset )
 				if( row < model->rowCount() - 1 )
 				{
 					++row;
-					height = model->heightForWidth( row, width );
+					height = q->rowHeightForWidth( row, width );
 				}
 				else
 				{
@@ -837,12 +856,14 @@ inline
 QSize
 AbstractListViewPrivate< T >::calcScrolledAreaSize() const
 {
+	const AbstractListView< T > * q = q_func();
+
 	const int width = viewport->rect().width();
 	const int rowWidth = width - spacing * 2;
 	int height = spacing;
 
 	for( int i = 0, last = model->rowCount(); i < last; ++i )
-		height += model->heightForWidth( i, rowWidth ) + spacing;
+		height += q->rowHeightForWidth( i, rowWidth ) + spacing;
 
 	return QSize( width, height );
 }

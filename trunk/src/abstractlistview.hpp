@@ -506,6 +506,8 @@ protected:
 	{
 		AbstractListViewPrivate< T > * d = d_func();
 
+		recalculateSize();
+
 		d->updateIfNeeded( first, last );
 	}
 

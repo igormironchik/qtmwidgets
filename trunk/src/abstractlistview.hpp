@@ -152,7 +152,7 @@ private:
 		const int x = spacing;
 		int y = data->offset + spacing;
 
-		if( row >= 0 )
+		if( data->model && row >= 0 )
 			while( y < r.y() + r.height() && row < data->model->rowCount() )
 			{
 				const int width = r.width() - spacing * 2;
@@ -325,25 +325,26 @@ public:
 		if( p.x() < x || p.x() > x + width )
 			return -1;
 
-		while( row >= 0 && row < d->model->rowCount() )
-		{
-			int height = rowHeightForWidth( row, width );
+		if( d->model )
+			while( row >= 0 && row < d->model->rowCount() )
+			{
+				int height = rowHeightForWidth( row, width );
 
-			const QRect r( x, y, width, height );
+				const QRect r( x, y, width, height );
 
-			if( r.contains( p ) )
-				return row;
+				if( r.contains( p ) )
+					return row;
 
-			if( qAbs( y ) + height + spacing > qAbs( p.y() ) )
-				return -1;
+				if( qAbs( y ) + height + spacing > qAbs( p.y() ) )
+					return -1;
 
-			if( p.y() < y )
-				--row;
-			else
-				++row;
+				if( p.y() < y )
+					--row;
+				else
+					++row;
 
-			y += ( p.y() < y ? - ( height + spacing ) : height + spacing );
-		}
+				y += ( p.y() < y ? - ( height + spacing ) : height + spacing );
+			}
 
 		return -1;
 	}
@@ -357,7 +358,7 @@ public:
 	{
 		AbstractListViewPrivate< T > * d = d_func();
 
-		if( row >= 0 && row < d->model->rowCount() )
+		if( d->model && row >= 0 && row < d->model->rowCount() )
 		{
 			switch( hint )
 			{
@@ -538,7 +539,7 @@ protected:
 
 		if( d->firstVisibleRow >= first && d->firstVisibleRow <= last )
 		{
-			if( d->model->rowCount() )
+			if( d->model && d->model->rowCount() )
 			{
 				if( first - 1 >= 0 )
 					d->firstVisibleRow = first - 1;
@@ -656,8 +657,9 @@ protected:
 
 		AbstractListViewPrivate< T > * d = d_func();
 
-		if( scrolledAreaSize().height() - topLeftPointShownArea().y() <=
-			d->viewport->height() )
+		if( d->model &&
+			scrolledAreaSize().height() - topLeftPointShownArea().y() <=
+				d->viewport->height() )
 				scrollTo( d->model->rowCount() - 1, PositionAtBottom );
 	}
 
@@ -707,7 +709,7 @@ AbstractListViewPrivate< T >::maxOffset() const
 {
 	const QRect r = viewport->rect();
 	const int width = r.width() - spacing * 2;
-	int row = model->rowCount() - 1;
+	int row = ( model ? model->rowCount() - 1 : -1 );
 	int y = 0;
 
 	const AbstractListView< T > * q = q_func();
@@ -766,6 +768,9 @@ bool
 AbstractListViewPrivate< T >::canScrollDown( int row ) const
 {
 	if( row == -1 )
+		return false;
+
+	if( !model )
 		return false;
 
 	const QRect r = viewport->rect();
@@ -829,7 +834,7 @@ AbstractListViewPrivate< T >::normalizeOffset( int & row, int & offset )
 				const int delta = height + spacing;
 				offset += delta;
 
-				if( row < model->rowCount() - 1 )
+				if( model && row < model->rowCount() - 1 )
 				{
 					++row;
 					height = q->rowHeightForWidth( row, width );
@@ -862,8 +867,9 @@ AbstractListViewPrivate< T >::calcScrolledAreaSize() const
 	const int rowWidth = width - spacing * 2;
 	int height = spacing;
 
-	for( int i = 0, last = model->rowCount(); i < last; ++i )
-		height += q->rowHeightForWidth( i, rowWidth ) + spacing;
+	if( model )
+		for( int i = 0, last = model->rowCount(); i < last; ++i )
+			height += q->rowHeightForWidth( i, rowWidth ) + spacing;
 
 	return QSize( width, height );
 }

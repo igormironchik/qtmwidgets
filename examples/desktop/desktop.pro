@@ -20,4 +20,5 @@ SUBDIRS = picker \
           slider \
           progressbar \
           listview \
-          messagebox
+          messagebox \
+          imagelist

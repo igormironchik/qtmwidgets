@@ -85,7 +85,7 @@ public:
 	AbstractListViewPrivate( AbstractListView< T > * parent );
 	virtual ~AbstractListViewPrivate();
 
-	int maxOffset() const;
+	int maxOffsetAndFirstVisibleRow( int * row = 0 ) const;
 	int calculateScroll( int row, int expectedOffset ) const;
 	bool canScrollDown( int row ) const;
 	void normalizeOffset( int & row, int & offset );
@@ -707,23 +707,26 @@ AbstractListViewPrivate< T >::~AbstractListViewPrivate()
 template< typename T >
 inline
 int
-AbstractListViewPrivate< T >::maxOffset() const
+AbstractListViewPrivate< T >::maxOffsetAndFirstVisibleRow( int * row ) const
 {
 	const QRect r = viewport->rect();
 	const int width = r.width() - spacing * 2;
-	int row = ( model ? model->rowCount() - 1 : -1 );
+	int tmpRow = ( model ? model->rowCount() - 1 : -1 );
 	int y = 0;
 
 	const AbstractListView< T > * q = q_func();
 
-	while( y < r.height() && row >= 0 )
+	while( y < r.height() && tmpRow >= 0 )
 	{
-		y += q->rowHeightForWidth( row, width ) + spacing;
-		--row;
+		y += q->rowHeightForWidth( tmpRow, width ) + spacing;
+		--tmpRow;
 	}
 
+	if( row )
+		*row = tmpRow + 1;
+
 	if( y > r.height() )
-		return r.height() - y - 1;
+		return r.height() - y - 1 - spacing;
 	else
 		return 0;
 }
@@ -775,19 +778,11 @@ AbstractListViewPrivate< T >::canScrollDown( int row ) const
 	if( !model )
 		return false;
 
-	const QRect r = viewport->rect();
-	int y = r.y() + spacing;
-	const int width = r.width() - spacing * 2;
+	int tmpRow = 0;
 
-	const AbstractListView< T > * q = q_func();
+	maxOffsetAndFirstVisibleRow( &tmpRow );
 
-	while( y < r.y() + r.height() && row < model->rowCount() )
-	{
-		y += q->rowHeightForWidth( row, width ) + spacing;
-		++row;
-	}
-
-	if( row < model->rowCount() )
+	if( row < tmpRow )
 		return true;
 	else
 		return false;
@@ -808,10 +803,6 @@ AbstractListViewPrivate< T >::normalizeOffset( int & row, int & offset )
 
 			while( offset > 0 )
 			{
-				const int delta = q->rowHeightForWidth( row,
-					width ) + spacing;
-				offset -= delta;
-
 				if( row != 0 )
 					--row;
 				else
@@ -819,6 +810,10 @@ AbstractListViewPrivate< T >::normalizeOffset( int & row, int & offset )
 					offset = 0;
 					break;
 				}
+
+				const int delta = q->rowHeightForWidth( row,
+					width ) + spacing;
+				offset -= delta;
 			}
 		}
 		else
@@ -850,7 +845,7 @@ AbstractListViewPrivate< T >::normalizeOffset( int & row, int & offset )
 		}
 		else
 		{
-			const int max = maxOffset();
+			const int max = maxOffsetAndFirstVisibleRow();
 
 			if( offset < max )
 				offset = max;

@@ -40,6 +40,8 @@
 #include <QHBoxLayout>
 #include <QResizeEvent>
 #include <QFrame>
+#include <QApplication>
+#include <QScreen>
 
 // QtMWidgets include.
 #include "messagebox.hpp"
@@ -298,6 +300,8 @@ public:
 		,	clickedButton( 0 )
 		,	screenMargin( 6 )
 		,	window( w )
+		,	h1( 0 )
+		,	h2( 0 )
 	{
 		init( titl, txt );
 	}
@@ -319,6 +323,8 @@ public:
 	QList< QAbstractButton* > buttons;
 	int screenMargin;
 	QWidget * window;
+	QFrame * h1;
+	QFrame * h2;
 }; // class MessageBoxPrivate
 
 void
@@ -336,7 +342,7 @@ MessageBoxPrivate::init( const QString & titl, const QString & txt )
 	title = new MsgBoxTitle( titl, frame );
 	vbox->addWidget( title );
 
-	QFrame * h1 = new QFrame( frame );
+	h1 = new QFrame( frame );
 	h1->setFrameStyle( QFrame::HLine | QFrame::Sunken );
 	vbox->addWidget( h1 );
 
@@ -351,7 +357,7 @@ MessageBoxPrivate::init( const QString & titl, const QString & txt )
 
 	vbox->addWidget( scrollArea );
 
-	QFrame * h2 = new QFrame( frame );
+	h2 = new QFrame( frame );
 	h2->setFrameStyle( QFrame::HLine | QFrame::Sunken );
 	vbox->addWidget( h2 );
 
@@ -372,24 +378,46 @@ MessageBoxPrivate::init( const QString & titl, const QString & txt )
 void
 MessageBoxPrivate::adjustSize()
 {
+	QSize ws = QApplication::primaryScreen()->availableSize();
+	QSize s = q->size();
+	QRect wr = QApplication::primaryScreen()->availableGeometry();
+
 	if( window )
 	{
-		const QSize ws = window->window()->size();
-		const QSize s = q->size();
-		const QRect wr = window->window()->rect();
-
-		if( s.width() > ws.width() - screenMargin * 2 ||
-			s.height() > ws.height() - screenMargin * 2 )
-		{
-			q->resize( QSize( qMin( s.width(), ws.width() - screenMargin * 2 ),
-				qMin( s.height(), ws.height() - screenMargin * 2 ) ) );
-
-			q->move( wr.x() + ( ws.width() - q->width() ) / 2,
-				wr.y() + ( ws.height() - q->height() ) / 2 );
-
-			vbox->update();
-		}
+		ws = window->window()->size();
+		wr = window->window()->rect();
 	}
+
+	qreal factor = (qreal) s.height() / (qreal) s.width();
+
+	if( factor > 1.5 )
+	{
+		const int width = qRound( (qreal) s.width() * factor );
+
+		s = QSize( width,
+				textLabel->heightForWidth( width ) + title->height() +
+					okButton->height() + h1->height() + h2->height() );
+	}
+
+	if( s.width() > ws.width() - screenMargin * 2 )
+	{
+		const int width = ws.width() - screenMargin * 2;
+
+		s = QSize( width,
+			textLabel->heightForWidth( width ) + title->height() +
+				okButton->height() + h1->height() + h2->height() );
+	}
+
+	if( s.height() > ws.height() - screenMargin * 2 )
+		s = QSize( s.width(), ws.height() - screenMargin * 2 );
+
+
+	q->resize( s );
+
+	q->move( wr.x() + ( ws.width() - s.width() ) / 2,
+		wr.y() + ( ws.height() - s.height() ) / 2 );
+
+	vbox->update();
 }
 
 
@@ -431,6 +459,8 @@ MessageBox::addButton( QAbstractButton * button, ButtonRole role )
 			this, &MessageBox::_q_clicked );
 
 		resize( d->vbox->sizeHint() );
+
+		d->adjustSize();
 	}
 }
 
@@ -506,6 +536,8 @@ MessageBox::removeButton( QAbstractButton * button )
 			disconnect( button, 0, this, 0 );
 
 			resize( d->vbox->sizeHint() );
+
+			d->adjustSize();
 		}
 	}
 }
@@ -540,8 +572,6 @@ void
 MessageBox::resizeEvent( QResizeEvent * e )
 {
 	d->frame->resize( e->size() );
-
-	d->adjustSize();
 
 	e->accept();
 }

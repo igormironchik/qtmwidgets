@@ -384,8 +384,20 @@ MessageBoxPrivate::adjustSize()
 
 	if( window )
 	{
-		ws = window->window()->size();
-		wr = window->window()->rect();
+		ws = window->size();
+		wr = window->rect();
+	}
+
+	{
+		int width = 0;
+
+		foreach( QAbstractButton * btn, buttons )
+			width += btn->sizeHint().width();
+
+		if( width > s.width() )
+			s = QSize( width,
+					textLabel->heightForWidth( width ) + title->height() +
+						okButton->height() + h1->height() + h2->height() );
 	}
 
 	qreal factor = (qreal) s.height() / (qreal) s.width();
@@ -414,8 +426,13 @@ MessageBoxPrivate::adjustSize()
 
 	q->resize( s );
 
-	q->move( wr.x() + ( ws.width() - s.width() ) / 2,
+	QPoint p = QPoint( wr.x() + ( ws.width() - s.width() ) / 2,
 		wr.y() + ( ws.height() - s.height() ) / 2 );
+
+	if( window )
+		p = window->mapToGlobal( p );
+
+	q->move( p );
 
 	vbox->update();
 }

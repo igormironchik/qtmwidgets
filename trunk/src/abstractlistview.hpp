@@ -325,6 +325,8 @@ public:
 		if( p.x() < x || p.x() > x + width )
 			return -1;
 
+		bool lastIteration = false;
+
 		if( d->model )
 			while( row >= 0 && row < d->model->rowCount() )
 			{
@@ -335,15 +337,36 @@ public:
 				if( r.contains( p ) )
 					return row;
 
-				if( qAbs( y ) + height + spacing > qAbs( p.y() ) )
-					return -1;
+				if( !lastIteration )
+				{
+					if( p.y() < y )
+					{
+						int prevRowHeight = -1;
 
-				if( p.y() < y )
-					--row;
+						--row;
+
+						if( row < 0 )
+							return -1;
+
+						prevRowHeight = rowHeightForWidth( row, width );
+
+						y -= ( prevRowHeight + spacing );
+
+						if( y < p.y() )
+							lastIteration = true;
+					}
+					else if( p.y() > y )
+					{
+						++row;
+
+						y += height + spacing;
+
+						if( y > p.y() )
+							lastIteration = true;
+					}
+				}
 				else
-					++row;
-
-				y += ( p.y() < y ? - ( height + spacing ) : height + spacing );
+					return -1;
 			}
 
 		return -1;
@@ -637,7 +660,8 @@ protected:
 		{
 			const int row = rowAt( e->pos() );
 
-			emit rowTouched( row );
+			if( row >= 0 && row < d->model->rowCount() )
+				emit rowTouched( row );
 
 			if( d->elapsedTimer.elapsed() <= 500 )
 				++d->clickCount;
@@ -646,7 +670,7 @@ protected:
 
 			d->elapsedTimer.start();
 
-			if( d->clickCount == 2 )
+			if( d->clickCount == 2 && row >= 0 && row < d->model->rowCount())
 				emit rowDoubleTouched( row );
 		}
 	}

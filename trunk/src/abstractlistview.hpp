@@ -608,7 +608,10 @@ protected:
 
 		d->timer->stop();
 
-		emit rowLongTouched( rowAt( d->mousePos ) );
+		const int row = rowAt( d->mousePos );
+
+		if( row >= 0 && row < d->model->rowCount() )
+			emit rowLongTouched( row );
 	}
 
 	virtual void recalculateSize()

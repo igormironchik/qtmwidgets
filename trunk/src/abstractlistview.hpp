@@ -659,7 +659,7 @@ protected:
 
 		d->timer->stop();
 
-		if( e->button() == Qt::LeftButton && d->mouseMoveDelta <= 3 )
+		if( e->button() == Qt::LeftButton && d->mouseMoveDelta <= 5 )
 		{
 			const int row = rowAt( e->pos() );
 

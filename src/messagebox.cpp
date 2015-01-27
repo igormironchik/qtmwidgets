@@ -333,7 +333,7 @@ MessageBoxPrivate::init( const QString & titl, const QString & txt )
 	q->setModal( true );
 
 	frame = new QFrame( q );
-	frame->setFrameStyle( QFrame::StyledPanel | QFrame::Sunken );
+	frame->setFrameStyle( QFrame::Box | QFrame::Plain );
 
 	vbox = new QVBoxLayout( frame );
 	vbox->setSpacing( 0 );

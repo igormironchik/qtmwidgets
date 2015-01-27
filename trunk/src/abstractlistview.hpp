@@ -615,14 +615,14 @@ protected:
 
 	virtual void mouseMoveEvent( QMouseEvent * e )
 	{
-		AbstractListViewBase::mouseMoveEvent( e );
-
 		AbstractListViewPrivate< T > * d = d_func();
 
 		d->mouseMoveDelta += ( d->mousePos - e->pos() ).manhattanLength();
 
 		if( d->mouseMoveDelta > 3 )
 			d->timer->stop();
+
+		AbstractListViewBase::mouseMoveEvent( e );
 	}
 
 	virtual void mouseReleaseEvent( QMouseEvent * e )

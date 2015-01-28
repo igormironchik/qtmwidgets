@@ -645,7 +645,7 @@ protected:
 
 		d->mouseMoveDelta += ( d->mousePos - e->pos() ).manhattanLength();
 
-		if( d->mouseMoveDelta > 3 )
+		if( d->mouseMoveDelta > FingerGeometry::longTouchBounce() )
 			d->timer->stop();
 
 		AbstractListViewBase::mouseMoveEvent( e );
@@ -659,7 +659,8 @@ protected:
 
 		d->timer->stop();
 
-		if( e->button() == Qt::LeftButton && d->mouseMoveDelta <= 5 )
+		if( e->button() == Qt::LeftButton &&
+			d->mouseMoveDelta <= FingerGeometry::touchBounce() )
 		{
 			const int row = rowAt( e->pos() );
 

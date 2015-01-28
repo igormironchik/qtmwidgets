@@ -32,6 +32,7 @@
 #include "textedit.hpp"
 #include "private/scrollarea_p.hpp"
 #include "private/cursorshifter.hpp"
+#include "fingergeometry.hpp"
 
 // Qt include.
 #include <QAbstractTextDocumentLayout>
@@ -1474,7 +1475,8 @@ TextEdit::mouseReleaseEvent( QMouseEvent * e )
 	{
 		TextEditPrivate * d = d_func();
 
-		if( d->leftMouseButtonPressed && d->mouseMoveDelta < 3 )
+		if( d->leftMouseButtonPressed &&
+			d->mouseMoveDelta <= FingerGeometry::touchBounce() )
 		{
 			const QTextCursor oldSelection = d->cursor;
 

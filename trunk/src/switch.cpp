@@ -32,6 +32,7 @@
 #include "switch.hpp"
 #include "color.hpp"
 #include "private/drawing.hpp"
+#include "fingergeometry.hpp"
 
 // Qt include.
 #include <QStyleOption>
@@ -404,7 +405,7 @@ Switch::mouseReleaseEvent( QMouseEvent * event )
 
 		const int distance = rect().width() - d->radius * 2;
 
-		if( d->mouseMoveDelta < 3 )
+		if( d->mouseMoveDelta <= FingerGeometry::touchBounce() )
 		{
 			switch( d->state )
 			{

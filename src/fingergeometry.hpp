@@ -49,6 +49,12 @@ public:
 
 	//! \return Height of finger.
 	static int height();
+
+	//! \return Bounce of the touch.
+	static int touchBounce();
+
+	//! \return Bounce of the long touch.
+	static int longTouchBounce();
 }; // class FingerGeometry
 
 } /* namespace QtMWidgets */

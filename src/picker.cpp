@@ -33,6 +33,7 @@
 #include "private/drawing.hpp"
 #include "color.hpp"
 #include "scroller.hpp"
+#include "fingergeometry.hpp"
 
 // Qt include.
 #include <QStandardItemModel>
@@ -1060,8 +1061,9 @@ Picker::mouseReleaseEvent( QMouseEvent * event )
 	{
 		d->leftMouseButtonPressed = false;
 
-		if( !d->mouseWasMoved || d->mouseMoveDelta < 3 )
-			d->setCurrentIndex( event->pos() );
+		if( !d->mouseWasMoved
+			|| d->mouseMoveDelta <= FingerGeometry::touchBounce() )
+				d->setCurrentIndex( event->pos() );
 
 		event->accept();
 	}

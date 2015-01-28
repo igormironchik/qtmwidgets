@@ -94,4 +94,22 @@ FingerGeometry::height()
 #endif
 }
 
+int
+FingerGeometry::touchBounce()
+{
+	static const int bounce = qRound(
+		(qreal) qMax( FingerGeometry::height(), FingerGeometry::width() ) * 0.2 );
+
+	return bounce;
+}
+
+int
+FingerGeometry::longTouchBounce()
+{
+	static const int bounce = qRound(
+		(qreal) qMax( FingerGeometry::height(), FingerGeometry::width() ) * 0.6 );
+
+	return bounce;
+}
+
 } /* namespace QtMWidgets */

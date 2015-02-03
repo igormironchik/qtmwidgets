@@ -89,6 +89,9 @@ darkerColor( const QColor & c, int b )
 
 	v -= b;
 
+	if( v < 0 )
+		v = 0;
+
 	hsv.setHsv( h, s, v, a );
 
 	return hsv.convertTo( c.spec() );

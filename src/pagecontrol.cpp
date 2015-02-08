@@ -379,7 +379,7 @@ PageControl::mouseReleaseEvent( QMouseEvent * e )
 		{
 			const QPoint pos = e->pos() - d->clickPos;
 
-			if( pos.manhattanLength() < 3 )
+			if( pos.manhattanLength() <= FingerGeometry::touchBounce() )
 			{
 				const int index = d->findButton( e->pos() );
 
@@ -387,6 +387,8 @@ PageControl::mouseReleaseEvent( QMouseEvent * e )
 					setCurrentIndex( index );
 			}
 		}
+
+		d->leftButtonPressed = false;
 
 		e->accept();
 	}

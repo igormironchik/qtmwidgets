@@ -966,6 +966,12 @@ DateTimePicker::setTimeSpec( Qt::TimeSpec spec )
 	}
 }
 
+Scroller *
+DateTimePicker::scroller() const
+{
+	return d->scroller;
+}
+
 QSize
 DateTimePicker::sizeHint() const
 {

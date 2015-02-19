@@ -40,6 +40,9 @@
 
 namespace QtMWidgets {
 
+class Scroller;
+
+
 //
 // DateTimePicker
 //
@@ -466,6 +469,9 @@ public:
 		\sa timeSpec.
 	*/
 	void setTimeSpec( Qt::TimeSpec spec );
+
+	//! \return Scroller interface.
+	Scroller * scroller() const;
 
 	virtual QSize sizeHint() const;
 

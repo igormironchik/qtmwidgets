@@ -811,6 +811,12 @@ Picker::setHighlightColor( const QColor & c )
 	}
 }
 
+Scroller *
+Picker::scroller() const
+{
+	return d->scroller;
+}
+
 QSize
 Picker::sizeHint() const
 {

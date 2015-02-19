@@ -40,6 +40,9 @@
 
 namespace QtMWidgets {
 
+class Scroller;
+
+
 //
 // Picker
 //
@@ -352,6 +355,9 @@ public:
 	QColor highlightColor() const;
 	//! Set color used to highlight the current item.
 	void setHighlightColor( const QColor & c );
+
+	//! \return Scroller interface.
+	Scroller * scroller() const;
 
 	virtual QSize sizeHint() const;
 	virtual QSize minimumSizeHint() const;

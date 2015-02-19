@@ -38,6 +38,9 @@
 
 namespace QtMWidgets {
 
+class Scroller;
+
+
 //
 // AbstractScrollArea
 //
@@ -71,7 +74,7 @@ class AbstractScrollAreaPrivate;
 	ScrollArea, which inherits AbstractScrollArea, provides smooth
 	scrolling for any QWidget (i.e., the widget is scrolled pixel by
 	pixel). You only need to subclass AbstractScrollArea if you need
-	more specialized behavior. This is, for instance, true if the
+	more specialized behaviour. This is, for instance, true if the
 	entire contents of the area is not suitable for being drawn on a
 	QWidget or if you do not want smooth scrolling.
 
@@ -132,7 +135,7 @@ class AbstractScrollArea
 
 public:
 	/*!
-		This enums describes the variuos modes of scroll indicators.
+		This enum describes the various modes of scroll indicators.
 	*/
 	enum ScrollIndicatorPolicy {
 		/*!
@@ -140,7 +143,7 @@ public:
 			is too large to fit and not otherwise. This is default.
 		*/
 		ScrollIndicatorAsNeeded = 0,
-		//! AbstractScrollArea never shows scroll indocators.
+		//! AbstractScrollArea never shows scroll indicators.
 		ScrollIndicatorAlwaysOff = 1,
 		//! AbstractScrollArea always shows scroll indicators.
 		ScrollIndicatorAlwaysOn = 2
@@ -180,6 +183,9 @@ public:
 		\sa setViewport()
 	*/
 	virtual void setupViewport( QWidget * viewport );
+
+	//! \return Scroller interface.
+	Scroller * scroller() const;
 
 	//! \return Color used to paint scrolling indicators.
 	QColor indicatorColor() const;

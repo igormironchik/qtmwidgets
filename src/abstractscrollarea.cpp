@@ -751,6 +751,12 @@ AbstractScrollArea::setupViewport( QWidget * )
 {
 }
 
+Scroller *
+AbstractScrollArea::scroller() const
+{
+	return d->scroller;
+}
+
 QColor
 AbstractScrollArea::indicatorColor() const
 {

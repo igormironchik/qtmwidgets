@@ -1,0 +1,5 @@
+
+/examples/**/debug/
+/examples/**/release/
+/src/.moc/
+/src/.obj/

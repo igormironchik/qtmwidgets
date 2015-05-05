@@ -80,6 +80,10 @@ CursorShifterPrivate::init()
 	timer = new QTimer( q );
 	q->setWindowModality( Qt::NonModal );
 
+	q->setAttribute( Qt::WA_TranslucentBackground, true );
+	q->setAttribute( Qt::WA_NoSystemBackground, true );
+	q->setAutoFillBackground( false );
+
 	QObject::connect( timer, SIGNAL( timeout() ),
 		q, SLOT( _q_hideTimer() ) );
 }
@@ -91,7 +95,6 @@ CursorShifterPrivate::init()
 CursorShifter::CursorShifter( QWidget * parent )
 	:	QWidget( parent, Qt::ToolTip | Qt::FramelessWindowHint |
 			Qt::WindowDoesNotAcceptFocus |
-			Qt::WindowTransparentForInput |
 			Qt::NoDropShadowWindowHint |
 			Qt::WindowStaysOnTopHint )
 	,	d( new CursorShifterPrivate( this ) )

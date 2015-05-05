@@ -963,9 +963,11 @@ AbstractScrollArea::mousePressEvent( QMouseEvent * e )
 		d->mousePos = e->pos();
 		d->leftMouseButtonPressed = true;
 		d->stopScrollIndicatorsAnimation();
-	}
 
-	e->ignore();
+		e->accept();
+	}
+	else
+		e->ignore();
 }
 
 void
@@ -983,9 +985,11 @@ AbstractScrollArea::mouseReleaseEvent( QMouseEvent * e )
 			d->stopScrollIndicatorsAnimation();
 
 		d->animateHiddingBlurEffect();
-	}
 
-	e->ignore();
+		e->accept();
+	}
+	else
+		e->ignore();
 }
 
 void
@@ -1001,9 +1005,11 @@ AbstractScrollArea::mouseMoveEvent( QMouseEvent * e )
 		d->scrollContentsBy( dx, dy );
 
 		scrollContentsBy( dx, dy );
-	}
 
-	e->ignore();
+		e->accept();
+	}
+	else
+		e->ignore();
 }
 
 void
@@ -1046,6 +1052,8 @@ AbstractScrollArea::wheelEvent( QWheelEvent * e )
 			d->animateScrollIndicators();
 
 	d->animateHiddingBlurEffect();
+
+	e->accept();
 }
 
 void

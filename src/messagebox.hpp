@@ -120,9 +120,6 @@ public:
 	//! Set text format.
 	void setTextFormat( Qt::TextFormat fmt );
 
-protected:
-	virtual void resizeEvent( QResizeEvent * e );
-
 private slots:
 	void _q_clicked();
 

@@ -39,7 +39,6 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QResizeEvent>
-#include <QFrame>
 #include <QApplication>
 #include <QScreen>
 
@@ -48,132 +47,10 @@
 #include "fingergeometry.hpp"
 #include "scrollarea.hpp"
 #include "textlabel.hpp"
+#include "private/messageboxbutton.hpp"
 
 
 namespace QtMWidgets {
-
-class MsgBoxButton;
-
-//
-// MsgBoxButtonPrivate
-//
-
-class MsgBoxButtonPrivate {
-public:
-	MsgBoxButtonPrivate( const QString & t, MsgBoxButton * parent )
-		:	q( parent )
-		,	text( t )
-		,	pressed( false )
-	{
-	}
-
-	void init();
-
-	MsgBoxButton * q;
-	QString text;
-	bool pressed;
-}; // class MsgBoxButtonPrivate
-
-
-//
-// MsgBoxButton
-//
-
-class MsgBoxButton
-	:	public QAbstractButton
-{
-	Q_OBJECT
-
-public:
-	explicit MsgBoxButton( const QString & text, QWidget * parent = 0 )
-		:	QAbstractButton( parent )
-		,	d( new MsgBoxButtonPrivate( text, this ) )
-	{
-		d->init();
-
-		connect( this, &QAbstractButton::pressed,
-			this, &MsgBoxButton::_q_pressed );
-
-		connect( this, &QAbstractButton::released,
-			this, &MsgBoxButton::_q_released );
-	}
-
-	virtual ~MsgBoxButton()
-	{
-	}
-
-	virtual QSize minimumSizeHint() const
-	{
-		const int margin = fontMetrics().height() / 3;
-
-		const QSize s = fontMetrics()
-			.boundingRect( QRect(), Qt::AlignCenter, d->text )
-			.marginsAdded( QMargins( margin, margin, margin, margin ) )
-			.size();
-
-		return QSize( qMax( s.width(), FingerGeometry::width() ),
-			qMax( s.height(), FingerGeometry::height() ) );
-	}
-
-	virtual QSize sizeHint() const
-	{
-		return minimumSizeHint();
-	}
-
-protected:
-	virtual void paintEvent( QPaintEvent * )
-	{
-		QPainter p( this );
-
-		p.setPen( palette().color( QPalette::WindowText ) );
-
-		p.drawText( rect(), d->text, QTextOption( Qt::AlignCenter ) );
-
-		if( d->pressed )
-		{
-			QColor c = palette().color( QPalette::Highlight );
-			c.setAlpha( 75 );
-
-			p.setPen( Qt::NoPen );
-			p.setBrush( c );
-			p.drawRect( rect() );
-		}
-	}
-
-private slots:
-	void _q_pressed()
-	{
-		d->pressed = true;
-
-		update();
-	}
-
-	void _q_released()
-	{
-		d->pressed = false;
-
-		update();
-	}
-
-private:
-	Q_DISABLE_COPY( MsgBoxButton )
-
-	QScopedPointer< MsgBoxButtonPrivate > d;
-}; // class MsgBoxButton
-
-
-//
-// MsgBoxButtonPrivate
-//
-
-void
-MsgBoxButtonPrivate::init()
-{
-	q->setBackgroundRole( QPalette::Window );
-	q->setAutoFillBackground( true );
-	q->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Fixed );
-}
-
 
 class MsgBoxTitle;
 
@@ -332,8 +209,12 @@ MessageBoxPrivate::init( const QString & titl, const QString & txt )
 {
 	q->setModal( true );
 
+	QVBoxLayout * layout = new QVBoxLayout( q );
+	layout->setContentsMargins( 0, 0, 0, 0 );
+
 	frame = new QFrame( q );
 	frame->setFrameStyle( QFrame::Box | QFrame::Plain );
+	layout->addWidget( frame );
 
 	vbox = new QVBoxLayout( frame );
 	vbox->setSpacing( 0 );
@@ -444,9 +325,11 @@ MessageBoxPrivate::adjustSize()
 
 MessageBox::MessageBox( const QString & title,
 	const QString & text, QWidget * parent )
-	:	QDialog( parent, Qt::Dialog | Qt::ToolTip | Qt::FramelessWindowHint )
+	:	QDialog( parent, Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint )
 	,	d( new MessageBoxPrivate( title, text, this, parent ) )
 {
+	setAttribute( Qt::WA_MacAlwaysShowToolWindow, true );
+
 	connect( d->okButton, &MsgBoxButton::clicked,
 		this, &MessageBox::_q_clicked );
 
@@ -586,14 +469,6 @@ MessageBox::setTextFormat( Qt::TextFormat fmt )
 }
 
 void
-MessageBox::resizeEvent( QResizeEvent * e )
-{
-	d->frame->resize( e->size() );
-
-	e->accept();
-}
-
-void
 MessageBox::_q_clicked()
 {
 	d->clickedButton = qobject_cast< QAbstractButton* > ( sender() );
@@ -618,5 +493,3 @@ MessageBox::_q_clicked()
 }
 
 } /* namespace QtMWidgets */
-
-#include "messagebox.moc"

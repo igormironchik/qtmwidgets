@@ -3,7 +3,6 @@
 /examples/**/release/
 /src/.moc/
 /src/.obj/
-/lib/
 /**/Makefile*
 /**/*.o
 /**/*.moc

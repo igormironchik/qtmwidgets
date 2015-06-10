@@ -55,12 +55,6 @@ class NavigationButton
 	Q_ENUMS( Direction )
 
 	/*!
-		\property text
-
-		Text of the button.
-	*/
-	Q_PROPERTY( QString text READ text WRITE setText )
-	/*!
 		\property direction
 
 		Direction of the button.
@@ -95,11 +89,6 @@ public:
 		QWidget * parent = 0 );
 
 	virtual ~NavigationButton();
-
-	//! \return Text of the button.
-	const QString & text() const;
-	//! Set text of the button.
-	void setText( const QString & t );
 
 	//! \return Direction of the button.
 	Direction direction() const;

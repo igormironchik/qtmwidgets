@@ -60,7 +60,6 @@ public:
 
 	NavigationButton * q;
 	NavigationButton::Direction direction;
-	QString text;
 	QColor color;
 	QColor baseColor;
 	QColor textColor;
@@ -91,7 +90,30 @@ NavigationButtonPrivate::makeString( const QString & text, const QRect & r,
 	{
 		const int averageCount = r.width() / opt.fontMetrics.averageCharWidth();
 
-		res = text.left( averageCount - 3 );
+		QString tmp = res;
+		res = QString();
+		int length = averageCount - 3;
+		int i = 0;
+
+		for( ; i < length && i < tmp.length(); ++i )
+		{
+			if( tmp.at( i ) == QLatin1Char( '&' ) )
+			{
+				res.append( tmp.at( i ) );
+				++i;
+				++length;
+
+				if( i < tmp.length() )
+					res.append( tmp.at( i ) );
+			}
+			else
+				res.append( tmp.at( i ) );
+		}
+
+		if( ( res.endsWith( QLatin1Char( '&' ) ) && i != tmp.length() ) &&
+			!res.endsWith( QLatin1String( "&&" ) ) )
+				res.remove( res.length() - 1, 1 );
+
 		res.append( QLatin1String( "..." ) );
 	}
 
@@ -132,23 +154,6 @@ NavigationButton::NavigationButton( Direction direction, const QString & text,
 
 NavigationButton::~NavigationButton()
 {
-}
-
-const QString &
-NavigationButton::text() const
-{
-	return d->text;
-}
-
-void
-NavigationButton::setText( const QString & t )
-{
-	if( d->text != t )
-	{
-		d->text = t;
-
-		update();
-	}
 }
 
 NavigationButton::Direction
@@ -230,7 +235,7 @@ NavigationButton::paintEvent( QPaintEvent * )
 	const int delta = ( r.height() - arrowHeight ) /2;
 	const int offset = 10;
 
-	int flags = Qt::TextSingleLine | Qt::AlignVCenter;
+	int flags = Qt::TextSingleLine | Qt::TextShowMnemonic | Qt::AlignVCenter;
 
 	switch( d->direction )
 	{
@@ -265,10 +270,10 @@ NavigationButton::paintEvent( QPaintEvent * )
 	QStyleOption opt;
 	opt.initFrom( this );
 
-	const QString text = d->makeString( d->text, textRect, flags, opt );
+	const QString t = d->makeString( text(), textRect, flags, opt );
 
 	p.setPen( d->textColor );
-	p.drawText( textRect, flags, text );
+	p.drawText( textRect, flags, t );
 
 	if( d->direction == Left )
 	{

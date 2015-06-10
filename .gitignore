@@ -5,3 +5,6 @@
 /src/.obj/
 /lib/
 /**/Makefile*
+/**/*.o
+/**/*.moc
+/**/qrc_*.cpp

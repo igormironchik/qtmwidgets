@@ -4,6 +4,7 @@ TARGET = navigationbar
 DESTDIR = .
 CONFIG += windows
 QT += core gui widgets
+CONFIG += C++14
 
 SOURCES += main.cpp
 

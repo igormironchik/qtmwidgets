@@ -284,6 +284,8 @@ Section::value( const QDateTime & dt ) const
 			return v;
 		break;
 	}
+
+	return v;
 }
 
 void

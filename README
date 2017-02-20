@@ -1,7 +1,0 @@
-
-Library with a set of widgets for mobile development.
-
-
-COMPILING
-
- * Juct run qmake and then make, as usually.

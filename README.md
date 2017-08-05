@@ -17,7 +17,7 @@ QComboBox.
 
 ![Picker]( https://image.ibb.co/hqOiak/picker_v2.png )
 
-```
+```cpp
 QtMWidgets::Picker * picker =
     new QtMWidgets::Picker( this );
 
@@ -44,7 +44,7 @@ are look similar as correspondence widgets from iOS but have interface as QDateT
 
 ![DateTimePicker]( https://image.ibb.co/nxUd85/datetimepicker_v2.png )
 
-```
+```cpp
 QtMWidgets::DateTimePicker * picker =
     new QtMWidgets::DateTimePicker( this );
 
@@ -55,7 +55,7 @@ picker->setFont( font );
 ```
 ![DatePicker]( https://image.ibb.co/c47n1Q/datepicker_v2.png )
 
-```
+```cpp
 QtMWidgets::DatePicker * picker =
     new QtMWidgets::DatePicker( this );
 
@@ -67,7 +67,7 @@ picker->setFont( font );
 
 ![TimePicker]( https://image.ibb.co/kiJiak/timepicker_v2.png )
 
-```
+```cpp
 QtMWidgets::TimePicker * picker =
     new QtMWidgets::TimePicker( this );
 
@@ -85,7 +85,7 @@ Switch is On/Off button used, for example, in Setting app for options that can b
 
 ![Switch]( https://image.ibb.co/n1L71Q/switch_v2.png )
 
-```
+```cpp
 QtMWidgets::Switch * s =
     new QtMWidgets::Switch( this );
 
@@ -104,7 +104,7 @@ doesn't fit the screen area.
 
 ![ScrollArea]( https://image.ibb.co/bTrrT5/scrollarea.png )
 
-```
+```cpp
 QtMWidgets::ScrollArea * scrollArea =
     new QtMWidgets::ScrollArea( this );
 
@@ -125,7 +125,7 @@ for settings of the application.
 
 ![TableView]( https://image.ibb.co/g7A71Q/tableview_v2.png )
 
-```
+```cpp
 QtMWidgets::TableView * view =
     new QtMWidgets::TableView( this );
 
@@ -174,7 +174,7 @@ position of the handle in the groove.
 
 ![Slider]( https://image.ibb.co/dF63ak/slider_v2.png )
 
-```
+```cpp
 QtMWidgets::Slider * volumeSlider =
     new QtMWidgets::Slider(
         Qt::Horizontal, this );

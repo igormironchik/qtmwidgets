@@ -94,6 +94,11 @@ int main( int argc, char ** argv )
 {
 	QApplication app( argc, argv );
 
+	QPalette p = app.palette();
+	p.setColor( QPalette::Text, p.color( QPalette::WindowText ) );
+
+	app.setPalette( p );
+
 	Object o;
 
 	QTimer::singleShot( 0, &o, &Object::start );

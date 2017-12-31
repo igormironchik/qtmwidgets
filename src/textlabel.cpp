@@ -66,7 +66,7 @@ TextLabelPrivate::init()
 	staticText.setTextFormat( Qt::AutoText );
 
 	QTextOption opt;
-	opt.setAlignment( Qt::AlignLeft | Qt::AlignVCenter );
+	opt.setAlignment( Qt::AlignLeft );
 	opt.setFlags( QTextOption::IncludeTrailingSpaces );
 	opt.setWrapMode( QTextOption::WordWrap );
 	staticText.setTextOption( opt );
@@ -208,12 +208,16 @@ TextLabel::heightForWidth( int w ) const
 	if( text().isEmpty() )
 		return 2 * frameWidth();
 
-	QStaticText st = d->staticText;
-	st.setTextWidth( w );
-
 	const QMargins margins = contentsMargins();
 
-	return st.size().height() + 2 * frameWidth() + margins.top() +
+	const qreal width = w - 2 * frameWidth() - margins.left() -
+		margins.right() - 2 * d->margin;
+
+	QStaticText st = d->staticText;
+	st.setTextWidth( width );
+
+	return qRound( st.size().width() * st.size().height() / width ) +
+		2 * frameWidth() + margins.top() +
 		margins.bottom() + 2 * d->margin;
 }
 

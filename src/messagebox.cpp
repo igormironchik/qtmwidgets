@@ -232,6 +232,7 @@ MessageBoxPrivate::init( const QString & titl, const QString & txt )
 
 	textLabel = new TextLabel( frame );
 	textLabel->setBackgroundRole( QPalette::Window );
+    textLabel->setColor( q->palette().color( QPalette::WindowText ) );
 	textLabel->setAutoFillBackground( true );
 	textLabel->setText( txt );
 	scrollArea->setWidget( textLabel );

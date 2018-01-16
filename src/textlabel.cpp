@@ -36,6 +36,7 @@
 #include <QPainter>
 #include <QResizeEvent>
 #include <QFontMetrics>
+#include <QTextDocument>
 
 
 namespace QtMWidgets {
@@ -213,10 +214,12 @@ TextLabel::heightForWidth( int w ) const
 	const qreal width = w - 2 * frameWidth() - margins.left() -
 		margins.right() - 2 * d->margin;
 
-	QStaticText st = d->staticText;
-	st.setTextWidth( width );
+	QTextDocument doc;
+	doc.setHtml( d->staticText.text() );
+	doc.setTextWidth( width );
+	doc.setDefaultTextOption( d->staticText.textOption() );
 
-	return qRound( st.size().width() * st.size().height() / width ) +
+	return doc.size().height() +
 		2 * frameWidth() + margins.top() +
 		margins.bottom() + 2 * d->margin;
 }

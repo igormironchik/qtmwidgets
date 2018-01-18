@@ -230,17 +230,15 @@ TextLabel::minimumSizeHint() const
 	if( text().isEmpty() )
 		return QSize( 2 * frameWidth(), 2 * frameWidth() );
 
-	QStaticText st = d->staticText;
-
-	if( width() > 0 )
-		st.setTextWidth( width() );
-	else
-		st.setTextWidth( fontMetrics().averageCharWidth() * 10 );
-
-	const QSizeF size = st.size();
-	const int frame = 2 * frameWidth();
-
 	const QMargins margins = contentsMargins();
+
+	QTextDocument doc;
+	doc.setHtml( d->staticText.text() );
+	doc.setDefaultTextOption( d->staticText.textOption() );
+	doc.setTextWidth( fontMetrics().averageCharWidth() * 10 );
+
+	const QSizeF size = doc.size();
+	const int frame = 2 * frameWidth();
 
 	return QSize( size.width() + frame + margins.left() + margins.right() +
 		2 * d->margin,

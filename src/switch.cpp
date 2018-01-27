@@ -177,7 +177,7 @@ SwitchPrivate::initOffset( const QRect & r )
 	{
 		case Switch::NotAcceptedCheck :
 		case Switch::AcceptedCheck :
-			offset = r.width() - radius * 2;
+			offset = r.width() - radius * 2 - 2;
 		break;
 
 		case Switch::NotAcceptedUncheck :
@@ -312,7 +312,7 @@ Switch::sizeHint() const
 
 	d->initOffset( r );
 
-	return QSize( r.width(), r.height() );
+	return QSize( r.width() + 2, r.height() + 2 );
 }
 
 void
@@ -325,6 +325,7 @@ Switch::paintEvent( QPaintEvent * )
 	QColor lightColor = opt.palette.color( QPalette::Base );
 
 	QPainter p( this );
+	p.translate( 1.0, 1.0 );
 	p.setRenderHint( QPainter::Antialiasing );
 
 	switch( d->state )
@@ -354,7 +355,7 @@ Switch::paintEvent( QPaintEvent * )
 	p.setPen( borderColor );
 
 	QPainterPath rect;
-	rect.addRoundedRect( 0, 0, opt.rect.width(), d->radius * 2,
+	rect.addRoundedRect( 0, 0, opt.rect.width() - 2, d->radius * 2,
 		d->radius, d->radius );
 
 	p.drawPath( rect );
@@ -374,8 +375,8 @@ Switch::paintEvent( QPaintEvent * )
 
 	p.drawPath( rect.intersected( glow ) );
 
-	drawSliderHandle( &p, QRect( d->offset + 1, 1,
-		d->radius * 2 - 2, d->radius * 2 - 2 ),
+	drawSliderHandle( &p, QRect( d->offset, 0,
+		d->radius * 2, d->radius * 2 ),
 			d->radius, d->radius, borderColor, lightColor );
 }
 
@@ -477,8 +478,8 @@ Switch::mouseMoveEvent( QMouseEvent * event )
 
 		if( d->offset < 0 )
 			d->offset = 0;
-		else if( d->offset > rect().width() - d->radius * 2 )
-			d->offset = rect().width() - d->radius * 2;
+		else if( d->offset > rect().width() - d->radius * 2 - 2 )
+			d->offset = rect().width() - d->radius * 2 - 2;
 
 		update();
 	}

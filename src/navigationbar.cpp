@@ -308,7 +308,7 @@ NavigationBar::showScreen( int index )
 		QSharedPointer< NavigationItem > nextItem = d->itemsMap[ index ];
 		QSharedPointer< NavigationItem > currentItem = d->itemsMap[ currentIndex() ];
 
-		if( d->backStack.back() != currentIndex() )
+		if( d->backStack.isEmpty() || d->backStack.back() != currentIndex() )
 		{
 			d->backStack.push( currentIndex() );
 
@@ -331,7 +331,7 @@ NavigationBar::showPreviousScreen()
 		QSharedPointer< NavigationItem > prevItem = d->itemsMap[ prevIndex ];
 		QSharedPointer< NavigationItem > currentItem = d->itemsMap[ currentIndex() ];
 
-		if( d->forwardStack.back() != currentIndex() )
+		if( d->forwardStack.isEmpty() || d->forwardStack.back() != currentIndex() )
 		{
 			d->forwardStack.push( currentIndex() );
 

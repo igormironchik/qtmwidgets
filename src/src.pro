@@ -29,9 +29,6 @@ HEADERS += private/drawing.hpp \
            textlabel.hpp \
            slider.hpp \
            busyindicator.hpp \
-           lineedit.hpp \
-           private/cursorshifter.hpp \
-           textedit.hpp \
            navigationbar.hpp \
            navigationbutton.hpp \
            navigationarrow.hpp \
@@ -64,9 +61,6 @@ SOURCES += private/drawing.cpp \
            textlabel.cpp \
            slider.cpp \
            busyindicator.cpp \
-           lineedit.cpp \
-           private/cursorshifter.cpp \
-           textedit.cpp \
            navigationbar.cpp \
            navigationbutton.cpp \
            navigationarrow.cpp \

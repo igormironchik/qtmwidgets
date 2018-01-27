@@ -9,8 +9,6 @@ SUBDIRS = picker \
           scrollarea \
           tableview \
           busyindicator \
-          lineedit \
-          textedit \
           navigationarrow \
           navigationbutton \
           navigationbar \

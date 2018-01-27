@@ -32,10 +32,10 @@
 #include <QApplication>
 #include <QWidget>
 #include <QHBoxLayout>
+#include <QLineEdit>
 
 // QtMWidgets include.
 #include <QtMWidgets/Stepper>
-#include <QtMWidgets/LineEdit>
 
 
 class Widget
@@ -49,7 +49,7 @@ public:
 	{
 		QHBoxLayout * l = new QHBoxLayout( this );
 
-		edit = new QtMWidgets::LineEdit( this );
+		edit = new QLineEdit( this );
 		edit->setReadOnly( true );
 
 		l->addWidget( edit );
@@ -73,7 +73,7 @@ private slots:
 	}
 
 private:
-	QtMWidgets::LineEdit * edit;
+	QLineEdit * edit;
 };
 
 

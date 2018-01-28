@@ -59,7 +59,7 @@ public:
 		,	stack( 0 )
 		,	imageList( 0 )
 		,	futureWatcher( 0 )
-		,	currentLoadImageIndex( 0 )
+		,	filesFutureWatcher( 0 )
 	{
 	}
 
@@ -78,10 +78,14 @@ public:
 	QStringList imageFiles;
 	//! Load images future watcher.
 	QFutureWatcher< QImage > * futureWatcher;
-	//! Current index for loading image.
-	int currentLoadImageIndex;
 	//! Future.
 	QFuture< QImage > future;
+	//! Files future.
+	QFuture< QStringList > fileFuture;
+	//! Files future watcher.
+	QFutureWatcher< QStringList > * filesFutureWatcher;
+	//! Image locations.
+	QStringList imageLocations;
 }; // class WindowPrivate
 
 void
@@ -98,6 +102,11 @@ WindowPrivate::init()
 
 	QObject::connect( futureWatcher, &QFutureWatcher< QImage >::finished,
 		q, &Window::_q_imageLoaded );
+
+	filesFutureWatcher = new QFutureWatcher< QStringList > ( q );
+
+	QObject::connect( filesFutureWatcher, &QFutureWatcher< QStringList >::finished,
+		q, &Window::_q_filesFound );
 }
 
 QImage loadImage( const QString & fileName, const QSize & maxSize )
@@ -116,14 +125,14 @@ QImage loadImage( const QString & fileName, const QSize & maxSize )
 void
 WindowPrivate::loadImages()
 {
-	currentLoadImageIndex = 0;
-
 	if( !imageFiles.isEmpty() )
 	{
 		future = QtConcurrent::run( loadImage,
-			imageFiles.at( currentLoadImageIndex ),
+			imageFiles.at( 0 ),
 			imageList->maxImageSize() );
 		futureWatcher->setFuture( future );
+
+		imageFiles.removeFirst();
 	}
 }
 
@@ -143,7 +152,7 @@ Window::~Window()
 }
 
 QStringList findFiles( const QString & startDir,
-	const QStringList & filters )
+	const QStringList & filters, QStringList * locations )
 {
 	QStringList names;
 	QDir dir( startDir );
@@ -153,7 +162,7 @@ QStringList findFiles( const QString & startDir,
 
 	foreach( const QString & subdir, dir.entryList(
 		QDir::AllDirs | QDir::NoDotAndDotDot ) )
-			names += findFiles( startDir + "/" + subdir, filters );
+			*locations += ( startDir + "/" + subdir );
 
 	return names;
 }
@@ -175,17 +184,21 @@ Window::startAndFinish( Qt::ApplicationState state )
 				d->imageList->setModel( imageModel );
 				d->stack->addWidget( d->imageList );
 
-				QStringList imageLocations =
+				d->imageLocations =
 					QStandardPaths::standardLocations(
 						QStandardPaths::PicturesLocation );
 
-				foreach( const QString & path, imageLocations )
-					d->imageFiles += findFiles( path, QStringList() << "*.jpg"
-						<< "*.jpeg" << "*.png" );
+				if( !d->imageLocations.isEmpty() )
+				{
+					d->fileFuture = QtConcurrent::run(
+						findFiles, d->imageLocations.at( 0 ),
+						QStringList() << "*.jpg" << "*.jpeg" << "*.png",
+						&d->imageLocations );
 
-				d->imageList->model()->insertRows( 0, d->imageFiles.count() );
+					d->imageLocations.removeFirst();
 
-				d->loadImages();
+					d->filesFutureWatcher->setFuture( d->fileFuture );
+				}
 			}
 		}
 			break;
@@ -206,16 +219,31 @@ Window::_q_imageLoaded()
 {
 	QImage image = d->future.result();
 
-	d->imageList->model()->setData( d->currentLoadImageIndex, image );
+	d->imageList->model()->insertRow( d->imageList->model()->rowCount() );
+	d->imageList->model()->setData( d->imageList->model()->rowCount() - 1, image );
 
-	++d->currentLoadImageIndex;
+	d->loadImages();
+}
 
-	if( d->currentLoadImageIndex < d->imageList->model()->rowCount() )
+void
+Window::_q_filesFound()
+{
+	const bool start = d->imageFiles.isEmpty();
+
+	d->imageFiles += d->fileFuture.result();
+
+	if( start )
+		d->loadImages();
+
+	if( !d->imageLocations.isEmpty() )
 	{
-		d->future = QtConcurrent::run( loadImage,
-			d->imageFiles.at( d->currentLoadImageIndex ),
-			d->imageList->maxImageSize() );
+		d->fileFuture = QtConcurrent::run(
+			findFiles, d->imageLocations.at( 0 ),
+			QStringList() << "*.jpg" << "*.jpeg" << "*.png",
+			&d->imageLocations );
 
-		d->futureWatcher->setFuture( d->future );
+		d->imageLocations.removeFirst();
+
+		d->filesFutureWatcher->setFuture( d->fileFuture );
 	}
 }

@@ -59,6 +59,8 @@ public slots:
 private slots:
 	//! Image loaded.
 	void _q_imageLoaded();
+	//! Files found.
+	void _q_filesFound();
 
 private:
 	friend class WindowPrivate;

@@ -190,12 +190,13 @@ Window::startAndFinish( Qt::ApplicationState state )
 
 				if( !d->imageLocations.isEmpty() )
 				{
+					const QString path = d->imageLocations.at( 0 );
+					d->imageLocations.removeFirst();
+
 					d->fileFuture = QtConcurrent::run(
-						findFiles, d->imageLocations.at( 0 ),
+						findFiles, path,
 						QStringList() << "*.jpg" << "*.jpeg" << "*.png",
 						&d->imageLocations );
-
-					d->imageLocations.removeFirst();
 
 					d->filesFutureWatcher->setFuture( d->fileFuture );
 				}
@@ -237,12 +238,13 @@ Window::_q_filesFound()
 
 	if( !d->imageLocations.isEmpty() )
 	{
+		const QString path = d->imageLocations.at( 0 );
+		d->imageLocations.removeFirst();
+
 		d->fileFuture = QtConcurrent::run(
-			findFiles, d->imageLocations.at( 0 ),
+			findFiles, path,
 			QStringList() << "*.jpg" << "*.jpeg" << "*.png",
 			&d->imageLocations );
-
-		d->imageLocations.removeFirst();
 
 		d->filesFutureWatcher->setFuture( d->fileFuture );
 	}

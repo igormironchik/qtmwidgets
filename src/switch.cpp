@@ -308,11 +308,11 @@ Switch::sizeHint() const
 	d->textWidth = qMax( offWidth, onWidth );
 
 	const QRect r( 0, 0,
-		d->textWidth + d->radius * 3 + d->radius / 2, d->radius * 2 );
+		d->textWidth + d->radius * 3 + d->radius / 2 + 2, d->radius * 2 + 2 );
 
 	d->initOffset( r );
 
-	return QSize( r.width() + 2, r.height() + 2 );
+	return QSize( r.width(), r.height() );
 }
 
 void

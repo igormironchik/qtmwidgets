@@ -3,8 +3,10 @@
 /examples/**/release/
 /src/.moc/
 /src/.obj/
+/src/.qmake.stash
 /**/Makefile*
 /**/*.o
 /**/*.moc
 /**/qrc_*.cpp
 /**/*.user
+/lib/*

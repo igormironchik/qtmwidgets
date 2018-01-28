@@ -193,22 +193,27 @@ TableViewCellLayout::setTextGeometry( const QRect & r, int imageOffset,
 
 	if( detailedTextHeight == 0 && textHeight != 0 )
 	{
-		textLabel->setGeometry( r.x() + imageOffset, r.y(),
+		textLabel->setGeometry( r.x() + imageOffset, r.y() +
+				( r.height() > textHeight ? ( r.height() - textHeight ) / 2 : 0 ),
 			width, r.height() );
 		detailedTextLabel->setGeometry( r.x(), r.y(), 0, 0 );
 	}
 	else if( textHeight == 0 && detailedTextHeight != 0 )
 	{
-		detailedTextLabel->setGeometry( r.x() + imageOffset, r.y(),
+		detailedTextLabel->setGeometry( r.x() + imageOffset, r.y() +
+				( r.height() > detailedTextHeight ?
+					( r.height() - detailedTextHeight ) / 2 : 0 ),
 			width, r.height() );
 		textLabel->setGeometry( r.x(), r.y(), 0, 0 );
 	}
 	else if( textHeight != 0 && detailedTextHeight != 0 )
 	{
-		textLabel->setGeometry( r.x() + imageOffset, r.y(),
+		const int h = ( r.height() > textHeight + detailedTextHeight ?
+			( r.height() - textHeight - detailedTextHeight ) / 2 : 0 );
+		textLabel->setGeometry( r.x() + imageOffset, r.y() + h,
 			width, textHeight );
-		detailedTextLabel->setGeometry( r.x() + imageOffset, r.y() +
-			textHeight + spacing(), width, detailedTextHeight );
+		detailedTextLabel->setGeometry( r.x() + imageOffset, r.y() + h +
+			textHeight, width, detailedTextHeight );
 	}
 }
 

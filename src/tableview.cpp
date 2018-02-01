@@ -41,6 +41,8 @@
 #include <QMouseEvent>
 #include <QPainter>
 
+#include <QDebug>
+
 
 namespace QtMWidgets {
 
@@ -103,7 +105,7 @@ public:
 	virtual bool hasHeightForWidth() const;
 	virtual int heightForWidth( int w ) const;
 
-	virtual QSize minimumSize() const;
+	virtual QSize minimumSizeHint() const;
 	virtual QSize sizeHint() const;
 
 private:
@@ -195,7 +197,7 @@ TableViewCellLayout::setTextGeometry( const QRect & r, int imageOffset,
 	{
 		textLabel->setGeometry( r.x() + imageOffset, r.y() +
 				( r.height() > textHeight ? ( r.height() - textHeight ) / 2 : 0 ),
-			width, r.height() );
+			width, textHeight );
 		detailedTextLabel->setGeometry( r.x(), r.y(), 0, 0 );
 	}
 	else if( textHeight == 0 && detailedTextHeight != 0 )
@@ -203,7 +205,7 @@ TableViewCellLayout::setTextGeometry( const QRect & r, int imageOffset,
 		detailedTextLabel->setGeometry( r.x() + imageOffset, r.y() +
 				( r.height() > detailedTextHeight ?
 					( r.height() - detailedTextHeight ) / 2 : 0 ),
-			width, r.height() );
+			width, detailedTextHeight );
 		textLabel->setGeometry( r.x(), r.y(), 0, 0 );
 	}
 	else if( textHeight != 0 && detailedTextHeight != 0 )
@@ -314,7 +316,7 @@ TableViewCellLayout::heightForWidth( int w ) const
 	const int textWidth = qMax( 10,
 		w - imageSize.width() - accessorySize.width() );
 
-	int height = textLabel->heightForWidth( textWidth ) + spacing() +
+	int height = textLabel->heightForWidth( textWidth ) +
 		detailedTextLabel->heightForWidth( textWidth ) + m.top() + m.bottom();
 
 	height = qMax( height, imageSize.height() + m.top() + m.bottom() );
@@ -324,7 +326,7 @@ TableViewCellLayout::heightForWidth( int w ) const
 }
 
 QSize
-TableViewCellLayout::minimumSize() const
+TableViewCellLayout::minimumSizeHint() const
 {
 	const QSize imageSize = imageLabel->minimumSizeHint();
 
@@ -336,14 +338,15 @@ TableViewCellLayout::minimumSize() const
 
 	width += qMax( textSize.width(), detailedTextSize.width() );
 	height = qMax( height,
-		textSize.height() + detailedTextSize.height() + spacing() );
+		textSize.height() + detailedTextSize.height() );
 
 	const QSize accessorySize = accessoryWidget->minimumSizeHint();
 
 	width += accessorySize.width();
 	height = qMax( height, accessorySize.height() );
 
-	return QSize( width, height );
+	return QSize( width + contentsMargins().left() + contentsMargins().right(),
+		height + contentsMargins().top() + contentsMargins().bottom() );
 }
 
 QSize
@@ -359,14 +362,15 @@ TableViewCellLayout::sizeHint() const
 
 	width += qMax( textSize.width(), detailedTextSize.width() );
 	height = qMax( height,
-		textSize.height() + detailedTextSize.height() + spacing() );
+		textSize.height() + detailedTextSize.height() );
 
 	const QSize accessorySize = accessoryWidget->sizeHint();
 
 	width += accessorySize.width();
 	height = qMax( height, accessorySize.height() );
 
-	return QSize( width, height );
+	return QSize( width + contentsMargins().left() + contentsMargins().right(),
+		height + contentsMargins().top() + contentsMargins().bottom() );
 }
 
 
@@ -394,14 +398,24 @@ TableViewCellPrivate::init()
 	imageLabel->setWordWrap( true );
 	layout->setImageLabel( imageLabel );
 
-	textLabel = new TextLabel( q );
-	layout->setTextLabel( textLabel );
+	{
+		textLabel = new TextLabel( q );
+		QTextOption opt = textLabel->textOption();
+		opt.setAlignment( Qt::AlignVCenter | opt.alignment() );
+		textLabel->setTextOption( opt );
+		layout->setTextLabel( textLabel );
+	}
 
-	detailedTextLabel = new TextLabel( q );
-	QFont f = detailedTextLabel->font();
-	f.setPointSize( qMax( f.pointSize() - 1, 5 ) );
-	detailedTextLabel->setFont( f );
-	layout->setDetailedTextLabel( detailedTextLabel );
+	{
+		detailedTextLabel = new TextLabel( q );
+		QFont f = detailedTextLabel->font();
+		f.setPointSize( qMax( f.pointSize() - 1, 5 ) );
+		detailedTextLabel->setFont( f );
+		QTextOption opt = detailedTextLabel->textOption();
+		opt.setAlignment( Qt::AlignVCenter | opt.alignment() );
+		detailedTextLabel->setTextOption( opt );
+		layout->setDetailedTextLabel( detailedTextLabel );
+	}
 
 	accessoryWidget = new QWidget( q );
 	layout->setAccessoryWidget( accessoryWidget );
@@ -493,8 +507,7 @@ TableViewCell::minimumSizeHint() const
 	const int textWidth = qMax( d->textLabel->sizeHint().width(),
 		d->detailedTextLabel->sizeHint().width() );
 	const int textHeight = d->textLabel->sizeHint().height() +
-		d->detailedTextLabel->sizeHint().height() +
-		d->layout->spacing();
+		d->detailedTextLabel->sizeHint().height();
 
 	width += textWidth;
 	height = qMax( height, textHeight );

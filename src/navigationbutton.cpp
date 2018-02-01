@@ -214,10 +214,16 @@ NavigationButton::minimumSizeHint() const
 		FingerGeometry::height() );
 }
 
+const int c_offset = 10;
+
 QSize
 NavigationButton::sizeHint() const
 {
-	return minimumSizeHint();
+	const QRect & b = fontMetrics().boundingRect( text() );
+
+	return QSize( minimumSizeHint().width() + b.width() + c_offset * 2,
+		( minimumSizeHint().height() > b.height() ?
+			minimumSizeHint().height() : b.height() ) );
 }
 
 void
@@ -233,7 +239,6 @@ NavigationButton::paintEvent( QPaintEvent * )
 	const int arrowWidth = FingerGeometry::width() / 3;
 	const int arrowHeight = FingerGeometry::height() / 2;
 	const int delta = ( r.height() - arrowHeight ) /2;
-	const int offset = 10;
 
 	int flags = Qt::TextSingleLine | Qt::TextShowMnemonic | Qt::AlignVCenter;
 
@@ -244,8 +249,8 @@ NavigationButton::paintEvent( QPaintEvent * )
 			arrowRect.setRect( r.width() - arrowWidth, r.y() + delta,
 				arrowWidth, arrowHeight );
 
-			textRect.setRect( r.x() + arrowWidth + offset, r.y(),
-				r.width() - arrowWidth - offset, r.height() );
+			textRect.setRect( r.x() + arrowWidth + c_offset, r.y(),
+				r.width() - arrowWidth - c_offset, r.height() );
 
 			flags |= Qt::AlignLeft;
 		}
@@ -257,7 +262,7 @@ NavigationButton::paintEvent( QPaintEvent * )
 				arrowWidth, arrowHeight );
 
 			textRect.setRect( r.x(), r.y(),
-				r.width() - arrowWidth - offset, r.height() );
+				r.width() - arrowWidth - c_offset, r.height() );
 
 			flags |= Qt::AlignRight;
 		}

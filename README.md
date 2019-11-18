@@ -123,7 +123,7 @@ from iOS. TableView is widget based view that allows to display sections with ro
 (cells). Cell can have accessory widget, for example, Switch. This class is very usefull
 for settings of the application.
 
-![TableView]( https://image.ibb.co/g7A71Q/tableview_v2.png )
+![TableView]( https://i.ibb.co/YbpMyPh/tableview-v3.png )
 
 ```cpp
 QtMWidgets::TableView * view =

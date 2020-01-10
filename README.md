@@ -15,7 +15,7 @@ and enjoy it.
 Picker is the list of selectable strings on the cylinder. It looks like iOS Picker but with API like
 QComboBox.
 
-![Picker]( https://image.ibb.co/hqOiak/picker_v2.png )
+![Picker]( doc/img/picker_v2.png )
 
 ```cpp
 QtMWidgets::Picker * picker =
@@ -42,7 +42,7 @@ picker->setFont( font );
 DateTimePicker, DatePicker and TimePicker are widgets for selecting date &amp; time, date, time. They
 are look similar as correspondence widgets from iOS but have interface as QDateTimeEdit.
 
-![DateTimePicker]( https://image.ibb.co/nxUd85/datetimepicker_v2.png )
+![DateTimePicker]( doc/img/datetimepicker_v2.png )
 
 ```cpp
 QtMWidgets::DateTimePicker * picker =
@@ -53,7 +53,7 @@ font.setPointSize( 13 );
 
 picker->setFont( font );
 ```
-![DatePicker]( https://image.ibb.co/c47n1Q/datepicker_v2.png )
+![DatePicker]( doc/img/datepicker_v2.png )
 
 ```cpp
 QtMWidgets::DatePicker * picker =
@@ -65,7 +65,7 @@ font.setPointSize( 13 );
 picker->setFont( font );
 ```
 
-![TimePicker]( https://image.ibb.co/kiJiak/timepicker_v2.png )
+![TimePicker]( doc/img/timepicker_v2.png )
 
 ```cpp
 QtMWidgets::TimePicker * picker =
@@ -83,7 +83,7 @@ picker->setFormat( QLatin1String( "hh mm a" ) );
 
 Switch is On/Off button used, for example, in Setting app for options that can be switched.
 
-![Switch]( https://image.ibb.co/n1L71Q/switch_v2.png )
+![Switch]( doc/img/switch_v2.png )
 
 ```cpp
 QtMWidgets::Switch * s =
@@ -102,7 +102,7 @@ s->setOffText( QLatin1String( "OFF" ) );
 AbstractScrollArea and ScrollArea provides possibility of scrolling large widgets that
 doesn't fit the screen area.
 
-![ScrollArea]( https://image.ibb.co/bTrrT5/scrollarea.png )
+![ScrollArea]( doc/img/scrollarea.png )
 
 ```cpp
 QtMWidgets::ScrollArea * scrollArea =
@@ -123,7 +123,7 @@ from iOS. TableView is widget based view that allows to display sections with ro
 (cells). Cell can have accessory widget, for example, Switch. This class is very usefull
 for settings of the application.
 
-![TableView]( https://i.ibb.co/YbpMyPh/tableview-v3.png )
+![TableView]( doc/img/tableview-v3.png )
 
 ```cpp
 QtMWidgets::TableView * view =
@@ -172,7 +172,7 @@ But it doesn't support styles, but it acceptable to use
 on mobile platforms. It has big slider's handle and highlights
 position of the handle in the groove.
 
-![Slider]( https://image.ibb.co/dF63ak/slider_v2.png )
+![Slider]( doc/img/slider_v2.png )
 
 ```cpp
 QtMWidgets::Slider * volumeSlider =

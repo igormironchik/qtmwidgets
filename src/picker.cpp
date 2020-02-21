@@ -876,6 +876,8 @@ Picker::scrollTo( int index )
 
 		d->topItemIndex = top;
 		d->drawItemOffset = 0;
+
+		update();
 	}
 }
 

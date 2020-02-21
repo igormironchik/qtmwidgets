@@ -383,6 +383,8 @@ public slots:
 		does nothing.
 	*/
 	void setCurrentText( const QString & text );
+	//! Scroll picker to the \a index.
+	void scrollTo( int index );
 
 private slots:
 	void _q_emitCurrentIndexChanged( const QModelIndex & index );

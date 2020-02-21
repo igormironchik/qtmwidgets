@@ -851,6 +851,7 @@ Picker::setCurrentIndex( int index )
 {
 	QModelIndex mi = d->model->index( index, d->modelColumn, d->root );
 	d->setCurrentIndex( mi );
+	scrollTo( index );
 }
 
 void
@@ -860,6 +861,22 @@ Picker::setCurrentText( const QString & text )
 
 	if( i > -1 )
 		setCurrentIndex( i );
+}
+
+void
+Picker::scrollTo( int index )
+{
+	if( count() > d->itemsCount )
+	{
+		QModelIndex mi = d->model->index( index, d->modelColumn, d->root );
+		QPersistentModelIndex top = mi;
+
+		for( int i = 0; i < d->itemsCount / 2; ++i )
+			d->makePrevIndex( top );
+
+		d->topItemIndex = top;
+		d->drawItemOffset = 0;
+	}
 }
 
 void

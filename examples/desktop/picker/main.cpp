@@ -61,6 +61,8 @@ public:
 
 		picker->setFont( font );
 
+		picker->setCurrentIndex( 1 );
+
 		l->addWidget( picker );
 	}
 };

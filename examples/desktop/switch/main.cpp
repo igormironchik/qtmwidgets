@@ -31,7 +31,7 @@
 // Qt include.
 #include <QApplication>
 #include <QWidget>
-#include <QVBoxLayout>
+#include <QHBoxLayout>
 
 // QtMWidgets include.
 #include <QtMWidgets/Switch>
@@ -43,17 +43,52 @@ class Widget
 public:
 	Widget()
 	{
-		QVBoxLayout * l = new QVBoxLayout( this );
-		QtMWidgets::Switch * s = new QtMWidgets::Switch( this );
+		QHBoxLayout * l = new QHBoxLayout( this );
 
-		QFont f = s->font();
-		f.setBold( true );
-		s->setFont( f );
+		{
+			QtMWidgets::Switch * s = new QtMWidgets::Switch( this );
 
-		s->setOnText( QLatin1String( "ON" ) );
-		s->setOffText( QLatin1String( "OFF" ) );
+			QFont f = s->font();
+			f.setBold( true );
+			s->setFont( f );
 
-		l->addWidget( s );
+			s->setOnText( QLatin1String( "ON" ) );
+			s->setOffText( QLatin1String( "OFF" ) );
+
+			l->addWidget( s );
+
+			s->setState( QtMWidgets::Switch::AcceptedUncheck );
+		}
+
+		{
+			QtMWidgets::Switch * s = new QtMWidgets::Switch( this );
+
+			QFont f = s->font();
+			f.setBold( true );
+			s->setFont( f );
+
+			s->setOnText( QLatin1String( "ON" ) );
+			s->setOffText( QLatin1String( "OFF" ) );
+
+			l->addWidget( s );
+
+			s->setState( QtMWidgets::Switch::NotAcceptedCheck );
+		}
+
+		{
+			QtMWidgets::Switch * s = new QtMWidgets::Switch( this );
+
+			QFont f = s->font();
+			f.setBold( true );
+			s->setFont( f );
+
+			s->setOnText( QLatin1String( "ON" ) );
+			s->setOffText( QLatin1String( "OFF" ) );
+
+			l->addWidget( s );
+
+			s->setState( QtMWidgets::Switch::AcceptedCheck );
+		}
 	}
 };
 

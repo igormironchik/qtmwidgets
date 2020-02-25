@@ -125,46 +125,6 @@ for settings of the application.
 
 ![TableView]( doc/img/tableview-v3.png )
 
-```cpp
-QtMWidgets::TableView * view =
-    new QtMWidgets::TableView( this );
-
-QtMWidgets::TableViewSection * ringerAndAlerts =
-    new QtMWidgets::TableViewSection( view );
-ringerAndAlerts->header()->setText(
-    QLatin1String( "RINGER AND ALERTS" ) );
-ringerAndAlerts->footer()->setText(
-    QLatin1String( "The volume of the ringer and alerts "
-        "can be adjusted using the volume buttons." ) );
-
-QtMWidgets::TableViewCell * volume =
-    new QtMWidgets::TableViewCell( ringerAndAlerts );
-volume->textLabel()->setSizePolicy( QSizePolicy::Fixed,
-    QSizePolicy::Fixed );
-volume->layout()->setSpacing( 0 );
-QSlider * volumeSlider = new QSlider( Qt::Horizontal,
-    volume );
-volumeSlider->setSizePolicy( QSizePolicy::Expanding,
-    QSizePolicy::Fixed );
-volume->setAccessoryWidget( volumeSlider );
-ringerAndAlerts->addCell( volume );
-
-QtMWidgets::TableViewCell * changeWithButtons =
-    new QtMWidgets::TableViewCell( ringerAndAlerts );
-changeWithButtons->textLabel()->setText(
-    QLatin1String( "Change with Buttons" ) );
-
-QtMWidgets::Switch * changeWithButtonsSwitch =
-    new QtMWidgets::Switch( changeWithButtons );
-changeWithButtonsSwitch->setState(
-    QtMWidgets::Switch::AcceptedCheck );
-
-changeWithButtons->setAccessoryWidget( changeWithButtonsSwitch );
-ringerAndAlerts->addCell( changeWithButtons );
-
-view->addSection( ringerAndAlerts );
-```
-
 ## Slider
 
 This is the most common slider, almost identical to QSlider.

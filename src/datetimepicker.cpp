@@ -92,7 +92,7 @@ public:
 	void drawSectionItems( int section, QPainter * p,
 		const QStyleOption & opt );
 	void drawWindow( QPainter * p, const QStyleOption & opt );
-	void findMovableSection( const QPoint & pos );
+	void findMovableSection( const QPointF & pos );
 	void updateOffset( int delta );
 	void clearOffset();
 	void updateDaysIfNeeded();
@@ -430,7 +430,7 @@ DateTimePickerPrivate::drawWindow( QPainter * p, const QStyleOption & opt )
 }
 
 void
-DateTimePickerPrivate::findMovableSection( const QPoint & pos )
+DateTimePickerPrivate::findMovableSection( const QPointF & pos )
 {
 	const int x = pos.x();
 
@@ -1028,7 +1028,7 @@ DateTimePicker::wheelEvent( QWheelEvent * event )
 
 	if( !numDegrees.isNull() )
 	{
-		d->findMovableSection( event->pos() );
+		d->findMovableSection( event->position() );
 
 		if( numDegrees.y() > 0 )
 			d->updateOffset( d->itemHeight + d->itemTopMargin );

@@ -59,13 +59,13 @@ QSize qSmartMinSize( const QWidget * w );
 
 QSize qSmartMaxSize( const QSize & sizeHint,
 	const QSize & minSize, const QSize & maxSize,
-	const QSizePolicy & sizePolicy, Qt::Alignment align = 0 );
+	const QSizePolicy & sizePolicy, Qt::Alignment align = Qt::Alignment() );
 
 //
 // qSmartMaxSize
 //
 
-QSize qSmartMaxSize( const QWidget * w, Qt::Alignment align = 0 );
+QSize qSmartMaxSize( const QWidget * w, Qt::Alignment align = Qt::Alignment() );
 
 } /* namespace QtMWidgets */
 

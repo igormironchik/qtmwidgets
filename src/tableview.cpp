@@ -40,8 +40,7 @@
 #include <QSpacerItem>
 #include <QMouseEvent>
 #include <QPainter>
-
-#include <QDebug>
+#include <QPicture>
 
 
 namespace QtMWidgets {
@@ -63,8 +62,9 @@ public:
 
 	QSize minimumSizeHint() const
 	{
-		if( text().isEmpty() && !pixmap() && !movie() && !picture() )
-			return QSize( 0, 0 );
+		if( text().isEmpty() && pixmap( Qt::ReturnByValue ).isNull() && !movie() &&
+			picture( Qt::ReturnByValue ).isNull() )
+				return QSize( 0, 0 );
 		else
 		{
 			const QSize labelSizeHint = QLabel::sizeHint();
@@ -231,7 +231,7 @@ TableViewCellLayout::setGeometry( const QRect & rect )
 
 	const QSize accessorySizeHint = accessoryWidget->sizeHint();
 
-	if( !imageLabel->pixmap() || !imageLabel->text().isEmpty() )
+	if( imageLabel->pixmap( Qt::ReturnByValue ).isNull() || !imageLabel->text().isEmpty() )
 	{
 		if( accessorySizeHint.isEmpty() && textLabel->text().isEmpty() &&
 			detailedTextLabel->text().isEmpty() )

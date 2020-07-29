@@ -171,7 +171,7 @@ signals:
 	void currentTextChanged( const QString & text );
 
 public:
-	Picker( QWidget * parent = 0, Qt::WindowFlags f = 0 );
+	Picker( QWidget * parent = 0, Qt::WindowFlags f = Qt::WindowFlags() );
 
 	virtual ~Picker();
 

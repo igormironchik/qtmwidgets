@@ -267,6 +267,7 @@ private slots:
 	void _q_horBlurAnimFinished();
 	void _q_vertBlurAnim( const QVariant & value );
 	void _q_vertBlurAnimFinished();
+	void _q_startBlurAnim();
 
 private:
 	Q_DISABLE_COPY( AbstractScrollArea )

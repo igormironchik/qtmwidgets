@@ -39,6 +39,7 @@
 #include <QPainter>
 #include <QLinearGradient>
 #include <QMouseEvent>
+#include <QPainterPath>
 
 
 namespace QtMWidgets {

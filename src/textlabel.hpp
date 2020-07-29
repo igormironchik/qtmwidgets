@@ -116,7 +116,7 @@ public:
 		The \a parent and widget flag \a f, arguments are passed
 		to the QFrame constructor.
 	*/
-	TextLabel( QWidget * parent = 0, Qt::WindowFlags f = 0 );
+	TextLabel( QWidget * parent = 0, Qt::WindowFlags f = Qt::WindowFlags() );
 	/*!
 		Constructs a label that displays the text \a text.
 
@@ -124,7 +124,7 @@ public:
 		to the QFrame constructor.
 	*/
 	explicit TextLabel( const QString & text,
-		QWidget * parent = 0, Qt::WindowFlags f = 0 );
+		QWidget * parent = 0, Qt::WindowFlags f = Qt::WindowFlags() );
 
 	virtual ~TextLabel();
 

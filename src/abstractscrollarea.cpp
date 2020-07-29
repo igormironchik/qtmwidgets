@@ -272,6 +272,11 @@ AbstractScrollAreaPrivate::init()
 	vertBlurAnim->setLoopCount( 1 );
 
 	animationTimer = new QTimer( q );
+	animationTimer->setSingleShot( true );
+
+	startBlurAnimTimer = new QTimer( q );
+	startBlurAnimTimer->setSingleShot( true );
+
 	scroller = new Scroller( q, q );
 
 	q->setFocusPolicy( Qt::WheelFocus );
@@ -651,6 +656,9 @@ AbstractScrollArea::AbstractScrollArea( QWidget * parent )
 	connect( d->animationTimer, &QTimer::timeout,
 		this, &AbstractScrollArea::_q_animateScrollIndicators );
 
+	connect( d->startBlurAnimTimer, &QTimer::timeout,
+		this, &AbstractScrollArea::_q_startBlurAnim );
+
 	connect( d->scroller, &Scroller::scroll,
 		this, &AbstractScrollArea::_q_kineticScrolling );
 
@@ -682,6 +690,9 @@ AbstractScrollArea::AbstractScrollArea( AbstractScrollAreaPrivate * dd,
 
 	connect( d->animationTimer, &QTimer::timeout,
 		this, &AbstractScrollArea::_q_animateScrollIndicators );
+
+	connect( d->startBlurAnimTimer, &QTimer::timeout,
+		this, &AbstractScrollArea::_q_startBlurAnim );
 
 	connect( d->scroller, &Scroller::scroll,
 		this, &AbstractScrollArea::_q_kineticScrolling );
@@ -1018,7 +1029,7 @@ AbstractScrollArea::wheelEvent( QWheelEvent * e )
 	QPoint numPixels = e->pixelDelta();
 	QPoint numDegrees = e->angleDelta();
 
-	d->stopScrollIndicatorsAnimation();
+	d->stopAnimatingBlurEffect();
 
 	if( !numPixels.isNull() )
 	{
@@ -1051,7 +1062,8 @@ AbstractScrollArea::wheelEvent( QWheelEvent * e )
 		d->vertIndicator->policy == ScrollIndicatorAsNeeded )
 			d->animateScrollIndicators();
 
-	d->animateHiddingBlurEffect();
+	d->startBlurAnimTimer->stop();
+	d->startBlurAnimTimer->start( d->animationTimeout );
 
 	e->accept();
 }
@@ -1122,6 +1134,12 @@ void
 AbstractScrollArea::_q_vertBlurAnimFinished()
 {
 	d->vertBlur->hide();
+}
+
+void
+AbstractScrollArea::_q_startBlurAnim()
+{
+	d->animateHiddingBlurEffect();
 }
 
 } /* namespace QtMWidgets */

@@ -136,6 +136,7 @@ public:
 		,	horIndicator( 0 )
 		,	vertIndicator( 0 )
 		,	animationTimer( 0 )
+		,	startBlurAnimTimer( 0 )
 		,	animationTimeout( 100 )
 		,	animationAlphaDelta( 25 )
 		,	scroller( 0 )
@@ -178,6 +179,7 @@ public:
 	ScrollIndicator * horIndicator;
 	ScrollIndicator * vertIndicator;
 	QTimer * animationTimer;
+	QTimer * startBlurAnimTimer;
 	int animationTimeout;
 	int animationAlphaDelta;
 	Scroller * scroller;

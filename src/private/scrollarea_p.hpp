@@ -53,7 +53,6 @@ public:
 	explicit ScrollAreaPrivate( ScrollArea * parent )
 		:	AbstractScrollAreaPrivate( parent )
 		,	resizable( false )
-		,	alignment( 0 )
 	{
 	}
 

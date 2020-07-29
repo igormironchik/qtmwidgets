@@ -68,7 +68,7 @@ maxShortDay( const QStyleOption & opt )
 	for( int i = 1; i < 8; ++i )
 	{
 		const int tmpWidth = opt.fontMetrics.boundingRect(
-			QDate::shortDayName( i ) + QLatin1Char( ' ' ) ).width();
+			QLocale::system().dayName( i, QLocale::ShortFormat ) + QLatin1Char( ' ' ) ).width();
 
 		if( tmpWidth > width  )
 		{
@@ -77,7 +77,7 @@ maxShortDay( const QStyleOption & opt )
 		}
 	}
 
-	return QDate::shortDayName( index );
+	return QLocale::system().dayName( index, QLocale::ShortFormat );
 }
 
 static inline QString
@@ -89,7 +89,7 @@ maxLongDay( const QStyleOption & opt )
 	for( int i = 1; i < 8; ++i )
 	{
 		const int tmpWidth = opt.fontMetrics.boundingRect(
-			QDate::longDayName( i ) + QLatin1Char( ' ' ) ).width();
+			QLocale::system().dayName( i ) + QLatin1Char( ' ' ) ).width();
 
 		if( tmpWidth > width  )
 		{
@@ -98,7 +98,7 @@ maxLongDay( const QStyleOption & opt )
 		}
 	}
 
-	return QDate::longDayName( index );
+	return QLocale::system().dayName( index );
 }
 
 static inline QString
@@ -110,7 +110,7 @@ maxShortMonth( const QStyleOption & opt )
 	for( int i = 1; i < 13; ++i )
 	{
 		const int tmpWidth = opt.fontMetrics.boundingRect(
-			QDate::shortMonthName( i ) + QLatin1Char( ' ' ) ).width();
+			QLocale::system().monthName( i, QLocale::ShortFormat ) + QLatin1Char( ' ' ) ).width();
 
 		if( tmpWidth > width  )
 		{
@@ -119,7 +119,7 @@ maxShortMonth( const QStyleOption & opt )
 		}
 	}
 
-	return QDate::shortMonthName( index );
+	return QLocale::system().monthName( index, QLocale::ShortFormat );
 }
 
 static inline QString
@@ -131,7 +131,7 @@ maxLongMonth( const QStyleOption & opt )
 	for( int i = 1; i < 13; ++i )
 	{
 		const int tmpWidth = opt.fontMetrics.boundingRect(
-			QDate::longMonthName( i ) + QLatin1Char( ' ' ) ).width();
+			QLocale::system().monthName( i ) + QLatin1Char( ' ' ) ).width();
 
 		if( tmpWidth > width  )
 		{
@@ -140,7 +140,7 @@ maxLongMonth( const QStyleOption & opt )
 		}
 	}
 
-	return QDate::longMonthName( index );
+	return QLocale::system().monthName( index );
 }
 
 int
@@ -427,7 +427,7 @@ Section::fillValues( const QDateTime & current,
 
 				v.prepend( QLatin1Char( ' ' ) );
 
-				v.prepend( QDate::shortDayName( date.dayOfWeek() ) );
+				v.prepend( QLocale::system().dayName( date.dayOfWeek(), QLocale::ShortFormat ) );
 
 				values.append( v );
 
@@ -453,7 +453,7 @@ Section::fillValues( const QDateTime & current,
 
 				v.prepend( QLatin1Char( ' ' ) );
 
-				v.prepend( QDate::longDayName( date.dayOfWeek() ) );
+				v.prepend( QLocale::system().dayName( date.dayOfWeek() ) );
 
 				values.append( v );
 
@@ -489,7 +489,7 @@ Section::fillValues( const QDateTime & current,
 				if( m == i )
 					currentIndex = values.size();
 
-				values.append( QDate::shortMonthName( i ) );
+				values.append( QLocale::system().monthName( i, QLocale::ShortFormat ) );
 			}
 		}
 		break;
@@ -503,7 +503,7 @@ Section::fillValues( const QDateTime & current,
 				if( m == i )
 					currentIndex = values.size();
 
-				values.append( QDate::longMonthName( i ) );
+				values.append( QLocale::system().monthName( i ) );
 			}
 		}
 		break;

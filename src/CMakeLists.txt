@@ -5,7 +5,6 @@ project( QtMWidgets )
 set( SRC picker.hpp
 	pageview.hpp
 	progressbar.cpp
-	lineedit.hpp
 	stepper.cpp
 	abstractlistmodel.hpp
 	abstractscrollarea.cpp
@@ -14,7 +13,6 @@ set( SRC picker.hpp
 	busyindicator.hpp
 	fingergeometry.hpp
 	datetimepicker.cpp
-	lineedit.cpp
 	abstractlistview.cpp
 	abstractscrollarea.hpp
 	scroller.cpp
@@ -29,14 +27,12 @@ set( SRC picker.hpp
 	tableview.cpp
 	slider.hpp
 	messagebox.cpp
-	textedit.cpp
 	color.cpp
 	datetimepicker.hpp
 	stepper.hpp
 	datepicker.hpp
 	scroller.hpp
 	pagecontrol.cpp
-	textedit.hpp
 	timepicker.cpp
 	scrollarea.hpp
 	navigationbar.cpp
@@ -50,7 +46,6 @@ set( SRC picker.hpp
 	scrollarea.cpp
 	switch.hpp
 	navigationbutton.hpp
-	private/cursorshifter.hpp
 	private/layoutengine.cpp
 	private/datetimeparser.hpp
 	private/datetimeparser.cpp
@@ -63,7 +58,6 @@ set( SRC picker.hpp
 	private/scrollarea_p.hpp
 	private/listmodel_p.hpp
 	private/layoutengine.hpp
-	private/cursorshifter.cpp
 	slider.cpp
 	busyindicator.cpp
 	tableview.hpp

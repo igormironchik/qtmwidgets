@@ -98,6 +98,7 @@ ScrollIndicator::paintEvent( QPaintEvent * )
 				shown = false;
 				break;
 			}
+			[[fallthrough]];
 		case AbstractScrollArea::ScrollIndicatorAlwaysOn :
 			drawIndicator( &p, color );
 		break;
@@ -934,7 +935,7 @@ AbstractScrollArea::topLeftPointShownArea() const
 
 void
 AbstractScrollArea::setTopLeftPointShownArea( const QPoint & p )
-{	
+{
 	const int dx = p.x() - d->topLeftCorner.x();
 	const int dy = p.y() - d->topLeftCorner.y();
 

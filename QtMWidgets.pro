@@ -28,6 +28,7 @@ defineTest(minQtVersion) {
 }
 
 TEMPLATE = subdirs
+CONFIG += c++17
 
 SUBDIRS = src \
           examples

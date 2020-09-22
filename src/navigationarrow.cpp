@@ -134,8 +134,8 @@ NavigationArrow::setColor( const QColor & color )
 QSize
 NavigationArrow::minimumSizeHint() const
 {
-	const int width = FingerGeometry::width() / 3;
-	const int height = FingerGeometry::height() / 2;
+	const int width = qRound( (qreal) FingerGeometry::width() / 5.0 );
+	const int height = qRound( (qreal) FingerGeometry::height() / 3.0 );
 
 	return ( ( d->direction == Left || d->direction == Right ) ?
 		QSize( width, height ) : QSize( height, width ) );
@@ -205,7 +205,7 @@ void
 NavigationArrow::mouseReleaseEvent( QMouseEvent * e )
 {
 	if( e->button() == Qt::LeftButton )
-	{		
+	{
 		if( d->leftButtonPressed && rect().contains( e->pos() ) )
 			emit clicked();
 

@@ -236,8 +236,8 @@ NavigationButton::paintEvent( QPaintEvent * )
 	QRect arrowRect;
 	QRect textRect;
 
-	const int arrowWidth = FingerGeometry::width() / 3;
-	const int arrowHeight = FingerGeometry::height() / 2;
+	const int arrowWidth = qRound( (qreal) FingerGeometry::width() / 5.0 );
+	const int arrowHeight = qRound( (qreal) FingerGeometry::height() / 3.0 );
 	const int delta = ( r.height() - arrowHeight ) /2;
 
 	int flags = Qt::TextSingleLine | Qt::TextShowMnemonic | Qt::AlignVCenter;

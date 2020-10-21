@@ -85,7 +85,9 @@ private slots:
 
 		QTest::mouseMove( &picker, c );
 		QTest::mousePress( &picker, Qt::LeftButton, {}, c );
-		QTest::mouseMove( &picker, c + d, 20 );
+		QMouseEvent me( QEvent::MouseMove, c + d, Qt::LeftButton,
+			Qt::LeftButton, {} );
+		QApplication::sendEvent( &picker, &me );
 		QTest::mouseRelease( &picker, Qt::LeftButton, {}, c + d, 20 );
 		QTest::mouseMove( &picker, c, 20 );
 		QTest::mouseClick( &picker, Qt::LeftButton, {}, c, 20 );
@@ -96,7 +98,9 @@ private slots:
 		{
 			QTest::mouseMove( &picker, c );
 			QTest::mousePress( &picker, Qt::LeftButton, {}, c );
-			QTest::mouseMove( &picker, c + d, 20 );
+			QMouseEvent me( QEvent::MouseMove, c + d, Qt::LeftButton,
+				Qt::LeftButton, {} );
+			QApplication::sendEvent( &picker, &me );
 			QTest::mouseRelease( &picker, Qt::LeftButton, {}, c + d, 20 );
 			QTest::mouseMove( &picker, c, 20 );
 			QTest::mouseClick( &picker, Qt::LeftButton, {}, c, 20 );

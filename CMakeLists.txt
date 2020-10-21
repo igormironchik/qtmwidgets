@@ -23,3 +23,7 @@ find_package( Qt5Widgets 5.15 REQUIRED )
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib )
 
 add_subdirectory( src )
+
+enable_testing()
+
+add_subdirectory( tests )

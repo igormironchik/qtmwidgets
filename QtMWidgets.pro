@@ -31,9 +31,11 @@ TEMPLATE = subdirs
 CONFIG += c++17
 
 SUBDIRS = src \
-          examples
+          examples \
+          tests
 
 examples.depends = src
+tests.depends = src
 
 libDir.commands = mkdir lib
 

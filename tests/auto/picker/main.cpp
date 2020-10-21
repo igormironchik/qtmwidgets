@@ -80,15 +80,15 @@ private slots:
 
 		QPoint c( picker.width() / 2, picker.height() / 2 );
 		QFontMetrics fm( font );
-		const auto h = fm.boundingRect( QLatin1Char( 'A' ) ).height();
+		const auto h = fm.boundingRect( QLatin1String( "A" ) ).height();
 		QPoint d = QPoint( 0, - ( h + h / 3 ) );
 
 		QTest::mouseMove( &picker, c );
 		QTest::mousePress( &picker, Qt::LeftButton, {}, c );
-		QTest::mouseMove( &picker, c + d * 2, 20 );
+		QTest::mouseMove( &picker, c + d, 20 );
 		QTest::mouseRelease( &picker, Qt::LeftButton, {}, c + d, 20 );
 		QTest::mouseMove( &picker, c, 20 );
-		QTest::mouseClick( &picker, Qt::LeftButton, {}, c );
+		QTest::mouseClick( &picker, Qt::LeftButton, {}, c, 20 );
 
 		QVERIFY( picker.currentIndex() == 3 );
 
@@ -96,10 +96,10 @@ private slots:
 		{
 			QTest::mouseMove( &picker, c );
 			QTest::mousePress( &picker, Qt::LeftButton, {}, c );
-			QTest::mouseMove( &picker, c + d * 2, 20 );
+			QTest::mouseMove( &picker, c + d, 20 );
 			QTest::mouseRelease( &picker, Qt::LeftButton, {}, c + d, 20 );
 			QTest::mouseMove( &picker, c, 20 );
-			QTest::mouseClick( &picker, Qt::LeftButton, {}, c );
+			QTest::mouseClick( &picker, Qt::LeftButton, {}, c, 20 );
 		}
 
 		QVERIFY( picker.currentIndex() == 3 );

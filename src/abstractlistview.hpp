@@ -42,6 +42,7 @@
 #include <QMouseEvent>
 #include <QTimer>
 #include <QElapsedTimer>
+#include <QPainter>
 
 
 namespace QtMWidgets {

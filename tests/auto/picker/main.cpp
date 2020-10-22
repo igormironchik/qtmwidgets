@@ -152,9 +152,14 @@ private slots:
 
 		QVERIFY( spy.count() == 1 );
 
+		QVERIFY( m_picker->count() == m_data.size() - 1 );
 		QVERIFY( m_picker->currentIndex() == 0 );
-
 		QVERIFY( m_picker->currentText() == m_data.at( 1 ) );
+
+		m_picker->setCurrentText( m_data.at( 6 ) );
+
+		QVERIFY( m_picker->currentIndex() == 5 );
+		QVERIFY( m_picker->currentText() == m_data.at( 6 ) );
 	}
 
 private:

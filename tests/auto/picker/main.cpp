@@ -32,6 +32,7 @@
 #include <QObject>
 #include <QtTest/QtTest>
 #include <QSharedPointer>
+#include <QStringListModel>
 
 // QtMWidgets include.
 #include <QtMWidgets/Picker>
@@ -54,6 +55,8 @@ private slots:
 		m_data.append( QStringLiteral( "Belorussian" ) );
 		m_data.append( QStringLiteral( "Polish" ) );
 		m_data.append( QStringLiteral( "Ukrainian" ) );
+
+		m_model.setStringList( m_data );
 
 		m_picker.reset( new QtMWidgets::Picker );
 
@@ -83,12 +86,12 @@ private slots:
 		m_picker->setCurrentIndex( 2 );
 
 		QVERIFY( m_picker->currentIndex() == 2 );
-		QVERIFY( m_picker->currentText() == QStringLiteral( "German" ) );
+		QVERIFY( m_picker->currentText() == m_data.at( 2 ) );
 
 		QVERIFY( m_picker->count() == 8 );
 
-		QVERIFY( m_picker->findText( QStringLiteral( "Polish" ) ) == 6 );
-		QVERIFY( m_picker->itemText( 6 ) == QStringLiteral( "Polish" ) );
+		QVERIFY( m_picker->findText( m_data.at( 6 ) ) == 6 );
+		QVERIFY( m_picker->itemText( 6 ) == m_data.at( 6 ) );
 
 		QPoint c( m_picker->width() / 2, m_picker->height() / 2 );
 
@@ -123,9 +126,41 @@ private slots:
 		QVERIFY( m_picker->currentIndex() == 3 );
 	}
 
+	void testWithModel()
+	{
+		m_picker->setModel( &m_model );
+		m_picker->setCurrentIndex( 0 );
+
+		QVERIFY( m_picker->currentText() == m_data.at( 0 ) );
+		QVERIFY( m_picker->currentData( Qt::DisplayRole ).toString() == m_data.at( 0 ) );
+		QVERIFY( m_picker->findData( m_data.at( 0 ), Qt::DisplayRole ) == 0 );
+		QVERIFY( m_picker->itemData( 0, Qt::DisplayRole ).toString() == m_data.at( 0 ) );
+
+		const auto wrong = QStringLiteral( "Wrong" );
+
+		m_picker->setItemText( 0, wrong );
+
+		QVERIFY( m_picker->currentText() == wrong );
+
+		m_picker->setItemData( 0, m_data.at( 0 ), Qt::DisplayRole );
+
+		QVERIFY( m_picker->currentText() == m_data.at( 0 ) );
+
+		QSignalSpy spy( m_picker.data(), &QtMWidgets::Picker::currentTextChanged );
+
+		m_picker->removeItem( 0 );
+
+		QVERIFY( spy.count() == 1 );
+
+		QVERIFY( m_picker->currentIndex() == 0 );
+
+		QVERIFY( m_picker->currentText() == m_data.at( 1 ) );
+	}
+
 private:
 	QStringList m_data;
 	QSharedPointer< QtMWidgets::Picker > m_picker;
+	QStringListModel m_model;
 	QFont m_font;
 	int m_lineHeight;
 	QPoint m_delta;

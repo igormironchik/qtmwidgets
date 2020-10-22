@@ -1,6 +1,11 @@
 
 project( QtMWidgets )
 
+if( ENABLE_COVERAGE )
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage" )
+	set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage" )
+endif( ENABLE_COVERAGE )
+
 
 set( SRC picker.hpp
 	pageview.hpp
@@ -64,7 +69,7 @@ set( SRC picker.hpp
 	textlabel.hpp
 	navigationarrow.hpp
 	listmodel.hpp )
-    
+
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../include
 	${CMAKE_CURRENT_SOURCE_DIR} )
 

@@ -160,6 +160,23 @@ private slots:
 
 		QVERIFY( m_picker->currentIndex() == 5 );
 		QVERIFY( m_picker->currentText() == m_data.at( 6 ) );
+
+		QVERIFY( m_picker->rootModelIndex() == QModelIndex() );
+		QVERIFY( m_picker->modelColumn() == 0 );
+		QVERIFY( m_picker->model() == &m_model );
+
+		m_picker->insertItem( 0, m_data.at( 0 ) );
+
+		QVERIFY( m_picker->count() == m_data.size() );
+		QVERIFY( m_picker->itemText( 0 ) == m_data.at( 0 ) );
+
+		m_picker->addItems( m_data );
+
+		QVERIFY( m_picker->count() == m_data.size() * 2 );
+
+		m_picker->clear();
+
+		QVERIFY( m_picker->count() == 0 );
 	}
 
 private:

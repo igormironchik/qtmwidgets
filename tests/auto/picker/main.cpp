@@ -31,6 +31,7 @@
 // Qt include.
 #include <QObject>
 #include <QtTest/QtTest>
+#include <QSharedPointer>
 
 // QtMWidgets include.
 #include <QtMWidgets/Picker>
@@ -43,71 +44,91 @@ class TestPicker
 
 private slots:
 
+	void initTestCase()
+	{
+		m_data.append( QStringLiteral( "English" ) );
+		m_data.append( QStringLiteral( "Russian" ) );
+		m_data.append( QStringLiteral( "German" ) );
+		m_data.append( QStringLiteral( "Spanish" ) );
+		m_data.append( QStringLiteral( "Portuguese" ) );
+		m_data.append( QStringLiteral( "Belorussian" ) );
+		m_data.append( QStringLiteral( "Polish" ) );
+		m_data.append( QStringLiteral( "Ukrainian" ) );
+
+		m_picker.reset( new QtMWidgets::Picker );
+
+		m_picker->setMouseTracking( true );
+
+		for( int i = 0; i < m_data.size(); ++i )
+			m_picker->addItem( m_data.at( i ) );
+
+		m_font = m_picker->font();
+		m_font.setBold( true );
+		m_font.setPixelSize( 15 );
+
+		m_picker->setFont( m_font );
+
+		m_picker->show();
+
+		QVERIFY( QTest::qWaitForWindowActive( m_picker.data() ) );
+
+		QFontMetrics fm( m_font );
+		m_lineHeight = fm.boundingRect( QStringLiteral( "A" ) ).height();
+
+		m_delta = QPoint( 0, - ( m_lineHeight + m_lineHeight / 3 ) );
+	}
+
 	void testPicker()
 	{
-		QtMWidgets::Picker picker;
-		picker.setMouseTracking( true );
+		m_picker->setCurrentIndex( 2 );
 
-		picker.addItem( QLatin1String( "English" ) );
-		picker.addItem( QLatin1String( "Russian" ) );
-		picker.addItem( QLatin1String( "German" ) );
-		picker.addItem( QLatin1String( "Spanish" ) );
-		picker.addItem( QLatin1String( "Portuguese" ) );
-		picker.addItem( QLatin1String( "Belorussian" ) );
-		picker.addItem( QLatin1String( "Polish" ) );
-		picker.addItem( QLatin1String( "Ukrainian" ) );
+		QVERIFY( m_picker->currentIndex() == 2 );
+		QVERIFY( m_picker->currentText() == QStringLiteral( "German" ) );
 
-		QFont font = picker.font();
-		font.setBold( true );
-		font.setPixelSize( 15 );
+		QVERIFY( m_picker->count() == 8 );
 
-		picker.setFont( font );
-		picker.setCurrentIndex( 1 );
+		QVERIFY( m_picker->findText( QStringLiteral( "Polish" ) ) == 6 );
+		QVERIFY( m_picker->itemText( 6 ) == QStringLiteral( "Polish" ) );
 
-		picker.show();
+		QPoint c( m_picker->width() / 2, m_picker->height() / 2 );
 
-		QVERIFY( QTest::qWaitForWindowActive( &picker ) );
-
-		picker.setCurrentIndex( 2 );
-
-		QVERIFY( picker.currentIndex() == 2 );
-		QVERIFY( picker.currentText() == QStringLiteral( "German" ) );
-
-		QVERIFY( picker.count() == 8 );
-
-		QVERIFY( picker.findText( QStringLiteral( "Polish" ) ) == 6 );
-		QVERIFY( picker.itemText( 6 ) == QStringLiteral( "Polish" ) );
-
-		QPoint c( picker.width() / 2, picker.height() / 2 );
-		QFontMetrics fm( font );
-		const auto h = fm.boundingRect( QLatin1String( "A" ) ).height();
-		QPoint d = QPoint( 0, - ( h + h / 3 ) );
-
-		QTest::mouseMove( &picker, c );
-		QTest::mousePress( &picker, Qt::LeftButton, {}, c );
-		QMouseEvent me( QEvent::MouseMove, c + d, Qt::LeftButton,
+		QTest::mousePress( m_picker.data(), Qt::LeftButton, {}, c );
+		QMouseEvent me( QEvent::MouseMove, c + m_delta, Qt::LeftButton,
 			Qt::LeftButton, {} );
-		QApplication::sendEvent( &picker, &me );
-		QTest::mouseRelease( &picker, Qt::LeftButton, {}, c + d, 20 );
-		QTest::mouseMove( &picker, c, 20 );
-		QTest::mouseClick( &picker, Qt::LeftButton, {}, c, 20 );
+		QApplication::sendEvent( m_picker.data(), &me );
+		QTest::mouseRelease( m_picker.data(), Qt::LeftButton, {}, c + m_delta, 20 );
+		QTest::mouseClick( m_picker.data(), Qt::LeftButton, {}, c, 20 );
 
-		QVERIFY( picker.currentIndex() == 3 );
+		QVERIFY( m_picker->currentIndex() == 3 );
+
+		int idx = 4;
 
 		for( int i = 0; i < 8; ++i )
 		{
-			QTest::mouseMove( &picker, c );
-			QTest::mousePress( &picker, Qt::LeftButton, {}, c );
-			QMouseEvent me( QEvent::MouseMove, c + d, Qt::LeftButton,
+			QTest::mousePress( m_picker.data(), Qt::LeftButton, {}, c );
+			QMouseEvent me( QEvent::MouseMove, c + m_delta, Qt::LeftButton,
 				Qt::LeftButton, {} );
-			QApplication::sendEvent( &picker, &me );
-			QTest::mouseRelease( &picker, Qt::LeftButton, {}, c + d, 20 );
-			QTest::mouseMove( &picker, c, 20 );
-			QTest::mouseClick( &picker, Qt::LeftButton, {}, c, 20 );
+			QApplication::sendEvent( m_picker.data(), &me );
+			QTest::mouseRelease( m_picker.data(), Qt::LeftButton, {}, c + m_delta, 20 );
+			QTest::mouseClick( m_picker.data(), Qt::LeftButton, {}, c, 20 );
+
+			QVERIFY( m_picker->currentIndex() == idx );
+
+			++idx;
+
+			if( idx == m_data.size() )
+				idx = 0;
 		}
 
-		QVERIFY( picker.currentIndex() == 3 );
+		QVERIFY( m_picker->currentIndex() == 3 );
 	}
+
+private:
+	QStringList m_data;
+	QSharedPointer< QtMWidgets::Picker > m_picker;
+	QFont m_font;
+	int m_lineHeight;
+	QPoint m_delta;
 };
 
 

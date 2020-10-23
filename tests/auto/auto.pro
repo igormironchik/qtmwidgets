@@ -2,4 +2,5 @@
 TEMPLATE = subdirs
 
 SUBDIRS = picker \
-    switch
+    switch \
+    stepper

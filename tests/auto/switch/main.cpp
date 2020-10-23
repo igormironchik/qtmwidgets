@@ -83,15 +83,15 @@ private slots:
 		QVERIFY( m_switch->state() == QtMWidgets::Switch::AcceptedCheck );
 		QVERIFY( m_switch->isChecked() == true );
 
-		const auto w = m_switch->width() - 2;
-		const auto m = qRound( (double) ( w - m_delta.x() * 2 + 2 ) / 2.5 );
+		const auto w = m_switch->width();
+		const auto m1 = qRound( (double) ( w - m_delta.x() * 2 + 2 ) / 2.5 );
 		QTest::mousePress( m_switch.data(), Qt::LeftButton, {},
 			QPoint( w - m_delta.x(), m_delta.y() ), 20 );
-		QMouseEvent me( QEvent::MouseMove, QPoint( m, m_delta.y() ),
+		QMouseEvent me1( QEvent::MouseMove, QPoint( m1, m_delta.y() ),
 			Qt::LeftButton, Qt::LeftButton, {} );
-		QApplication::sendEvent( m_switch.data(), &me );
+		QApplication::sendEvent( m_switch.data(), &me1 );
 		QTest::mouseRelease( m_switch.data(), Qt::LeftButton, {},
-			QPoint( m, m_delta.y() ), 20 );
+			QPoint( m1, m_delta.y() ), 20 );
 
 		QVERIFY( spy.count() == 3 );
 
@@ -101,6 +101,32 @@ private slots:
 		m_switch->setState( QtMWidgets::Switch::AcceptedUncheck );
 
 		QVERIFY( m_switch->state() == QtMWidgets::Switch::AcceptedUncheck );
+		QVERIFY( m_switch->isChecked() == false );
+
+		const auto m2 = w - m_delta.x() * 2;
+		QTest::mousePress( m_switch.data(), Qt::LeftButton, {},
+			QPoint( m_delta.x(), m_delta.y() ), 20 );
+		QMouseEvent me2( QEvent::MouseMove, QPoint( m2, m_delta.y() ),
+			Qt::LeftButton, Qt::LeftButton, {} );
+		QApplication::sendEvent( m_switch.data(), &me2 );
+		QTest::mouseRelease( m_switch.data(), Qt::LeftButton, {},
+			QPoint( m2, m_delta.y() ), 20 );
+
+		QVERIFY( spy.count() == 5 );
+
+		QVERIFY( m_switch->state() == QtMWidgets::Switch::NotAcceptedCheck );
+		QVERIFY( m_switch->isChecked() == true );
+
+		m_switch->setState( QtMWidgets::Switch::AcceptedCheck );
+
+		QVERIFY( m_switch->state() == QtMWidgets::Switch::AcceptedCheck );
+		QVERIFY( m_switch->isChecked() == true );
+
+		QTest::mouseClick( m_switch.data(), Qt::LeftButton, {}, m_delta, 20 );
+
+		QVERIFY( spy.count() == 7 );
+
+		QVERIFY( m_switch->state() == QtMWidgets::Switch::NotAcceptedUncheck );
 		QVERIFY( m_switch->isChecked() == false );
 	}
 

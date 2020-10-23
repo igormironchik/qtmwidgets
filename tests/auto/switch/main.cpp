@@ -83,15 +83,15 @@ private slots:
 		QVERIFY( m_switch->state() == QtMWidgets::Switch::AcceptedCheck );
 		QVERIFY( m_switch->isChecked() == true );
 
-		const auto w = m_switch->width();
-
+		const auto w = m_switch->width() - 2;
+		const auto m = qRound( (double) ( w - m_delta.x() * 2 + 2 ) / 2.5 );
 		QTest::mousePress( m_switch.data(), Qt::LeftButton, {},
 			QPoint( w - m_delta.x(), m_delta.y() ), 20 );
-		QMouseEvent me( QEvent::MouseMove, QPoint( w - m_delta.x() * 3, m_delta.y() ),
+		QMouseEvent me( QEvent::MouseMove, QPoint( m, m_delta.y() ),
 			Qt::LeftButton, Qt::LeftButton, {} );
 		QApplication::sendEvent( m_switch.data(), &me );
 		QTest::mouseRelease( m_switch.data(), Qt::LeftButton, {},
-			QPoint( w - m_delta.x() * 3, m_delta.y() ), 20 );
+			QPoint( m, m_delta.y() ), 20 );
 
 		QVERIFY( spy.count() == 3 );
 

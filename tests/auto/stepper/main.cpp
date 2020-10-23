@@ -69,6 +69,7 @@ private slots:
 		QVERIFY( m_stepper->maximum() == 5 );
 		QVERIFY( m_stepper->wrapping() == false );
 		QVERIFY( m_stepper->autorepeat() == false );
+		QVERIFY( m_stepper->singleStep() == 1 );
 
 		QSignalSpy spy( m_stepper.data(), &QtMWidgets::Stepper::valueChanged );
 
@@ -123,6 +124,11 @@ private slots:
 
 		QVERIFY( m_stepper->value() == 5 );
 		QVERIFY( spy.count() == 17 );
+
+		m_stepper->setValue( 2 );
+
+		QVERIFY( m_stepper->value() == 2 );
+		QVERIFY( spy.count() == 18 );
 	}
 
 private:

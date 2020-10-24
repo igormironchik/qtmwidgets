@@ -468,7 +468,68 @@ private slots:
 			QVERIFY( m_dt->dateTime() == QDateTime( { 2019, 10, 12 }, { 15, 12 }, Qt::UTC ) );
 		}
 
+		m_dt->setDateTime( { { 2021, 12, 31 }, { 23, 59, 59, 999 }, Qt::UTC } );
+
+		m_dt->setTimeRange( { 0, 0 }, { 22, 0 } );
+
+		QVERIFY( m_dt->dateTime() == QDateTime( { 2021, 12, 31 }, { 22, 0 }, Qt::UTC ) );
+
+		m_dt->clearMaximumTime();
+		m_dt->clearMinimumTime();
+		m_dt->clearMaximumDate();
+		m_dt->clearMinimumDate();
+
+		{
+			QPoint p( m_dtSections.at( 4 ), m_dt->height() / 2 );
+			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
+			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QApplication::sendEvent( m_dt.data(), &me );
+			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );
+
+			QVERIFY( m_dt->dateTime() == QDateTime( { 2021, 12, 31 }, { 22, 1 }, Qt::UTC ) );
+		}
+
+		m_dt->setMaximumDateTime( { { 2021, 12, 31 }, { 22, 0 }, Qt::UTC });
+
+		QVERIFY( m_dt->dateTime() == QDateTime( { 2021, 12, 31 }, { 22, 0 }, Qt::UTC ) );
+
+		m_dt->setMaximumDateTime( { { 2021, 12, 31 }, { 22, 2 }, Qt::UTC } );
+		m_dt->setMinimumDateTime( { { 2021, 12, 31 }, { 22, 1 }, Qt::UTC } );
+
+		QVERIFY( m_dt->dateTime() == QDateTime( { 2021, 12, 31 }, { 22, 1 }, Qt::UTC ) );
+
+		m_dt->clearMaximumDateTime();
+		m_dt->clearMinimumDateTime();
+
+		{
+			QPoint p( m_dtSections.at( 3 ), m_dt->height() / 2 );
+			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
+			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QApplication::sendEvent( m_dt.data(), &me );
+			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );
+
+			QVERIFY( m_dt->dateTime() == QDateTime( { 2021, 12, 31 }, { 23, 1 }, Qt::UTC ) );
+		}
+
 		m_dt->hide();
+	}
+
+	void testCtors()
+	{
+		{
+			QtMWidgets::DateTimePicker dt( QDateTime( { 2019, 12, 31 }, { 23, 59 } ) );
+			QVERIFY( dt.dateTime() == QDateTime( { 2019, 12, 31 }, { 23, 59 } ) );
+		}
+
+		{
+			QtMWidgets::DateTimePicker dt( QDate( 2019, 12, 31 ) );
+			QVERIFY( dt.dateTime() == QDateTime( { 2019, 12, 31 }, { 0, 0 } ) );
+		}
+
+		{
+			QtMWidgets::DateTimePicker dt( QTime( 23, 59 ) );
+			QVERIFY( dt.dateTime() == QDateTime( { 2000, 1, 1 }, { 23, 59 } ) );
+		}
 	}
 
 private:

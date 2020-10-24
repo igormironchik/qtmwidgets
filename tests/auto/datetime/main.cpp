@@ -511,6 +511,11 @@ private slots:
 			QVERIFY( m_dt->dateTime() == QDateTime( { 2021, 12, 31 }, { 23, 1 }, Qt::UTC ) );
 		}
 
+		m_dt->setTimeSpec( Qt::LocalTime );
+		m_dt->setDateRange( { 2020, 12, 31 }, { 2019, 12, 31 } );
+
+		QVERIFY( m_dt->date() == QDate( 2020, 12, 31 ) );
+
 		m_dt->hide();
 	}
 

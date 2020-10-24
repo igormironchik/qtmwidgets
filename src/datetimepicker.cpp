@@ -1006,7 +1006,7 @@ void
 DateTimePicker::setDateTime( const QDateTime & dateTime )
 {
 	if( dateTime.isValid() )
-		d->setValue( QDateTime( dateTime.date(), dateTime.time(), d->spec ) );
+		d->setValue( dateTime.toTimeSpec( d->spec ) );
 }
 
 void

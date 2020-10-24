@@ -3,4 +3,5 @@ TEMPLATE = subdirs
 
 SUBDIRS = picker \
     switch \
-    stepper
+    stepper \
+    datetime

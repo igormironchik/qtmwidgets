@@ -354,6 +354,123 @@ private slots:
 		m_t->hide();
 	}
 
+	void testDateTime2()
+	{
+		m_dt->setFormat( QStringLiteral( "d M yy h m s" ) );
+		m_dt->setTimeSpec( Qt::UTC );
+		m_dt->setDateTime( { { 2020, 10, 12 }, { 15, 12, 00 }, Qt::UTC } );
+		m_dt->setMinimumDate( { 2019, 1, 1 } );
+		m_dt->setMaximumDate( { 2021, 12, 31 } );
+
+		m_dt->show();
+
+		QVERIFY( m_dt->timeSpec() == Qt::UTC );
+		QVERIFY( m_dt->minimumDate() == QDate( 2019, 1, 1 ) );
+		QVERIFY( m_dt->maximumDate() == QDate( 2021, 12, 31 ) );
+		QVERIFY( m_dt->dateTime() == QDateTime( { 2020, 10, 12 }, { 15, 12, 00 }, Qt::UTC ) );
+
+		m_dt->setDateTimeRange( { { 2019, 1, 1 }, { 0, 0 }, Qt::UTC },
+			{ { 2021, 12, 31 }, { 23, 59, 59, 999 }, Qt::UTC } );
+
+		QVERIFY( m_dt->minimumDate() == QDate( 2019, 1, 1 ) );
+		QVERIFY( m_dt->maximumDate() == QDate( 2021, 12, 31 ) );
+		QVERIFY( m_dt->dateTime() == QDateTime( { 2020, 10, 12 }, { 15, 12, 00 }, Qt::UTC ) );
+
+		{
+			m_dtSections.clear();
+
+			QStyleOption opt;
+			opt.initFrom( m_dt.data() );
+
+			QtMWidgets::Section s1( QtMWidgets::Section::DaySection );
+
+			int sw = s1.maxWidth( opt ) + 5 * 2 + 6;
+			int w = sw;
+
+			m_dtSections.append( sw / 2 );
+
+			QtMWidgets::Section s2( QtMWidgets::Section::MonthSection );
+
+			sw = s2.maxWidth( opt ) + 5 * 2 + 6;
+
+			m_dtSections.append( w + sw / 2 );
+
+			w += sw;
+
+			QtMWidgets::Section s3( QtMWidgets::Section::YearSection2Digits );
+
+			sw = s3.maxWidth( opt ) + 5 * 2 + 6;
+
+			m_dtSections.append( w + sw / 2 );
+
+			w += sw;
+
+			QtMWidgets::Section s4( QtMWidgets::Section::Hour24Section );
+
+			sw = s4.maxWidth( opt ) + 5 * 2 + 6;
+
+			m_dtSections.append( w + sw / 2 );
+
+			w += sw;
+
+			QtMWidgets::Section s5( QtMWidgets::Section::MinuteSection );
+
+			sw = s5.maxWidth( opt ) + 5 * 2 + 6;
+
+			m_dtSections.append( w + sw / 2 );
+
+			w += sw;
+
+			QtMWidgets::Section s6( QtMWidgets::Section::SecondSection );
+
+			sw = s6.maxWidth( opt ) + 5 * 2 + 6;
+
+			m_dtSections.append( w + sw / 2 );
+		}
+
+		{
+			QPoint p( m_dtSections.at( 2 ), m_dt->height() / 2 );
+			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
+			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QApplication::sendEvent( m_dt.data(), &me );
+			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );
+
+			QVERIFY( m_dt->dateTime() == QDateTime( { 2021, 10, 12 }, { 15, 12 }, Qt::UTC ) );
+		}
+
+		{
+			QPoint p( m_dtSections.at( 2 ), m_dt->height() / 2 );
+			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
+			QMouseEvent me( QEvent::MouseMove, p - m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QApplication::sendEvent( m_dt.data(), &me );
+			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p - m_delta, 20 );
+
+			QVERIFY( m_dt->dateTime() == QDateTime( { 2020, 10, 12 }, { 15, 12 }, Qt::UTC ) );
+		}
+
+		{
+			QPoint p( m_dtSections.at( 2 ), m_dt->height() / 2 );
+			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
+			QMouseEvent me( QEvent::MouseMove, p - m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QApplication::sendEvent( m_dt.data(), &me );
+			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p - m_delta, 20 );
+
+			QVERIFY( m_dt->dateTime() == QDateTime( { 2019, 10, 12 }, { 15, 12 }, Qt::UTC ) );
+		}
+
+		{
+			QPoint p( m_dtSections.at( 2 ), m_dt->height() / 2 );
+			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
+			QMouseEvent me( QEvent::MouseMove, p - m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QApplication::sendEvent( m_dt.data(), &me );
+			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p - m_delta, 20 );
+
+			QVERIFY( m_dt->dateTime() == QDateTime( { 2019, 10, 12 }, { 15, 12 }, Qt::UTC ) );
+		}
+
+		m_dt->hide();
+	}
+
 private:
 	QSharedPointer< QtMWidgets::DateTimePicker > m_dt;
 	QSharedPointer< QtMWidgets::DatePicker > m_d;

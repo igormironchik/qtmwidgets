@@ -48,6 +48,7 @@ private slots:
 	{
 		QtMWidgets::BusyIndicator i;
 		i.setRadius( 35 );
+		i.setRunning( false );
 
 		i.show();
 

@@ -535,6 +535,16 @@ private slots:
 			QtMWidgets::DateTimePicker dt( QTime( 23, 59 ) );
 			QVERIFY( dt.dateTime() == QDateTime( { 2000, 1, 1 }, { 23, 59 } ) );
 		}
+
+		{
+			QtMWidgets::DatePicker d( QDate( 2011, 10, 9 ) );
+			QVERIFY( d.date() == QDate( 2011, 10, 9 ) );
+		}
+
+		{
+			QtMWidgets::TimePicker t( QTime( 23, 59 ) );
+			QVERIFY( t.time() == QTime( 23, 59 ) );
+		}
 	}
 
 private:

@@ -122,11 +122,12 @@ public:
 	*/
 	virtual bool moveRows( int sourceRow, int count, int destinationRow )
 	{
-		if( sourceRow + count > destinationRow )
+		if( sourceRow == destinationRow )
 			return false;
 
 		for( int i = 0; i < count; ++i )
-			d->data.move( sourceRow, destinationRow + i );
+			d->data.move( sourceRow + ( sourceRow > destinationRow ? i : 0 ),
+				( destinationRow + i < d->data.size() ? destinationRow + i : d->data.size() - 1 ) );
 
 		emit rowsMoved( sourceRow, sourceRow + count - 1, destinationRow );
 

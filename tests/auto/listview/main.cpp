@@ -147,6 +147,65 @@ private slots:
 		QVERIFY( m_w->model()->data( m_data.size() - 1 ) == m_data.back() );
 	}
 
+	void testScroll()
+	{
+		const int s = 5;
+		m_w->setSpacing( s - 2 );
+
+		QVERIFY( m_w->spacing() == s - 2 );
+
+		int i = 0;
+		QRect r = m_w->visualRect( i );
+
+		while( r.isValid() )
+		{
+			++i;
+			r = m_w->visualRect( i );
+		}
+
+		m_w->scrollTo( i, QtMWidgets::AbstractListViewBase::EnsureVisible );
+
+		r = m_w->visualRect( i );
+
+		QVERIFY( r.isValid() );
+
+		m_w->scrollTo( i, QtMWidgets::AbstractListViewBase::PositionAtCenter );
+
+		r = m_w->visualRect( i );
+
+		const auto dc = r.center() - m_w->rect().center();
+
+		QVERIFY( qAbs( dc.x() ) <= s && qAbs( dc.y() ) <= s );
+
+		const auto row = m_w->rowAt( r.center() );
+
+		QVERIFY( row == i );
+
+		m_w->scrollTo( i, QtMWidgets::AbstractListViewBase::PositionAtTop );
+
+		r = m_w->visualRect( i );
+
+		const auto dt = r.topLeft() - m_w->rect().topLeft();
+
+		QVERIFY( qAbs( dt.x() ) <= s && qAbs( dt.y() ) <= s );
+
+		m_w->scrollTo( i, QtMWidgets::AbstractListViewBase::PositionAtBottom );
+
+		r = m_w->visualRect( i );
+
+		const auto db = r.bottomLeft() - m_w->rect().bottomLeft();
+
+		QVERIFY( qAbs( db.x() ) <= s && qAbs( db.y() ) <= s );
+
+		QSignalSpy spy( m_w.data(), &QtMWidgets::AbstractListViewBase::rowLongTouched );
+
+		QTest::mousePress( m_w.data(), Qt::LeftButton, {}, r.center(), 20 );
+		QTest::qWait( 2100 );
+		QTest::mouseRelease( m_w.data(), Qt::LeftButton, {}, r.center(), 20 );
+
+		QVERIFY( spy.count() == 1 );
+	}
+
 private:
 	QSharedPointer< ListView > m_w;
 	QVector< QColor > m_data;

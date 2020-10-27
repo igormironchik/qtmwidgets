@@ -48,6 +48,11 @@ public:
 		setModel( new QtMWidgets::ListModel< QColor > () );
 	}
 
+	void setViewportMargins( const QMargins & m )
+	{
+		QtMWidgets::AbstractListView< QColor >::setViewportMargins( m );
+	}
+
 protected:
 	void drawRow( QPainter * painter,
 		const QRect & rect, int row )
@@ -214,6 +219,51 @@ private slots:
 		r = m_w->visualRect( i );
 
 		QVERIFY( !r.isValid() );
+	}
+
+	void testIndicators()
+	{
+		m_w->setViewportMargins( QMargins( 5, 5, 5, 5 ) );
+		m_w->setVerticalScrollIndicatorPolicy(
+			QtMWidgets::AbstractScrollArea::ScrollIndicatorAsNeeded );
+		m_w->setHorizontalScrollIndicatorPolicy(
+			QtMWidgets::AbstractScrollArea::ScrollIndicatorAsNeeded );
+
+		QVERIFY( m_w->verticalScrollIndicatorPolicy() ==
+			QtMWidgets::AbstractScrollArea::ScrollIndicatorAsNeeded );
+		QVERIFY( m_w->horizontalScrollIndicatorPolicy() ==
+			QtMWidgets::AbstractScrollArea::ScrollIndicatorAsNeeded );
+
+		m_w->setBlurPolicy( QtMWidgets::AbstractScrollArea::BlurBothDirections );
+
+		QVERIFY( m_w->blurPolicy() ==
+			QtMWidgets::AbstractScrollArea::BlurBothDirections );
+
+		m_w->scrollTo( 0, QtMWidgets::AbstractListViewBase::PositionAtTop );
+
+		auto r = m_w->visualRect( 0 );
+
+		{
+			QTest::mouseClick( m_w.data(), Qt::LeftButton, {}, r.center(), 20 );
+			QMouseEvent me( QEvent::MouseMove, r.center() + QPoint( 0, r.height() ), Qt::LeftButton,
+				Qt::LeftButton, {} );
+			QApplication::sendEvent( m_w.data(), &me );
+			QTest::mouseRelease( m_w.data(), Qt::LeftButton, {},
+				r.center() + QPoint( 0, r.height() ), 200 );
+
+			QTest::qWait( 320 );
+		}
+
+		{
+			QTest::mouseClick( m_w.data(), Qt::LeftButton, {}, r.center(), 20 );
+			QMouseEvent me( QEvent::MouseMove, r.center() + QPoint( r.height(), 0 ), Qt::LeftButton,
+				Qt::LeftButton, {} );
+			QApplication::sendEvent( m_w.data(), &me );
+			QTest::mouseRelease( m_w.data(), Qt::LeftButton, {},
+				r.center() + QPoint( r.height(), 0 ), 200 );
+
+			QTest::qWait( 320 );
+		}
 	}
 
 private:

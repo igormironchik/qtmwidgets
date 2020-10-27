@@ -33,9 +33,29 @@
 #include <QtTest/QtTest>
 #include <QSharedPointer>
 #include <QStringListModel>
+#include <QtGlobal>
 
 // QtMWidgets include.
 #include <QtMWidgets/Picker>
+
+class StringListEvenDisabledModel
+	:	public QStringListModel
+{
+public:
+	explicit StringListEvenDisabledModel( QObject * parent = nullptr )
+		:	QStringListModel( parent )
+	{
+	}
+
+protected:
+	Qt::ItemFlags flags( const QModelIndex & index ) const override
+	{
+		if( index.row() % 2 )
+			return QStringListModel::flags( index );
+		else
+			return Qt::NoItemFlags;
+	}
+};
 
 
 class TestPicker
@@ -177,6 +197,34 @@ private slots:
 		m_picker->clear();
 
 		QVERIFY( m_picker->count() == 0 );
+	}
+
+	void testEvenDisabled()
+	{
+		StringListEvenDisabledModel model;
+		model.setStringList( m_data );
+
+		m_picker->setModel( &model );
+
+		m_picker->setCurrentIndex( 3 );
+
+		QPoint c( m_picker->width() / 2, m_picker->height() / 2 );
+
+		QSignalSpy spy( m_picker.data(), QOverload< int >::of(
+			&QtMWidgets::Picker::currentIndexChanged ) );
+
+		QTest::mousePress( m_picker.data(), Qt::LeftButton, {}, c );
+		QMouseEvent me( QEvent::MouseMove, c + m_delta, Qt::LeftButton,
+			Qt::LeftButton, {} );
+		QApplication::sendEvent( m_picker.data(), &me );
+		QTest::mouseRelease( m_picker.data(), Qt::LeftButton, {}, c + m_delta, 20 );
+		QTest::mouseClick( m_picker.data(), Qt::LeftButton, {}, c, 20 );
+
+		QVERIFY( spy.count() == 0 );
+
+		QTest::qWait( 5000 );
+
+		m_picker->setModel( &m_model );
 	}
 
 private:

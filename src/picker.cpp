@@ -368,7 +368,7 @@ PickerPrivate::setCurrentIndex( const QPoint & pos )
 {
 	const QModelIndex index = indexForPos( pos );
 
-	if( index.isValid() )
+	if( index.isValid() && ( index.flags() & Qt::ItemIsEnabled ) )
 	{
 		setCurrentIndex( index );
 		emit q->activated( itemText( index ) );

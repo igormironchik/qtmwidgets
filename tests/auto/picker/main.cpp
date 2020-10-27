@@ -235,6 +235,8 @@ private slots:
 
 		m_picker->resize( 150, 100 );
 		m_picker->setCurrentIndex( 1 );
+
+		QTest::qWait( 1000 );
 	}
 
 private:

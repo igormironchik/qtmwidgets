@@ -228,7 +228,8 @@ private slots:
 	void testThreeItems()
 	{
 		QStringList data;
-		data << QStringLiteral( "One" ) << QStringLiteral( "Very very very very very long line" )
+		data << QStringLiteral( "One" )
+			<< QStringLiteral( "Very very very very very very very long line" )
 			<< QStringLiteral( "Three" );
 		m_model.setStringList( data );
 

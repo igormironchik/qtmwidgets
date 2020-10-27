@@ -675,7 +675,7 @@ protected:
 
 			d->elapsedTimer.start();
 
-			if( d->clickCount == 2 && row >= 0 && row < d->model->rowCount())
+			if( d->clickCount == 2 && row >= 0 && row < d->model->rowCount() )
 				emit rowDoubleTouched( row );
 		}
 	}

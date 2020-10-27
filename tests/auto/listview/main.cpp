@@ -204,6 +204,16 @@ private slots:
 		QTest::mouseRelease( m_w.data(), Qt::LeftButton, {}, r.center(), 20 );
 
 		QVERIFY( spy.count() == 1 );
+
+		QTest::mousePress( m_w.data(), Qt::LeftButton, {}, r.center(), 20 );
+		QMouseEvent me( QEvent::MouseMove, r.center() + QPoint( 0, r.height() + s ), Qt::LeftButton,
+			Qt::LeftButton, {} );
+		QApplication::sendEvent( m_w.data(), &me );
+		QTest::mouseRelease( m_w.data(), Qt::LeftButton, {}, r.center(), 20 );
+
+		r = m_w->visualRect( i );
+
+		QVERIFY( !r.isValid() );
 	}
 
 private:

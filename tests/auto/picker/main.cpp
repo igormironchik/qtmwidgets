@@ -222,9 +222,20 @@ private slots:
 
 		QVERIFY( spy.count() == 0 );
 
-		QTest::qWait( 5000 );
-
 		m_picker->setModel( &m_model );
+	}
+
+	void testThreeItems()
+	{
+		QStringList data;
+		data << QStringLiteral( "One" ) << QStringLiteral( "Very very very very very long line" )
+			<< QStringLiteral( "Three" );
+		m_model.setStringList( data );
+
+		m_picker->resize( 150, 100 );
+		m_picker->setCurrentIndex( 1 );
+
+		QTest::qWait( 10000 );
 	}
 
 private:

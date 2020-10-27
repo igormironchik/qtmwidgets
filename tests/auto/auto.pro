@@ -6,4 +6,5 @@ SUBDIRS = picker \
     stepper \
     datetime \
     busy \
-    listview
+    listview \
+    arrow

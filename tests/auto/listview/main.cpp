@@ -243,11 +243,23 @@ private slots:
 
 		auto r = m_w->visualRect( 0 );
 
+		QTest::qWait( 300 );
+
 		{
-			QTest::mouseClick( m_w.data(), Qt::LeftButton, {}, r.center(), 20 );
-			QMouseEvent me( QEvent::MouseMove, r.center() + QPoint( 0, r.height() ), Qt::LeftButton,
+			QTest::mousePress( m_w.data(), Qt::LeftButton, {}, r.center(), 20 );
+			QMouseEvent me1( QEvent::MouseMove, r.center() + QPoint( 0, r.height() ), Qt::LeftButton,
 				Qt::LeftButton, {} );
-			QApplication::sendEvent( m_w.data(), &me );
+			QApplication::sendEvent( m_w.data(), &me1 );
+
+			QMouseEvent me2( QEvent::MouseMove, r.center() + QPoint( 0, r.height() * 2 ), Qt::LeftButton,
+				Qt::LeftButton, {} );
+
+			QTest::qWait( 100 );
+
+			QApplication::sendEvent( m_w.data(), &me2 );
+
+			QTest::qWait( 100 );
+
 			QTest::mouseRelease( m_w.data(), Qt::LeftButton, {},
 				r.center() + QPoint( 0, r.height() ), 200 );
 
@@ -255,10 +267,20 @@ private slots:
 		}
 
 		{
-			QTest::mouseClick( m_w.data(), Qt::LeftButton, {}, r.center(), 20 );
-			QMouseEvent me( QEvent::MouseMove, r.center() + QPoint( r.height(), 0 ), Qt::LeftButton,
+			QTest::mousePress( m_w.data(), Qt::LeftButton, {}, r.center(), 20 );
+			QMouseEvent me1( QEvent::MouseMove, r.center() + QPoint( 25, 0 ), Qt::LeftButton,
 				Qt::LeftButton, {} );
-			QApplication::sendEvent( m_w.data(), &me );
+			QApplication::sendEvent( m_w.data(), &me1 );
+
+			QMouseEvent me2( QEvent::MouseMove, r.center() + QPoint( 50, 0 ), Qt::LeftButton,
+				Qt::LeftButton, {} );
+
+			QTest::qWait( 100 );
+
+			QApplication::sendEvent( m_w.data(), &me2 );
+
+			QTest::qWait( 100 );
+
 			QTest::mouseRelease( m_w.data(), Qt::LeftButton, {},
 				r.center() + QPoint( r.height(), 0 ), 200 );
 

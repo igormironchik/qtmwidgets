@@ -91,6 +91,10 @@ private slots:
 		a.animate();
 
 		QTest::qWait( 500 );
+
+		QTest::mouseClick( &a, Qt::RightButton, {}, a.rect().center(), 20 );
+
+		QVERIFY( spy.count() == 1 );
 	}
 };
 

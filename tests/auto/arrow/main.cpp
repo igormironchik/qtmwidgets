@@ -66,7 +66,7 @@ private slots:
 
 		a.animate();
 
-		QTest::qWait( 500 );
+		QTest::qWait( 520 );
 
 		a.setDirection( QtMWidgets::NavigationArrow::Bottom );
 
@@ -74,7 +74,7 @@ private slots:
 
 		a.animate();
 
-		QTest::qWait( 500 );
+		QTest::qWait( 520 );
 
 		a.setDirection( QtMWidgets::NavigationArrow::Top );
 
@@ -82,7 +82,7 @@ private slots:
 
 		a.animate();
 
-		QTest::qWait( 500 );
+		QTest::qWait( 520 );
 
 		a.setColor( Qt::red );
 
@@ -90,7 +90,7 @@ private slots:
 
 		a.animate();
 
-		QTest::qWait( 500 );
+		QTest::qWait( 520 );
 
 		QTest::mouseClick( &a, Qt::RightButton, {}, a.rect().center(), 20 );
 

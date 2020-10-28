@@ -10,4 +10,5 @@ SUBDIRS = picker \
     arrow \
     messagebox \
     slider \
-    navbutton
+    navbutton \
+    pageview

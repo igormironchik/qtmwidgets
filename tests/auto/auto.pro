@@ -9,4 +9,5 @@ SUBDIRS = picker \
     listview \
     arrow \
     messagebox \
-    slider
+    slider \
+    navbutton

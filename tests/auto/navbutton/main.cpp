@@ -1,0 +1,78 @@
+
+/*!
+	\file
+
+	\author Igor Mironchik (igor.mironchik at gmail dot com).
+
+	Copyright (c) 2014 Igor Mironchik
+
+	Permission is hereby granted, free of charge, to any person
+	obtaining a copy of this software and associated documentation
+	files (the "Software"), to deal in the Software without
+	restriction, including without limitation the rights to use,
+	copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the
+	Software is furnished to do so, subject to the following
+	conditions:
+
+	The above copyright notice and this permission notice shall be
+	included in all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+	EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+	OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+	NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+	HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+	WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+	FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+	OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+// Qt include.
+#include <QObject>
+#include <QtTest/QtTest>
+#include <QSharedPointer>
+
+// QtMWidgets include.
+#include <QtMWidgets/NavigationButton>
+
+
+class TestNavButton
+	:	public QObject
+{
+	Q_OBJECT
+
+private slots:
+
+	void testButton()
+	{
+		QtMWidgets::NavigationButton b( QtMWidgets::NavigationButton::Right,
+			QStringLiteral( "Button" ) );
+		b.setArrowColor( Qt::red );
+		b.setTextColor( Qt::green );
+
+		b.show();
+
+		QVERIFY( QTest::qWaitForWindowActive( &b ) );
+
+		QVERIFY( b.arrowColor() == Qt::red );
+		QVERIFY( b.textColor() == Qt::green );
+		QVERIFY( b.direction() == QtMWidgets::NavigationButton::Right );
+		QVERIFY( b.text() == QStringLiteral( "Button" ) );
+
+		QSignalSpy spy( &b, &QtMWidgets::NavigationButton::clicked );
+
+		QTest::mouseClick( &b, Qt::LeftButton, {}, b.rect().center(), 20 );
+
+		QVERIFY( spy.count() == 1 );
+
+		b.setDirection( QtMWidgets::NavigationButton::Left );
+
+		QVERIFY( b.direction() == QtMWidgets::NavigationButton::Left );
+	}
+};
+
+
+QTEST_MAIN( TestNavButton )
+
+#include "main.moc"

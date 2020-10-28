@@ -7,4 +7,5 @@ SUBDIRS = picker \
     datetime \
     busy \
     listview \
-    arrow
+    arrow \
+    messagebox

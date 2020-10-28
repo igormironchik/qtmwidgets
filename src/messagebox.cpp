@@ -436,6 +436,8 @@ MessageBox::removeButton( QAbstractButton * button )
 
 			disconnect( button, 0, this, 0 );
 
+			button->deleteLater();
+
 			resize( d->vbox->sizeHint() );
 
 			d->adjustSize();

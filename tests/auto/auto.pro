@@ -8,4 +8,5 @@ SUBDIRS = picker \
     busy \
     listview \
     arrow \
-    messagebox
+    messagebox \
+    slider

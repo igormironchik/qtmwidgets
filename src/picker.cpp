@@ -34,6 +34,7 @@
 #include "color.hpp"
 #include "scroller.hpp"
 #include "fingergeometry.hpp"
+#include "private/utils.hpp"
 
 // Qt include.
 #include <QStandardItemModel>
@@ -268,40 +269,7 @@ QString
 PickerPrivate::makeString( const QString & text, const QRect & r,
 	int flags, const QStyleOption & opt )
 {
-	const QRect & b = opt.fontMetrics.boundingRect( r, flags, text );
-
-	QString res = text;
-
-	if( b.width() > r.width() )
-	{
-		int w = 0;
-		int x = 0;
-
-		res.clear();
-
-		while( w <= ( r.width() ) / 2 )
-		{
-			res.append( text.at( x ) );
-			++x;
-			w = opt.fontMetrics.boundingRect( r, flags, res ).width();
-		}
-
-		res.append( QStringLiteral( "..." ) );
-
-		x = text.length() - 1;
-
-		QString tmp = text.at( x );
-
-		while( opt.fontMetrics.boundingRect( r, flags, res + tmp ).width() <= r.width() )
-		{
-			--x;
-			tmp.prepend( text.at( x ) );
-		}
-
-		res.append( text.right( text.length() - x - 1 ) );
-	}
-
-	return res;
+	return accomodateString( text, r, flags, opt );
 }
 
 void

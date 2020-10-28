@@ -46,10 +46,12 @@ private slots:
 
 	void testButton()
 	{
-		QtMWidgets::NavigationButton b( QtMWidgets::NavigationButton::Right,
-			QStringLiteral( "Button" ) );
+		const auto text = QStringLiteral( "Button very very very very long" );
+
+		QtMWidgets::NavigationButton b( QtMWidgets::NavigationButton::Right, text );
 		b.setArrowColor( Qt::red );
 		b.setTextColor( Qt::green );
+		b.resize( 75, 25 );
 
 		b.show();
 
@@ -58,7 +60,7 @@ private slots:
 		QVERIFY( b.arrowColor() == Qt::red );
 		QVERIFY( b.textColor() == Qt::green );
 		QVERIFY( b.direction() == QtMWidgets::NavigationButton::Right );
-		QVERIFY( b.text() == QStringLiteral( "Button" ) );
+		QVERIFY( b.text() == text );
 
 		QSignalSpy spy( &b, &QtMWidgets::NavigationButton::clicked );
 
@@ -69,6 +71,12 @@ private slots:
 		b.setDirection( QtMWidgets::NavigationButton::Left );
 
 		QVERIFY( b.direction() == QtMWidgets::NavigationButton::Left );
+
+		QTest::qWait( 500 );
+
+		QtMWidgets::NavigationButton tmp( QtMWidgets::NavigationButton::Left );
+
+		QVERIFY( tmp.direction() == QtMWidgets::NavigationButton::Left );
 	}
 };
 

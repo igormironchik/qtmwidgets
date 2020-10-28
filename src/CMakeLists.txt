@@ -68,7 +68,9 @@ set( SRC picker.hpp
 	tableview.hpp
 	textlabel.hpp
 	navigationarrow.hpp
-	listmodel.hpp )
+	listmodel.hpp
+	private/utils.hpp
+	private/utils.cpp )
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../include
 	${CMAKE_CURRENT_SOURCE_DIR} )

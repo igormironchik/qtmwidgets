@@ -12,6 +12,7 @@ MOC_DIR = ./.moc
 
 HEADERS += private/drawing.hpp \
            private/datetimeparser.hpp \
+           private/utils.hpp \
            color.hpp \
            picker.hpp \
            timepicker.hpp \
@@ -47,6 +48,7 @@ HEADERS += private/drawing.hpp \
 
 SOURCES += private/drawing.cpp \
            private/datetimeparser.cpp \
+           private/utils.cpp \
            color.cpp \
            picker.cpp \
            timepicker.cpp \

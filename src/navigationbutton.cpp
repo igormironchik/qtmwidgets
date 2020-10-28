@@ -33,6 +33,7 @@
 #include "fingergeometry.hpp"
 #include "private/drawing.hpp"
 #include "color.hpp"
+#include "private/utils.hpp"
 
 // Qt include.
 #include <QStyleOption>
@@ -82,40 +83,8 @@ QString
 NavigationButtonPrivate::makeString( const QString & text, const QRect & r,
 	int flags, const QStyleOption & opt )
 {
-	const QRect & b = opt.fontMetrics.boundingRect( r, flags, text );
-
-	QString res = text;
-
-	if( b.width() > r.width() )
-	{
-		const int averageCount = r.width() / opt.fontMetrics.averageCharWidth();
-
-		QString tmp = res;
-		res = QString();
-		int length = averageCount - 3;
-		int i = 0;
-
-		for( ; i < length && i < tmp.length(); ++i )
-		{
-			if( tmp.at( i ) == QLatin1Char( '&' ) )
-			{
-				res.append( tmp.at( i ) );
-				++i;
-				++length;
-
-				if( i < tmp.length() )
-					res.append( tmp.at( i ) );
-			}
-			else
-				res.append( tmp.at( i ) );
-		}
-
-		if( ( res.endsWith( QLatin1Char( '&' ) ) && i != tmp.length() ) &&
-			!res.endsWith( QLatin1String( "&&" ) ) )
-				res.remove( res.length() - 1, 1 );
-
-		res.append( QLatin1String( "..." ) );
-	}
+	auto res = accomodateString( text, r, flags, opt );
+	res.replace( QLatin1String( "&..." ), QLatin1String( "..." ) );
 
 	return res;
 }

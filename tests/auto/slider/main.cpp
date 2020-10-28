@@ -44,7 +44,7 @@ class TestSlider
 
 private slots:
 
-	void testSlider()
+	void testVerticalSlider()
 	{
 		QtMWidgets::Slider s;
 
@@ -82,6 +82,14 @@ private slots:
 		QTest::mouseClick( &s, Qt::LeftButton, {}, r.center(), 20 );
 
 		QVERIFY( s.value() < v );
+
+		v = s.value();
+
+		s.setInvertedAppearance( true );
+
+		QTest::mouseClick( &s, Qt::LeftButton, {}, r.center(), 20 );
+
+		QVERIFY( s.value() > v );
 	}
 
 	void testCtors()
@@ -101,6 +109,54 @@ private slots:
 		s.setHighlightColor( Qt::red );
 
 		QVERIFY( s.highlightColor() == Qt::red );
+	}
+
+	void testHorizontalSlider()
+	{
+		QtMWidgets::Slider s( Qt::Horizontal );
+
+		s.resize( s.handleRadius() * 20, s.handleRadius() * 3 );
+		s.show();
+
+		QVERIFY( QTest::qWaitForWindowActive( &s ) );
+
+		QVERIFY( s.orientation() == Qt::Horizontal );
+
+		int v = 0;
+
+		s.setRange( 0, 100 );
+		s.setValue( v );
+
+		QRect r( s.handleRadius() * 2, s.height() / 2, s.handleRadius() * 2, s.handleRadius() * 2 );
+
+		QTest::mouseClick( &s, Qt::LeftButton, {}, r.center(), 20 );
+
+		QVERIFY( s.value() > v );
+
+		v = s.value();
+
+		QTest::mousePress( &s, Qt::LeftButton, {}, r.center(), 20 );
+		QMouseEvent me( QEvent::MouseMove, r.center() + QPoint( s.handleRadius() * 2, 0 ),
+			Qt::LeftButton, Qt::LeftButton, {} );
+		QApplication::sendEvent( &s, &me );
+		QTest::mouseRelease( &s, Qt::LeftButton, {},
+			r.center() + QPoint( s.handleRadius() * 2, 0 ), 20 );
+
+		QVERIFY( s.value() > v );
+
+		v = s.value();
+
+		QTest::mouseClick( &s, Qt::LeftButton, {}, r.center(), 20 );
+
+		QVERIFY( s.value() < v );
+
+		v = s.value();
+
+		s.setInvertedAppearance( true );
+
+		QTest::mouseClick( &s, Qt::LeftButton, {}, r.center(), 20 );
+
+		QVERIFY( s.value() > v );
 	}
 };
 

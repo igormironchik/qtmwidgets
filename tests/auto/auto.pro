@@ -12,4 +12,5 @@ SUBDIRS = picker \
     slider \
     navbutton \
     pageview \
-    navbar
+    navbar \
+    progress

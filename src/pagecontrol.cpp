@@ -134,9 +134,15 @@ PageControlPrivate::updateButtonsInfo( int width )
 
 	countInOneLine = widgetWidth / buttonSize;
 
-	countInLastLine = count % countInOneLine;
+	if( countInOneLine > 1 )
+	{
+		countInLastLine = count % countInOneLine;
 
-	linesCount = count / countInOneLine + ( countInLastLine > 0 ? 1 : 0 );
+		linesCount = count / countInOneLine + ( countInLastLine > 0 ? 1 : 0 );
+
+		if( countInLastLine == 0 )
+			countInLastLine = countInOneLine;
+	}
 }
 
 void

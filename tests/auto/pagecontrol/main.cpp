@@ -59,6 +59,8 @@ private slots:
 
 		QVERIFY( QTest::qWaitForWindowActive( &p ) );
 
+		int count = p.width() / m_btnSize;
+
 		p.setPageIndicatorColor( Qt::red );
 		p.setCurrentPageIndicatorColor( Qt::red );
 
@@ -73,20 +75,26 @@ private slots:
 		QVERIFY( p.currentIndex() == 4 );
 
 		QTest::mouseClick( &p, Qt::LeftButton, {},
-			QRect( ( p.width() - m_btnSize * 3 ) / 2, 0, m_btnSize, m_btnSize ).center(),
+			QRect( ( p.width() - m_btnSize * count ) / 2, 0, m_btnSize, m_btnSize ).center(),
 			20 );
+
+		QTest::qWait( 50 );
 
 		QVERIFY( p.currentIndex() == 0 );
 
-		p.resize( m_btnSize * 5, m_btnSize * 2 );
+		p.resize( m_btnSize * 10, m_btnSize * 2 );
 
 		QTest::qWait( 50 );
+
+		count = p.width() / m_btnSize;
 
 		QSignalSpy spy( &p, &QtMWidgets::PageControl::currentChanged );
 
 		QTest::mouseClick( &p, Qt::LeftButton, {},
-			QRect( ( p.width() - m_btnSize * 5 ) / 2 + m_btnSize * 4, 0,
+			QRect( ( p.width() - m_btnSize * count ) / 2 + m_btnSize * 4, 0,
 				m_btnSize, m_btnSize ).center(), 20 );
+
+		QTest::qWait( 50 );
 
 		QVERIFY( p.currentIndex() == 4 );
 		QVERIFY( spy.count() == 1 );

@@ -56,14 +56,14 @@ class NavigationItem {
 public:
 
 	NavigationItem()
-		:	index( -1 )
+		:	self( nullptr )
 		,	parent( 0 )
 	{
 	}
 
 	NavigationItem( const NavigationItem & other )
 		:	title( other.title )
-		,	index( other.index )
+		,	self( other.self )
 		,	children( other.children )
 		,	parent( other.parent )
 	{
@@ -74,7 +74,7 @@ public:
 		if( this != &other )
 		{
 			title = other.title;
-			index = other.index;
+			self = other.self;
 			children = other.children;
 			parent = other.parent;
 		}
@@ -83,9 +83,8 @@ public:
 	}
 
 	QString title;
-	int index;
+	QWidget * self;
 	QVector< QSharedPointer< NavigationItem > > children;
-	QVector< int > childrenIndexes;
 	NavigationItem * parent;
 }; // class NavigationItem
 
@@ -107,12 +106,12 @@ public:
 	}
 
 	void init();
-	void removeWidget( int index );
+	void removeWidget( QWidget * w );
 
 	NavigationBar * q;
 	QStackedWidget * stack;
 	QList< QSharedPointer< NavigationItem > > rootItems;
-	QMap< int, QSharedPointer< NavigationItem > > itemsMap;
+	QMap< QWidget *, QSharedPointer< NavigationItem > > itemsMap;
 	NavigationButton * left;
 	NavigationButton * right;
 	TextLabel * title;
@@ -170,23 +169,21 @@ NavigationBarPrivate::init()
 }
 
 void
-NavigationBarPrivate::removeWidget( int index )
+NavigationBarPrivate::removeWidget( QWidget * w )
 {
-	QSharedPointer< NavigationItem > item = itemsMap[ index ];
+	QSharedPointer< NavigationItem > item = itemsMap[ w ];
 
-	itemsMap.remove( index );
-	stack->removeWidget( stack->widget( index ) );
+	itemsMap.remove( w );
+	stack->removeWidget( w );
 
-	foreach( int childIndex, item->childrenIndexes )
-		removeWidget( childIndex );
+	const auto tmp = item->children;
+
+	for( const auto & c : tmp )
+		removeWidget( c->self );
 
 	if( item->parent )
-	{
 		item->parent->children.removeAt(
 			item->parent->children.indexOf( item ) );
-		item->parent->childrenIndexes.removeAt(
-			item->parent->childrenIndexes.indexOf( index ) );
-	}
 }
 
 
@@ -213,10 +210,10 @@ NavigationBar::setMainWidget( const QString & title,
 
 	d->rootItems.append(
 		QSharedPointer< NavigationItem > ( new NavigationItem ) );
-	d->itemsMap[ index ] = d->rootItems.back();
+	d->itemsMap[ widget ] = d->rootItems.back();
 
-	d->rootItems.back()->index = index;
 	d->rootItems.back()->title = title;
+	d->rootItems.back()->self = widget;
 
 	d->stack->setCurrentIndex( index );
 	d->title->setText( title );
@@ -225,23 +222,24 @@ NavigationBar::setMainWidget( const QString & title,
 }
 
 int
-NavigationBar::addWidget( int parentIndex, const QString & title,
+NavigationBar::addWidget( QWidget * parent, const QString & title,
 	QWidget * widget )
 {
-	const int index = d->stack->addWidget( widget );
+	int index = -1;
 
-	if( d->itemsMap.contains( parentIndex ) )
+	if( d->itemsMap.contains( parent ) )
 	{
-		QSharedPointer< NavigationItem > parent = d->itemsMap[ parentIndex ];
+		index = d->stack->addWidget( widget );
+
+		QSharedPointer< NavigationItem > pp = d->itemsMap[ parent ];
 
 		QSharedPointer< NavigationItem > item( new NavigationItem );
-		item->index = index;
 		item->title = title;
-		item->parent = parent.data();
+		item->parent = pp.data();
+		item->self = widget;
 
-		parent->children.append( item );
-		parent->childrenIndexes.append( index );
-		d->itemsMap[ index ] = item;
+		pp->children.append( item );
+		d->itemsMap[ widget ] = item;
 	}
 
 	return index;
@@ -254,7 +252,7 @@ NavigationBar::removeWidget( QWidget * widget )
 
 	if( index != -1 )
 	{
-		d->removeWidget( index );
+		d->removeWidget( widget );
 
 		d->backStack.clear();
 		d->forwardStack.clear();
@@ -301,12 +299,13 @@ NavigationBar::sizeHint() const
 }
 
 void
-NavigationBar::showScreen( int index )
+NavigationBar::showScreen( QWidget * s )
 {
-	if( d->itemsMap.contains( index ) && currentIndex() != -1 )
+	if( d->itemsMap.contains( s ) && currentIndex() != -1 )
 	{
-		QSharedPointer< NavigationItem > nextItem = d->itemsMap[ index ];
-		QSharedPointer< NavigationItem > currentItem = d->itemsMap[ currentIndex() ];
+		QSharedPointer< NavigationItem > nextItem = d->itemsMap[ s ];
+		QSharedPointer< NavigationItem > currentItem =
+			d->itemsMap[ d->stack->widget( currentIndex() ) ];
 
 		if( d->backStack.isEmpty() || d->backStack.top() != currentIndex() )
 		{
@@ -321,7 +320,7 @@ NavigationBar::showScreen( int index )
 
 		d->title->setText( nextItem->title );
 
-		d->stack->setCurrentIndex( index );
+		d->stack->setCurrentWidget( nextItem->self );
 	}
 }
 
@@ -331,8 +330,10 @@ NavigationBar::showPreviousScreen()
 	if( !d->backStack.isEmpty() )
 	{
 		const int prevIndex = d->backStack.pop();
-		QSharedPointer< NavigationItem > prevItem = d->itemsMap[ prevIndex ];
-		QSharedPointer< NavigationItem > currentItem = d->itemsMap[ currentIndex() ];
+		QSharedPointer< NavigationItem > prevItem =
+			d->itemsMap[ d->stack->widget( prevIndex ) ];
+		QSharedPointer< NavigationItem > currentItem =
+			d->itemsMap[ d->stack->widget( currentIndex() ) ];
 
 		if( d->forwardStack.isEmpty() || d->forwardStack.top() != currentIndex() )
 		{
@@ -344,11 +345,12 @@ NavigationBar::showPreviousScreen()
 
 		d->title->setText( prevItem->title );
 
-		d->stack->setCurrentIndex( prevIndex );
+		d->stack->setCurrentWidget( prevItem->self );
 
 		if( !d->backStack.isEmpty() )
 		{
-			QSharedPointer< NavigationItem > backItem = d->itemsMap[ d->backStack.top() ];
+			QSharedPointer< NavigationItem > backItem =
+				d->itemsMap[ d->stack->widget( d->backStack.top() ) ];
 
 			d->left->setText( backItem->title );
 		}
@@ -363,8 +365,10 @@ NavigationBar::showNextScreen()
 	if( !d->forwardStack.isEmpty() )
 	{
 		const int nextIndex = d->forwardStack.pop();
-		QSharedPointer< NavigationItem > nextItem = d->itemsMap[ nextIndex ];
-		QSharedPointer< NavigationItem > currentItem = d->itemsMap[ currentIndex() ];
+		QSharedPointer< NavigationItem > nextItem =
+			d->itemsMap[ d->stack->widget( nextIndex ) ];
+		QSharedPointer< NavigationItem > currentItem =
+			d->itemsMap[ d->stack->widget( currentIndex() ) ];
 
 		d->backStack.push( currentIndex() );
 
@@ -373,11 +377,12 @@ NavigationBar::showNextScreen()
 		d->left->setText( currentItem->title );
 		d->left->show();
 
-		d->stack->setCurrentIndex( nextIndex );
+		d->stack->setCurrentWidget( nextItem->self );
 
 		if( !d->forwardStack.isEmpty() )
 		{
-			QSharedPointer< NavigationItem > item = d->itemsMap[ d->forwardStack.top() ];
+			QSharedPointer< NavigationItem > item =
+				d->itemsMap[ d->stack->widget( d->forwardStack.top() ) ];
 
 			d->right->setText( item->title );
 		}

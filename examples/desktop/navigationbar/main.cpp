@@ -82,10 +82,9 @@ public:
 		mainScreen->setBlurPolicy(
 			QtMWidgets::AbstractScrollArea::BlurVerticalOnly );
 
-		const int mainScreenIndex = bar->setMainWidget(
-			QLatin1String( "Sounds" ), mainScreen );
+		bar->setMainWidget(	QLatin1String( "Sounds" ), mainScreen );
 
-		createRingtoneScreen( mainScreenIndex );
+		createRingtoneScreen( mainScreen );
 
 		l->addWidget( bar );
 
@@ -169,7 +168,7 @@ private:
 		return view;
 	}
 
-	void createRingtoneScreen( int mainScreenIndex )
+	void createRingtoneScreen( QWidget * parent )
 	{
 		QtMWidgets::TableViewCell * cell = cells[ ringtoneString ];
 
@@ -182,10 +181,11 @@ private:
 		connect( btn, SIGNAL( clicked() ),
 			this, SLOT( selectRingtone() ) );
 
-		const int index = bar->addWidget( mainScreenIndex,
-			ringtoneString, new RingtoneScreen( bar ) );
+		auto * w = new RingtoneScreen( bar );
 
-		indexes.insert( ringtoneString, index );
+		bar->addWidget( parent, ringtoneString, w );
+
+		indexes.insert( ringtoneString, w );
 	}
 
 private slots:
@@ -196,7 +196,7 @@ private slots:
 
 private:
 	QMap< QString, QtMWidgets::TableViewCell* > cells;
-	QMap< QString, int > indexes;
+	QMap< QString, QWidget * > indexes;
 	QtMWidgets::NavigationBar * bar;
 };
 

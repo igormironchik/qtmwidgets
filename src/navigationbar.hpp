@@ -79,7 +79,7 @@ public:
 
 		\return Index of the screen.
 	*/
-	int addWidget( int parentIndex, const QString & title,
+	int addWidget( QWidget * parent, const QString & title,
 		QWidget * widget );
 
 	//! Remove widget from the hierarchy.
@@ -102,7 +102,7 @@ public:
 
 public slots:
 	//!	Show screen with the given \a index index.
-	void showScreen( int index );
+	void showScreen( QWidget * s );
 	//! Show previous screen.
 	void showPreviousScreen();
 	//! Show next screen.

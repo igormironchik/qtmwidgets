@@ -793,7 +793,7 @@ AbstractListViewPrivate< T >::calculateScroll( int row,
 		}
 	}
 
-	return delta;
+	return -delta;
 }
 
 template< typename T >

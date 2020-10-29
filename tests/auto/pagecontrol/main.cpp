@@ -72,7 +72,8 @@ private slots:
 		QVERIFY( p.count() == 10 );
 		QVERIFY( p.currentIndex() == 4 );
 
-		QTest::mouseClick( &p, Qt::LeftButton, {}, QRect( 0, 0, m_btnSize, m_btnSize ).center(),
+		QTest::mouseClick( &p, Qt::LeftButton, {},
+			QRect( ( p.width() - m_btnSize * 3 ) / 2, 0, m_btnSize, m_btnSize ).center(),
 			20 );
 
 		QVERIFY( p.currentIndex() == 0 );
@@ -84,7 +85,8 @@ private slots:
 		QSignalSpy spy( &p, &QtMWidgets::PageControl::currentChanged );
 
 		QTest::mouseClick( &p, Qt::LeftButton, {},
-			QRect( m_btnSize * 4, 0, m_btnSize, m_btnSize ).center(), 20 );
+			QRect( ( p.width() - m_btnSize * 5 ) / 2 + m_btnSize * 4, 0,
+				m_btnSize, m_btnSize ).center(), 20 );
 
 		QVERIFY( p.currentIndex() == 4 );
 		QVERIFY( spy.count() == 1 );

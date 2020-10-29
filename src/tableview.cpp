@@ -583,7 +583,7 @@ TableViewCell::mouseReleaseEvent( QMouseEvent * e )
 
 void
 TableViewSectionPrivate::init()
-{	
+{
 	q->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Fixed );
 	q->setBackgroundRole( QPalette::Base );
 	q->setAutoFillBackground( true );
@@ -733,6 +733,10 @@ TableViewSection::removeCell( int index )
 		cell->setParent( 0 );
 		cell->hide();
 
+		d->cells.removeAt( index );
+
+		adjustSize();
+
 		return cell;
 	}
 	else
@@ -867,6 +871,10 @@ TableView::removeSection( int index )
 		d->layout->removeWidget( s );
 		s->setParent( 0 );
 		s->hide();
+
+		d->sections.removeAt( index );
+
+		d->widget->adjustSize();
 
 		return s;
 	}

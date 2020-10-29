@@ -453,7 +453,7 @@ AbstractScrollAreaPrivate::calcIndicator( Qt::Orientation orient,
 void
 AbstractScrollAreaPrivate::scrollContentsBy( int dx, int dy )
 {
-	topLeftCorner -= QPoint( dx, dy );
+	topLeftCorner += QPoint( dx, dy );
 
 	makeBlurEffectIfNeeded();
 
@@ -1009,8 +1009,8 @@ AbstractScrollArea::mouseMoveEvent( QMouseEvent * e )
 {
 	if( d->leftMouseButtonPressed )
 	{
-		const int dy = e->pos().y() - d->mousePos.y();
-		const int dx = e->pos().x() - d->mousePos.x();
+		const int dy = d->mousePos.y() - e->pos().y();
+		const int dx = d->mousePos.x() - e->pos().x();
 
 		d->mousePos = e->pos();
 

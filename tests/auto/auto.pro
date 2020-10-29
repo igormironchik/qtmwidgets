@@ -14,4 +14,5 @@ SUBDIRS = picker \
     pageview \
     navbar \
     progress \
-    pagecontrol
+    pagecontrol \
+    table

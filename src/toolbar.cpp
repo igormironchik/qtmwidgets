@@ -254,7 +254,7 @@ ToolBarLayout::indexOf( QAction * action ) const
 			( buttons.at( i )->widget() );
 
 		if( b && b->action() == action )
-			return i;
+			return i + 1;
 	}
 
 	return -1;
@@ -867,6 +867,7 @@ ToolBar::actionEvent( QActionEvent * event )
 			ToolButton * b = new ToolButton( action, this );
 			b->setIconSize( d->iconSize );
 			d->layout->addButton( b );
+			b->show();
 		}
 			break;
 

@@ -15,4 +15,5 @@ SUBDIRS = picker \
     navbar \
     progress \
     pagecontrol \
-    table
+    table \
+    toolbar

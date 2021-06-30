@@ -141,3 +141,7 @@ QtMWidgets::Slider * volumeSlider =
     new QtMWidgets::Slider(
         Qt::Horizontal, this );
 ```
+
+# Donate
+
+[Donate with BTC](https://github.com/igormironchik)

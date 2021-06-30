@@ -144,4 +144,4 @@ QtMWidgets::Slider * volumeSlider =
 
 # Donate
 
-[Donate with BTC](https://github.com/igormironchik)
+[![](bitcoin-btc-logo-full.png)](https://github.com/igormironchik)

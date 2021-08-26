@@ -60,7 +60,7 @@ public:
 		setSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed );
 	}
 
-	QSize minimumSizeHint() const
+	QSize minimumSizeHint() const override
 	{
 		if( text().isEmpty() && pixmap( Qt::ReturnByValue ).isNull() && !movie() &&
 			picture( Qt::ReturnByValue ).isNull() )
@@ -74,7 +74,7 @@ public:
 		}
 	}
 
-	QSize sizeHint() const
+	QSize sizeHint() const override
 	{
 		return minimumSizeHint();
 	}
@@ -97,16 +97,16 @@ public:
 	void setDetailedTextLabel( TextLabel * label );
 	void setAccessoryWidget( QWidget * w );
 
-	virtual void addItem( QLayoutItem * item );
-	virtual int count() const;
-	virtual QLayoutItem * itemAt( int index ) const;
-	virtual void setGeometry( const QRect & rect );
-	virtual QLayoutItem * takeAt( int index );
-	virtual bool hasHeightForWidth() const;
-	virtual int heightForWidth( int w ) const;
+	void addItem( QLayoutItem * item ) override;
+	int count() const override;
+	QLayoutItem * itemAt( int index ) const override;
+	void setGeometry( const QRect & rect ) override;
+	QLayoutItem * takeAt( int index ) override;
+	bool hasHeightForWidth() const override;
+	int heightForWidth( int w ) const override;
 
-	virtual QSize minimumSizeHint() const;
-	virtual QSize sizeHint() const;
+	QSize minimumSize() const override;
+	QSize sizeHint() const override;
 
 private:
 	void setTextGeometry( const QRect & r, int imageOffset,
@@ -326,7 +326,7 @@ TableViewCellLayout::heightForWidth( int w ) const
 }
 
 QSize
-TableViewCellLayout::minimumSizeHint() const
+TableViewCellLayout::minimumSize() const
 {
 	const QSize imageSize = imageLabel->minimumSizeHint();
 

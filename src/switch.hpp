@@ -68,8 +68,6 @@ class Switch
 {
 	Q_OBJECT
 
-	Q_ENUMS( State )
-
 	/*!
 		\property state
 
@@ -160,6 +158,8 @@ public:
 		AcceptedCheck = 3
 	}; // enum State
 
+	Q_ENUM( State )
+
 public:
 	Switch( QWidget * parent = 0 );
 	explicit Switch( State st, QWidget * parent = 0 );
@@ -187,7 +187,7 @@ public:
 	//! Set color to highlight checked state.
 	void setOnColor( const QColor & c );
 
-	virtual QSize sizeHint() const;
+	QSize sizeHint() const override;
 
 public slots:
 	/*!
@@ -196,10 +196,10 @@ public slots:
 	void setState( State st );
 
 protected:
-	virtual void paintEvent( QPaintEvent * event );
-	virtual void mousePressEvent( QMouseEvent * event );
-	virtual void mouseReleaseEvent( QMouseEvent * event );
-	virtual void mouseMoveEvent( QMouseEvent * event );
+	void paintEvent( QPaintEvent * event ) override;
+	void mousePressEvent( QMouseEvent * event ) override;
+	void mouseReleaseEvent( QMouseEvent * event ) override;
+	void mouseMoveEvent( QMouseEvent * event ) override;
 
 private:
 	friend class SwitchPrivate;

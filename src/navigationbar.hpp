@@ -97,8 +97,8 @@ public:
 	//! \return Widget with the given \a index index.
 	QWidget * widget( int index ) const;
 
-	virtual QSize minimumSizeHint() const;
-	virtual QSize sizeHint() const;
+	QSize minimumSizeHint() const override;
+	QSize sizeHint() const override;
 
 public slots:
 	//!	Show screen with the given \a index index.
@@ -109,8 +109,8 @@ public slots:
 	void showNextScreen();
 
 protected:
-	virtual void resizeEvent( QResizeEvent * e );
-	virtual void hideEvent( QHideEvent * e );
+	void resizeEvent( QResizeEvent * e ) override;
+	void hideEvent( QHideEvent * e ) override;
 
 private:
 	Q_DISABLE_COPY( NavigationBar )

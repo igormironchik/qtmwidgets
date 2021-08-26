@@ -187,8 +187,8 @@ public:
 	//! Set groove color.
 	void setGrooveColor( const QColor & c );
 
-	virtual QSize sizeHint() const;
-	virtual QSize minimumSizeHint() const;
+	QSize sizeHint() const override;
+	QSize minimumSizeHint() const override;
 
 public slots:
 	/*!
@@ -208,7 +208,7 @@ public slots:
 	void setOrientation( Qt::Orientation orientation );
 
 protected:
-	virtual void paintEvent( QPaintEvent * );
+	void paintEvent( QPaintEvent * ) override;
 
 private slots:
 	void _q_animation( const QVariant & value );

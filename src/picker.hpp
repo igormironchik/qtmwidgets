@@ -359,8 +359,8 @@ public:
 	//! \return Scroller interface.
 	Scroller * scroller() const;
 
-	virtual QSize sizeHint() const;
-	virtual QSize minimumSizeHint() const;
+	QSize sizeHint() const override;
+	QSize minimumSizeHint() const override;
 
 public slots:
 	/*!
@@ -397,11 +397,11 @@ private slots:
 	void _q_scroll( int dx, int dy );
 
 protected:
-	virtual void paintEvent( QPaintEvent * event );
-	virtual void wheelEvent( QWheelEvent * event );
-	virtual void mousePressEvent( QMouseEvent * event );
-	virtual void mouseReleaseEvent( QMouseEvent * event );
-	virtual void mouseMoveEvent( QMouseEvent * event );
+	void paintEvent( QPaintEvent * event ) override;
+	void wheelEvent( QWheelEvent * event ) override;
+	void mousePressEvent( QMouseEvent * event ) override;
+	void mouseReleaseEvent( QMouseEvent * event ) override;
+	void mouseMoveEvent( QMouseEvent * event ) override;
 
 private:
 	friend class PickerPrivate;

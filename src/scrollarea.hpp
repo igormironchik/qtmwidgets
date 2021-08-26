@@ -164,14 +164,14 @@ public:
 	void ensureWidgetVisible( QWidget * childWidget,
 		int xmargin = 50, int ymargin = 50 );
 
-	virtual QSize sizeHint() const;
+	QSize sizeHint() const override;
 
 protected:
 	explicit ScrollArea( ScrollAreaPrivate * dd, QWidget * parent = 0 );
 
-	virtual bool eventFilter( QObject * o, QEvent * e );
-	virtual void resizeEvent( QResizeEvent * e );
-	virtual void scrollContentsBy( int dx, int dy );
+	bool eventFilter( QObject * o, QEvent * e ) override;
+	void resizeEvent( QResizeEvent * e ) override;
+	void scrollContentsBy( int dx, int dy ) override;
 
 private:
 	Q_DISABLE_COPY( ScrollArea )

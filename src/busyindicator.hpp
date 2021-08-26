@@ -102,11 +102,11 @@ public:
 	//! Set radius.
 	void setRadius( int r );
 
-	virtual QSize minimumSizeHint() const;
-	virtual QSize sizeHint() const;
+	QSize minimumSizeHint() const override;
+	QSize sizeHint() const override;
 
 protected:
-	virtual void paintEvent( QPaintEvent * );
+	void paintEvent( QPaintEvent * ) override;
 
 private slots:
 	void _q_update( const QVariant & );

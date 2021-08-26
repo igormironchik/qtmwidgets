@@ -80,17 +80,17 @@ public:
 	//! \return Action for this button.
 	QAction * action() const;
 
-	virtual QSize minimumSizeHint() const;
-	virtual QSize sizeHint() const;
+	QSize minimumSizeHint() const override;
+	QSize sizeHint() const override;
 
 public slots:
 	//! Set icon's size.
 	void setIconSize( const QSize & s );
 
 protected:
-	virtual void paintEvent( QPaintEvent * );
-	virtual void mousePressEvent( QMouseEvent * e );
-	virtual void mouseReleaseEvent( QMouseEvent * e );
+	void paintEvent( QPaintEvent * ) override;
+	void mousePressEvent( QMouseEvent * e ) override;
+	void mouseReleaseEvent( QMouseEvent * e ) override;
 
 private:
 	Q_DISABLE_COPY( ToolButton )
@@ -265,8 +265,8 @@ public:
 	//! \return Alignment.
 	Qt::Alignment alignment() const;
 
-	virtual QSize minimumSizeHint() const;
-	virtual QSize sizeHint() const;
+	QSize minimumSizeHint() const override;
+	QSize sizeHint() const override;
 
 public slots:
 	//! Set icon's size of the ToolBar.
@@ -277,7 +277,7 @@ public slots:
 	void setOrientation( Qt::Orientation orientation );
 
 protected:
-	virtual void actionEvent( QActionEvent * event );
+	void actionEvent( QActionEvent * event ) override;
 
 private slots:
 	void _q_leftArrowClicked();

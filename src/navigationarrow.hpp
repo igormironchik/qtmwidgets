@@ -55,8 +55,6 @@ class NavigationArrow
 {
 	Q_OBJECT
 
-	Q_ENUMS( Direction )
-
 	/*!
 		\property direction
 
@@ -91,6 +89,8 @@ public:
 		Bottom = 4
 	}; // enum Direction
 
+	Q_ENUM( Direction )
+
 public:
 	explicit NavigationArrow( Direction direction, QWidget * parent = 0 );
 	virtual ~NavigationArrow();
@@ -105,17 +105,17 @@ public:
 	//! Set color.
 	void setColor( const QColor & color );
 
-	virtual QSize minimumSizeHint() const;
-	virtual QSize sizeHint() const;
+	QSize minimumSizeHint() const override;
+	QSize sizeHint() const override;
 
 public slots:
 	//! Animate.
 	void animate();
 
 protected:
-	virtual void paintEvent( QPaintEvent * );
-	virtual void mousePressEvent( QMouseEvent * e );
-	virtual void mouseReleaseEvent( QMouseEvent * e );
+	void paintEvent( QPaintEvent * ) override;
+	void mousePressEvent( QMouseEvent * e ) override;
+	void mouseReleaseEvent( QMouseEvent * e ) override;
 
 private slots:
 	void _q_timer();

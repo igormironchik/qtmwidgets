@@ -125,11 +125,11 @@ public:
 	//! Set current page indicator color.
 	void setCurrentPageIndicatorColor( const QColor & c );
 
-	virtual bool hasHeightForWidth() const;
-	virtual int heightForWidth( int width ) const;
+	bool hasHeightForWidth() const override;
+	int heightForWidth( int width ) const override;
 
-	virtual QSize minimumSizeHint() const;
-	virtual QSize sizeHint() const;
+	QSize minimumSizeHint() const override;
+	QSize sizeHint() const override;
 
 public slots:
 	//! Set current index.
@@ -138,10 +138,10 @@ public slots:
 	void setCount( int c );
 
 protected:
-	virtual void paintEvent( QPaintEvent * );
-	virtual void resizeEvent( QResizeEvent * e );
-	virtual void mousePressEvent( QMouseEvent * e );
-	virtual void mouseReleaseEvent( QMouseEvent * e );
+	void paintEvent( QPaintEvent * ) override;
+	void resizeEvent( QResizeEvent * e ) override;
+	void mousePressEvent( QMouseEvent * e ) override;
+	void mouseReleaseEvent( QMouseEvent * e ) override;
 
 private:
 	Q_DISABLE_COPY( PageControl )

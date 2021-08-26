@@ -52,8 +52,6 @@ class NavigationButton
 {
 	Q_OBJECT
 
-	Q_ENUMS( Direction )
-
 	/*!
 		\property direction
 
@@ -81,6 +79,7 @@ public:
 		//! Right.
 		Right = 2
 	}; // enum Direction
+	Q_ENUM( Direction )
 
 public:
 	explicit NavigationButton( Direction direction, QWidget * parent = 0 );
@@ -105,11 +104,11 @@ public:
 	//! Set arrow color.
 	void setArrowColor( const QColor & c );
 
-	virtual QSize minimumSizeHint() const;
-	virtual QSize sizeHint() const;
+	QSize minimumSizeHint() const override;
+	QSize sizeHint() const override;
 
 protected:
-	virtual void paintEvent( QPaintEvent * );
+	void paintEvent( QPaintEvent * ) override;
 
 private slots:
 	void _q_pressed();

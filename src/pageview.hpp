@@ -196,10 +196,10 @@ public slots:
 	void setCurrentWidget( QWidget * widget );
 
 protected:
-	virtual void resizeEvent( QResizeEvent * e );
-	virtual void mousePressEvent( QMouseEvent * e );
-	virtual void mouseMoveEvent( QMouseEvent * e );
-	virtual void mouseReleaseEvent( QMouseEvent * e );
+	void resizeEvent( QResizeEvent * e ) override;
+	void mousePressEvent( QMouseEvent * e ) override;
+	void mouseMoveEvent( QMouseEvent * e ) override;
+	void mouseReleaseEvent( QMouseEvent * e ) override;
 
 private slots:
 	void _q_currentIndexChanged( int index, int prev );

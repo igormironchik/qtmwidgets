@@ -100,13 +100,13 @@ public:
 	//! Enable/disable highlighting of the cell on click.
 	void setHighlightOnClick( bool on );
 
-	virtual QSize minimumSizeHint() const;
-	virtual QSize sizeHint() const;
+	QSize minimumSizeHint() const override;
+	QSize sizeHint() const override;
 
 protected:
-	virtual void paintEvent( QPaintEvent * e );
-	virtual void mousePressEvent( QMouseEvent * e );
-	virtual void mouseReleaseEvent( QMouseEvent * e );
+	void paintEvent( QPaintEvent * e ) override;
+	void mousePressEvent( QMouseEvent * e ) override;
+	void mouseReleaseEvent( QMouseEvent * e ) override;
 
 protected:
 	explicit TableViewCell( TableViewCellPrivate * dd, QWidget * parent = 0 );

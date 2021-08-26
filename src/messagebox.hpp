@@ -58,8 +58,6 @@ class MessageBox
 {
 	Q_OBJECT
 
-	Q_ENUMS( ButtonRole )
-
 	/*!
 		\property text
 
@@ -89,6 +87,8 @@ public:
 		//! Clicking the button causes the dialog to be rejected (e.g. Cancel).
 		RejectRole = 1
 	}; // enume ButtonRole
+
+	Q_ENUM( ButtonRole )
 
 public:
 	MessageBox( const QString & title,

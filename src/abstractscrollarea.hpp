@@ -85,9 +85,6 @@ class AbstractScrollArea
 {
 	Q_OBJECT
 
-	Q_ENUMS( ScrollIndicatorPolicy )
-	Q_ENUMS( BlurPolicy )
-
 	/*!
 		\property indicatorColor
 
@@ -166,6 +163,9 @@ public:
 		BlurAlwaysOff = 3
 	}; // enum BlurPolicy
 
+	Q_ENUM( ScrollIndicatorPolicy )
+	Q_ENUM( BlurPolicy )
+
 public:
 	AbstractScrollArea( QWidget * parent = 0 );
 	virtual ~AbstractScrollArea();
@@ -212,8 +212,8 @@ public:
 	//! Set blur policy.
 	void setBlurPolicy( BlurPolicy policy );
 
-	virtual QSize minimumSizeHint() const;
-	virtual QSize sizeHint() const;
+	QSize minimumSizeHint() const override;
+	QSize sizeHint() const override;
 
 protected:
 	explicit AbstractScrollArea( AbstractScrollAreaPrivate * dd,
@@ -247,11 +247,11 @@ protected:
 	//! Start animation of fading scroll indicators.
 	void startScrollIndicatorsAnimation();
 
-	virtual void resizeEvent( QResizeEvent * e );
-	virtual void mousePressEvent( QMouseEvent * e );
-	virtual void mouseReleaseEvent( QMouseEvent * e );
-	virtual void mouseMoveEvent( QMouseEvent * e );
-	virtual void wheelEvent( QWheelEvent * e );
+	void resizeEvent( QResizeEvent * e ) override;
+	void mousePressEvent( QMouseEvent * e ) override;
+	void mouseReleaseEvent( QMouseEvent * e ) override;
+	void mouseMoveEvent( QMouseEvent * e ) override;
+	void wheelEvent( QWheelEvent * e ) override;
 
 protected:
 	QScopedPointer< AbstractScrollAreaPrivate > d;

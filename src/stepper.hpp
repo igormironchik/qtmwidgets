@@ -173,8 +173,8 @@ public:
 	//! Set color.
 	void setColor( const QColor & c );
 
-	virtual QSize sizeHint() const;
-	virtual QSize minimumSizeHint() const;
+	QSize sizeHint() const override;
+	QSize minimumSizeHint() const override;
 
 public slots:
 	//! Set value.
@@ -185,9 +185,9 @@ public slots:
 	void stepUp();
 
 protected:
-	virtual void paintEvent( QPaintEvent * );
-	virtual void mousePressEvent( QMouseEvent * event );
-	virtual void mouseReleaseEvent( QMouseEvent * event );
+	void paintEvent( QPaintEvent * ) override;
+	void mousePressEvent( QMouseEvent * event ) override;
+	void mouseReleaseEvent( QMouseEvent * event ) override;
 
 private slots:
 	void _q_autorepeat();

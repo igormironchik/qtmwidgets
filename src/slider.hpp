@@ -100,14 +100,14 @@ public:
 	//! Set groove height.
 	void setGrooveHeight( int h );
 
-	virtual QSize sizeHint() const;
-	virtual QSize minimumSizeHint() const;
+	QSize sizeHint() const override;
+	QSize minimumSizeHint() const override;
 
 protected:
-	virtual void paintEvent( QPaintEvent * e );
-	virtual void mousePressEvent( QMouseEvent * e );
-	virtual void mouseReleaseEvent( QMouseEvent * e );
-	virtual void mouseMoveEvent( QMouseEvent * e );
+	void paintEvent( QPaintEvent * e ) override;
+	void mousePressEvent( QMouseEvent * e ) override;
+	void mouseReleaseEvent( QMouseEvent * e ) override;
+	void mouseMoveEvent( QMouseEvent * e ) override;
 
 private:
 	Q_DISABLE_COPY( Slider )

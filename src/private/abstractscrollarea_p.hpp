@@ -56,11 +56,11 @@ class ScrollIndicator
 public:
 	ScrollIndicator( const QColor & c, Qt::Orientation o, QWidget * parent );
 
-	QSize minimumSizeHint() const;
-	QSize sizeHint() const;
+	QSize minimumSizeHint() const override;
+	QSize sizeHint() const override;
 
 protected:
-	void paintEvent( QPaintEvent * );
+	void paintEvent( QPaintEvent * ) override;
 
 private:
 	void drawIndicator( QPainter * p, const QColor & c );
@@ -93,11 +93,11 @@ class BlurEffect
 public:
 	BlurEffect( const QColor & c, Qt::Orientation o, QWidget * parent );
 
-	QSize minimumSizeHint() const;
-	QSize sizeHint() const;
+	QSize minimumSizeHint() const override;
+	QSize sizeHint() const override;
 
 protected:
-	virtual void paintEvent( QPaintEvent * );
+	void paintEvent( QPaintEvent * ) override;
 
 private:
 	void drawBlur( QPainter * p, const QColor & c );

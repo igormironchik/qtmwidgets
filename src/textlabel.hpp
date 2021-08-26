@@ -156,14 +156,14 @@ public:
 	//! Set color.
 	void setColor( const QColor & c );
 
-	virtual bool hasHeightForWidth() const;
-	virtual int	heightForWidth( int w ) const;
-	virtual QSize minimumSizeHint() const;
-	virtual QSize sizeHint() const;
+	bool hasHeightForWidth() const override;
+	int heightForWidth( int w ) const override;
+	QSize minimumSizeHint() const override;
+	QSize sizeHint() const override;
 
 protected:
-	virtual void paintEvent( QPaintEvent * e );
-	virtual void resizeEvent( QResizeEvent * e );
+	void paintEvent( QPaintEvent * e ) override;
+	void resizeEvent( QResizeEvent * e ) override;
 
 private:
 	Q_DISABLE_COPY( TextLabel )

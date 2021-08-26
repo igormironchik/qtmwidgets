@@ -195,15 +195,15 @@ public:
 	void setOffset( int delta );
 	void setIconSize( const QSize & s );
 
-	virtual void addItem( QLayoutItem * item );
-	virtual int count() const;
-	virtual QLayoutItem * itemAt( int index ) const;
-	virtual void setGeometry( const QRect & rect );
-	virtual QLayoutItem * takeAt( int index );
-	virtual bool hasHeightForWidth() const;
+	void addItem( QLayoutItem * item ) override;
+	int count() const override;
+	QLayoutItem * itemAt( int index ) const override;
+	void setGeometry( const QRect & rect ) override;
+	QLayoutItem * takeAt( int index ) override;
+	bool hasHeightForWidth() const override;
 
-	virtual QSize minimumSize() const;
-	virtual QSize sizeHint() const;
+	QSize minimumSize() const override;
+	QSize sizeHint() const override;
 
 private:
 	QWidgetItem * left;
@@ -782,7 +782,7 @@ ToolBar::addAction( const QIcon & icon,
 	const QObject * receiver, const char * member )
 {
 	QAction * action = new QAction( icon, QString(), this );
-	QObject::connect( action, SIGNAL( triggered( bool ) ), receiver, member );
+	QObject::connect( action, SIGNAL( triggered(bool) ), receiver, member );
 	addAction( action );
 	return action;
 }

@@ -53,11 +53,11 @@ public:
 	explicit MsgBoxButton( const QString & text, QWidget * parent = 0 );
 	virtual ~MsgBoxButton();
 
-	virtual QSize minimumSizeHint() const;
-	virtual QSize sizeHint() const;
+	QSize minimumSizeHint() const override;
+	QSize sizeHint() const override;
 
 protected:
-	virtual void paintEvent( QPaintEvent * );
+	void paintEvent( QPaintEvent * ) override;
 
 private slots:
 	void _q_pressed();

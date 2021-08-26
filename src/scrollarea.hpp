@@ -137,7 +137,7 @@ public:
 	//! Set widgetResizable property's value.
 	void setWidgetResizable( bool resizable );
 
-	bool focusNextPrevChild( bool next );
+	bool focusNextPrevChild( bool next ) override;
 
 	//! \return alignment property's value.
 	Qt::Alignment alignment() const;

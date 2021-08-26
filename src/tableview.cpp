@@ -628,13 +628,13 @@ public:
 		setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Fixed );
 	}
 
-	QSize sizeHint() const
+	QSize sizeHint() const override
 	{
 		return QSize( 1, 1 );
 	}
 
 protected:
-	void paintEvent( QPaintEvent * )
+	void paintEvent( QPaintEvent * ) override
 	{
 		QPainter p( this );
 

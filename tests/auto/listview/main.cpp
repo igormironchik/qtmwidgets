@@ -55,7 +55,7 @@ public:
 
 protected:
 	void drawRow( QPainter * painter,
-		const QRect & rect, int row )
+		const QRect & rect, int row ) override
 	{
 		const QColor & c = model()->data( row );
 

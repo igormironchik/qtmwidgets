@@ -6,6 +6,9 @@ if( ENABLE_COVERAGE )
 	set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage" )
 endif( ENABLE_COVERAGE )
 
+find_package( Qt6Core REQUIRED )
+find_package( Qt6Gui REQUIRED )
+find_package( Qt6Widgets REQUIRED )
 
 set( SRC picker.hpp
 	pageview.hpp
@@ -80,6 +83,8 @@ include_directories( ${Qt5Core_INCLUDE_DIRS}
 	${Qt5Widgets_INCLUDE_DIRS} )
 
 add_library( QtMWidgets STATIC ${SRC} )
+
+target_link_libraries( QtMWidgets Qt6::Widgets Qt6::Gui Qt6::Core )
 
 set_property( TARGET QtMWidgets PROPERTY CXX_STANDARD 14 )
 

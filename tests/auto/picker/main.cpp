@@ -119,8 +119,11 @@ private slots:
 		QMouseEvent me( QEvent::MouseMove, c + m_delta, Qt::LeftButton,
 			Qt::LeftButton, {} );
 		QApplication::sendEvent( m_picker.data(), &me );
+		QTest::qWait( 500 );
 		QTest::mouseRelease( m_picker.data(), Qt::LeftButton, {}, c + m_delta, 20 );
 		QTest::mouseClick( m_picker.data(), Qt::LeftButton, {}, c, 20 );
+
+		QTest::qWait( 500 );
 
 		QVERIFY( m_picker->currentIndex() == 3 );
 
@@ -132,8 +135,11 @@ private slots:
 			QMouseEvent me( QEvent::MouseMove, c + m_delta, Qt::LeftButton,
 				Qt::LeftButton, {} );
 			QApplication::sendEvent( m_picker.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_picker.data(), Qt::LeftButton, {}, c + m_delta, 20 );
 			QTest::mouseClick( m_picker.data(), Qt::LeftButton, {}, c, 20 );
+
+			QTest::qWait( 500 );
 
 			QVERIFY( m_picker->currentIndex() == idx );
 
@@ -217,6 +223,7 @@ private slots:
 		QMouseEvent me( QEvent::MouseMove, c + m_delta, Qt::LeftButton,
 			Qt::LeftButton, {} );
 		QApplication::sendEvent( m_picker.data(), &me );
+		QTest::qWait( 500 );
 		QTest::mouseRelease( m_picker.data(), Qt::LeftButton, {}, c + m_delta, 20 );
 		QTest::mouseClick( m_picker.data(), Qt::LeftButton, {}, c, 20 );
 

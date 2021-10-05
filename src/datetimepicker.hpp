@@ -502,7 +502,7 @@ protected:
 	void mouseReleaseEvent( QMouseEvent * event ) override;
 	void paintEvent( QPaintEvent * event ) override;
 
-	DateTimePicker( const QVariant & val, QVariant::Type parserType,
+	DateTimePicker( const QVariant & val, QMetaType::Type parserType,
 		QWidget * parent = 0 );
 
 private slots:

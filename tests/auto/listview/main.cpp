@@ -205,7 +205,7 @@ private slots:
 		QSignalSpy spy( m_w.data(), &QtMWidgets::AbstractListViewBase::rowLongTouched );
 
 		QTest::mousePress( m_w.data(), Qt::LeftButton, {}, r.center(), 20 );
-		QTest::qWait( 2100 );
+		QTest::qWait( 3100 );
 		QTest::mouseRelease( m_w.data(), Qt::LeftButton, {}, r.center(), 20 );
 
 		QVERIFY( spy.count() == 1 );
@@ -214,7 +214,9 @@ private slots:
 		QMouseEvent me( QEvent::MouseMove, r.center() + QPoint( 0, r.height() + s ), Qt::LeftButton,
 			Qt::LeftButton, {} );
 		QApplication::sendEvent( m_w.data(), &me );
+		QTest::qWait( 500 );
 		QTest::mouseRelease( m_w.data(), Qt::LeftButton, {}, r.center(), 20 );
+		QTest::qWait( 500 );
 
 		r = m_w->visualRect( i );
 
@@ -250,6 +252,7 @@ private slots:
 			QMouseEvent me1( QEvent::MouseMove, r.center() + QPoint( 0, r.height() ), Qt::LeftButton,
 				Qt::LeftButton, {} );
 			QApplication::sendEvent( m_w.data(), &me1 );
+			QTest::qWait( 500 );
 
 			QMouseEvent me2( QEvent::MouseMove, r.center() + QPoint( 0, r.height() * 2 ), Qt::LeftButton,
 				Qt::LeftButton, {} );
@@ -271,6 +274,7 @@ private slots:
 			QMouseEvent me1( QEvent::MouseMove, r.center() + QPoint( 25, 0 ), Qt::LeftButton,
 				Qt::LeftButton, {} );
 			QApplication::sendEvent( m_w.data(), &me1 );
+			QTest::qWait( 500 );
 
 			QMouseEvent me2( QEvent::MouseMove, r.center() + QPoint( 50, 0 ), Qt::LeftButton,
 				Qt::LeftButton, {} );

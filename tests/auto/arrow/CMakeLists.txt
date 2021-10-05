@@ -1,10 +1,10 @@
 
 project( test.arrow )
 
-find_package( Qt5Core 5.15 REQUIRED )
-find_package( Qt5Test 5.15 REQUIRED )
-find_package( Qt5Gui 5.15 REQUIRED )
-find_package( Qt5Widgets 5.15 REQUIRED )
+find_package( Qt6Core REQUIRED )
+find_package( Qt6Test REQUIRED )
+find_package( Qt6Gui REQUIRED )
+find_package( Qt6Widgets REQUIRED )
 
 set( CMAKE_AUTOMOC ON )
 
@@ -23,7 +23,7 @@ link_directories( ${CMAKE_CURRENT_BINARY_DIR}/../../../lib )
 
 add_executable( test.arrow ${SRC} )
 
-target_link_libraries( test.arrow QtMWidgets Qt5::Widgets Qt5::Gui Qt5::Test Qt5::Core )
+target_link_libraries( test.arrow QtMWidgets Qt6::Widgets Qt6::Gui Qt6::Test Qt6::Core )
 
 add_test( NAME test.arrow
 	COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test.arrow

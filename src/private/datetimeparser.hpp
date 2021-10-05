@@ -125,7 +125,7 @@ public:
 */
 class DateTimeParser {
 public:
-	explicit DateTimeParser( QVariant::Type t );
+	explicit DateTimeParser( QMetaType::Type t );
 
 	virtual ~DateTimeParser();
 
@@ -142,7 +142,7 @@ public:
 	//! Defined sections in format.
 	QVector< Section > sections;
 	//! Type of the parser.
-	QVariant::Type type;
+	QMetaType::Type type;
 	//! Format string.
 	QString format;
 }; // class DateTimeParser

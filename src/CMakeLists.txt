@@ -78,10 +78,6 @@ set( SRC picker.hpp
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../include
 	${CMAKE_CURRENT_SOURCE_DIR} )
 
-include_directories( ${Qt5Core_INCLUDE_DIRS}
-	${Qt5Gui_INCLUDE_DIRS}
-	${Qt5Widgets_INCLUDE_DIRS} )
-
 add_library( QtMWidgets STATIC ${SRC} )
 
 target_link_libraries( QtMWidgets Qt6::Widgets Qt6::Gui Qt6::Core )

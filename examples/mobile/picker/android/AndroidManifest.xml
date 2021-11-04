@@ -1,9 +1,9 @@
-<?xml version='1.0' encoding='utf-8'?>
-<manifest package="org.qtproject.Picker" android:versionName="1.0" android:installLocation="auto" android:versionCode="1" xmlns:android="http://schemas.android.com/apk/res/android">
-	<application android:label="@string/app_name" android:name="org.qtproject.qt5.android.bindings.QtApplication">
-		<activity android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|locale|fontScale|keyboard|keyboardHidden|navigation" android:label="@string/app_name" android:screenOrientation="unspecified" android:name="org.qtproject.qt5.android.bindings.QtActivity">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN"/>
+<?xml version="1.0"?>
+<manifest package="com.gmail.mironchik.igor.picker" android:versionName="1.0" android:installLocation="auto" android:versionCode="1" xmlns:android="http://schemas.android.com/apk/res/android">
+<application android:label="picker" android:name="org.qtproject.qt5.android.bindings.QtApplication">
+	<activity android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|locale|fontScale|keyboard|keyboardHidden|navigation" android:label="picker" android:screenOrientation="unspecified" android:name="org.qtproject.qt5.android.bindings.QtActivity">
+		<intent-filter>
+			<action android:name="android.intent.action.MAIN"/>
 				<category android:name="android.intent.category.LAUNCHER"/>
 			</intent-filter>
 			<meta-data android:value="-- %%INSERT_APP_LIB_NAME%% --" android:name="android.app.lib_name"/>
@@ -27,12 +27,11 @@
 			<meta-data android:value="@string/fatal_error_msg" android:name="android.app.fatal_error_msg"/>
 			<!--  Messages maps -->
 			<!-- Splash screen -->
-			<meta-data android:name="android.app.splash_screen" android:resource="@layout/splash"/>
 			<!-- Splash screen -->
-		</activity>
-	</application>
-	<uses-sdk android:minSdkVersion="9" android:targetSdkVersion="14"/>
-	<supports-screens android:largeScreens="true" android:normalScreens="true" android:anyDensity="true" android:smallScreens="true"/>
+			</activity>
+		</application>
+
+<supports-screens android:largeScreens="true" android:normalScreens="true" android:anyDensity="true" android:smallScreens="true"/>
 	<!-- %%INSERT_PERMISSIONS -->
 	<!-- %%INSERT_FEATURES -->
 	<uses-permission android:name="android.permission.INTERNET"/>

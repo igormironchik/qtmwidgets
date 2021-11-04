@@ -56,7 +56,7 @@ class DateTimePickerPrivate
 {
 public:
 	DateTimePickerPrivate( DateTimePicker * parent,
-		QVariant::Type parserType )
+		QMetaType::Type parserType )
 		:	DateTimeParser( parserType )
 		,	q( parent )
 		,	minimum( QDateTime( DATETIMEPICKER_COMPAT_DATE_MIN,
@@ -650,7 +650,7 @@ DateTimePickerPrivate::releaseScrolling()
 
 DateTimePicker::DateTimePicker( QWidget * parent )
 	:	QWidget( parent )
-	,	d( new DateTimePickerPrivate( this, QVariant::DateTime ) )
+	,	d( new DateTimePickerPrivate( this, QMetaType::QDateTime ) )
 {
 	setSizePolicy( QSizePolicy( QSizePolicy::Fixed,
 		QSizePolicy::Fixed ) );
@@ -667,7 +667,7 @@ DateTimePicker::DateTimePicker( QWidget * parent )
 
 DateTimePicker::DateTimePicker( const QDateTime & dt, QWidget * parent )
 	:	QWidget( parent )
-	,	d( new DateTimePickerPrivate( this, QVariant::DateTime ) )
+	,	d( new DateTimePickerPrivate( this, QMetaType::QDateTime ) )
 {
 	setSizePolicy( QSizePolicy( QSizePolicy::Fixed,
 		QSizePolicy::Fixed ) );
@@ -686,7 +686,7 @@ DateTimePicker::DateTimePicker( const QDateTime & dt, QWidget * parent )
 
 DateTimePicker::DateTimePicker( const QDate & date, QWidget * parent )
 	:	QWidget( parent )
-	,	d( new DateTimePickerPrivate( this, QVariant::Date ) )
+	,	d( new DateTimePickerPrivate( this, QMetaType::QDate ) )
 {
 	setSizePolicy( QSizePolicy( QSizePolicy::Fixed,
 		QSizePolicy::Fixed ) );
@@ -705,7 +705,7 @@ DateTimePicker::DateTimePicker( const QDate & date, QWidget * parent )
 
 DateTimePicker::DateTimePicker( const QTime & time, QWidget * parent )
 	:	QWidget( parent )
-	,	d( new DateTimePickerPrivate( this, QVariant::Time ) )
+	,	d( new DateTimePickerPrivate( this, QMetaType::QTime ) )
 {
 	setSizePolicy( QSizePolicy( QSizePolicy::Fixed,
 		QSizePolicy::Fixed ) );
@@ -722,7 +722,7 @@ DateTimePicker::DateTimePicker( const QTime & time, QWidget * parent )
 		this, &DateTimePicker::_q_scrollFinished );
 }
 
-DateTimePicker::DateTimePicker( const QVariant & val, QVariant::Type parserType,
+DateTimePicker::DateTimePicker( const QVariant & val, QMetaType::Type parserType,
 	QWidget * parent )
 	:	QWidget( parent )
 	,	d( new DateTimePickerPrivate( this, parserType ) )
@@ -730,17 +730,17 @@ DateTimePicker::DateTimePicker( const QVariant & val, QVariant::Type parserType,
 	setSizePolicy( QSizePolicy( QSizePolicy::Fixed,
 		QSizePolicy::Fixed ) );
 
-	switch( val.type() )
+	switch( val.metaType().id() )
 	{
-		case QVariant::Date :
+		case QMetaType::QDate :
 			setDate( val.toDate() );
 			break;
 
-		case QVariant::Time :
+		case QMetaType::QTime :
 			setTime( val.toTime() );
 			break;
 
-		case QVariant::DateTime :
+		case QMetaType::QDateTime :
 			setDateTime( val.toDateTime() );
 			break;
 

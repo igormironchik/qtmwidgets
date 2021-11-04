@@ -562,7 +562,7 @@ Section::fillValues( const QDateTime & current,
 // DateTimeParser
 //
 
-DateTimeParser::DateTimeParser( QVariant::Type t )
+DateTimeParser::DateTimeParser( QMetaType::Type t )
 	:	type( t )
 {
 	parseFormat( QLatin1String( "dddd MMMM yyyy hh mm" ) );
@@ -613,7 +613,7 @@ DateTimeParser::parseFormat( const QString & fmt )
 		{
 			case 'h' :
 			{
-				if( type != QVariant::Date )
+				if( type != QMetaType::QDate )
 				{
 					const int count = countRepeat( fmt, i, 2 );
 
@@ -640,7 +640,7 @@ DateTimeParser::parseFormat( const QString & fmt )
 
 			case 'm' :
 			{
-				if( type != QVariant::Date )
+				if( type != QMetaType::QDate )
 				{
 					const int count = countRepeat( fmt, i, 2 );
 
@@ -664,7 +664,7 @@ DateTimeParser::parseFormat( const QString & fmt )
 
 			case 's' :
 			{
-				if( type != QVariant::Date )
+				if( type != QMetaType::QDate )
 				{
 					const int count = countRepeat( fmt, i, 2 );
 
@@ -688,7 +688,7 @@ DateTimeParser::parseFormat( const QString & fmt )
 
 			case 'a' :
 			{
-				if( type != QVariant::Date )
+				if( type != QMetaType::QDate )
 				{
 					Section s( Section::AmPmSection );
 
@@ -710,7 +710,7 @@ DateTimeParser::parseFormat( const QString & fmt )
 
 			case 'y' :
 			{
-				if( type != QVariant::Time )
+				if( type != QMetaType::QTime )
 				{
 					const int count = countRepeat( fmt, i, 4 );
 
@@ -743,7 +743,7 @@ DateTimeParser::parseFormat( const QString & fmt )
 
 			case 'M' :
 			{
-				if( type != QVariant::Time )
+				if( type != QMetaType::QTime )
 				{
 					const int count = countRepeat( fmt, i, 4 );
 
@@ -774,7 +774,7 @@ DateTimeParser::parseFormat( const QString & fmt )
 
 			case 'd' :
 			{
-				if( type != QVariant::Time )
+				if( type != QMetaType::QTime )
 				{
 					const int count = countRepeat( fmt, i, 4 );
 

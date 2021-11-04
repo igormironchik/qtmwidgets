@@ -54,6 +54,8 @@ private slots:
 		m_dt.reset( new QtMWidgets::DateTimePicker );
 		m_dt->setFormat( QStringLiteral( "ddd MMMM yyyy hh mm a" ) );
 
+		m_dt->setMouseTracking( true );
+
 		m_font = m_dt->font();
 		m_font.setBold( true );
 		m_dt->setFont( m_font );
@@ -188,12 +190,18 @@ private slots:
 
 		QVERIFY( m_dt->dateTime() == dt );
 
+		m_dt->update();
+
+		QTest::qWait( 500 );
+
 		{
 			QPoint p( m_dtSections.at( 0 ), m_dt->height() / 2 );
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );
+			QTest::qWait( 500 );
 
 			QVERIFY( m_dt->dateTime() == QDateTime( { 2020, 10, 25 }, { 13, 12 } ) );
 		}
@@ -203,7 +211,9 @@ private slots:
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );
+			QTest::qWait( 500 );
 
 			QVERIFY( m_dt->dateTime() == QDateTime( { 2020, 11, 25 }, { 13, 12 } ) );
 		}
@@ -213,7 +223,10 @@ private slots:
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );
+
+			QTest::qWait( 500 );
 
 			QVERIFY( m_dt->dateTime() == QDateTime( { 2021, 11, 25 }, { 13, 12 } ) );
 		}
@@ -223,7 +236,10 @@ private slots:
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );
+
+			QTest::qWait( 500 );
 
 			QVERIFY( m_dt->dateTime() == QDateTime( { 2021, 11, 25 }, { 14, 12 } ) );
 		}
@@ -233,7 +249,10 @@ private slots:
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );
+
+			QTest::qWait( 500 );
 
 			QVERIFY( m_dt->dateTime() == QDateTime( { 2021, 11, 25 }, { 14, 13 } ) );
 		}
@@ -243,7 +262,10 @@ private slots:
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p - m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p - m_delta, 20 );
+
+			QTest::qWait( 500 );
 
 			QVERIFY( m_dt->dateTime() == QDateTime( { 2021, 11, 25 }, { 2, 13 } ) );
 		}
@@ -267,7 +289,10 @@ private slots:
 			QTest::mousePress( m_d.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_d.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_d.data(), Qt::LeftButton, {}, p + m_delta, 20 );
+
+			QTest::qWait( 500 );
 
 			QVERIFY( m_d->date() == QDate( 2020, 10, 25 ) );
 		}
@@ -277,7 +302,10 @@ private slots:
 			QTest::mousePress( m_d.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p - m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_d.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_d.data(), Qt::LeftButton, {}, p - m_delta, 20 );
+
+			QTest::qWait( 500 );
 
 			QVERIFY( m_d->date() == QDate( 2020, 9, 25 ) );
 		}
@@ -287,11 +315,15 @@ private slots:
 			QTest::mousePress( m_d.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_d.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_d.data(), Qt::LeftButton, {}, p + m_delta, 20 );
 
 			QTest::mousePress( m_d.data(), Qt::LeftButton, {}, p, 20 );
 			QApplication::sendEvent( m_d.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_d.data(), Qt::LeftButton, {}, p + m_delta, 20 );
+
+			QTest::qWait( 500 );
 
 			QVERIFY( m_d->date() == QDate( 2022, 9, 25 ) );
 		}
@@ -315,7 +347,10 @@ private slots:
 			QTest::mousePress( m_t.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_t.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_t.data(), Qt::LeftButton, {}, p + m_delta, 20 );
+
+			QTest::qWait( 500 );
 
 			QVERIFY( m_t->time() == QTime( 14, 12 ) );
 		}
@@ -325,7 +360,10 @@ private slots:
 			QTest::mousePress( m_t.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_t.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_t.data(), Qt::LeftButton, {}, p + m_delta, 20 );
+
+			QTest::qWait( 500 );
 
 			QVERIFY( m_t->time() == QTime( 14, 13 ) );
 		}
@@ -336,7 +374,10 @@ private slots:
 			QTest::mousePress( m_t.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_t.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_t.data(), Qt::LeftButton, {}, p + m_delta, 20 );
+
+			QTest::qWait( 500 );
 
 			QVERIFY( m_t->time() == QTime( ( i + 1 < 24 ? i + 1 : 0 ), 13 ) );
 		}
@@ -346,7 +387,10 @@ private slots:
 			QTest::mousePress( m_t.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_t.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_t.data(), Qt::LeftButton, {}, p + m_delta, 20 );
+
+			QTest::qWait( 500 );
 
 			QVERIFY( m_t->time() == QTime( 1, 13 ) );
 		}
@@ -433,7 +477,10 @@ private slots:
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );
+
+			QTest::qWait( 500 );
 
 			QVERIFY( m_dt->dateTime() == QDateTime( { 2021, 10, 12 }, { 15, 12 }, Qt::UTC ) );
 		}
@@ -443,7 +490,10 @@ private slots:
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p - m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p - m_delta, 20 );
+
+			QTest::qWait( 500 );
 
 			QVERIFY( m_dt->dateTime() == QDateTime( { 2020, 10, 12 }, { 15, 12 }, Qt::UTC ) );
 		}
@@ -453,7 +503,10 @@ private slots:
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p - m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p - m_delta, 20 );
+
+			QTest::qWait( 500 );
 
 			QVERIFY( m_dt->dateTime() == QDateTime( { 2019, 10, 12 }, { 15, 12 }, Qt::UTC ) );
 		}
@@ -463,7 +516,10 @@ private slots:
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p - m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p - m_delta, 20 );
+
+			QTest::qWait( 500 );
 
 			QVERIFY( m_dt->dateTime() == QDateTime( { 2019, 10, 12 }, { 15, 12 }, Qt::UTC ) );
 		}
@@ -484,6 +540,7 @@ private slots:
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );
 
 			QVERIFY( m_dt->dateTime() == QDateTime( { 2021, 12, 31 }, { 22, 1 }, Qt::UTC ) );
@@ -506,7 +563,10 @@ private slots:
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
 			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
+			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );
+
+			QTest::qWait( 500 );
 
 			QVERIFY( m_dt->dateTime() == QDateTime( { 2021, 12, 31 }, { 23, 1 }, Qt::UTC ) );
 		}

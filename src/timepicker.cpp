@@ -40,12 +40,12 @@ namespace QtMWidgets {
 //
 
 TimePicker::TimePicker( QWidget * parent )
-	:	DateTimePicker( DATETIMEPICKER_TIME_MIN, QVariant::Time, parent )
+	:	DateTimePicker( DATETIMEPICKER_TIME_MIN, QMetaType::QTime, parent )
 {
 }
 
 TimePicker::TimePicker( const QTime & time, QWidget * parent )
-	:	DateTimePicker( time, QVariant::Time, parent )
+	:	DateTimePicker( time, QMetaType::QTime, parent )
 {
 }
 

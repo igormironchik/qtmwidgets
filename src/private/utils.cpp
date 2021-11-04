@@ -68,7 +68,7 @@ accomodateString( const QString & text, const QRect & r,
 			tmp.prepend( text.at( x ) );
 		}
 
-		res.append( text.rightRef( text.length() - x - 1 ) );
+		res.append( text.right( text.length() - x - 1 ) );
 	}
 
 	return res;

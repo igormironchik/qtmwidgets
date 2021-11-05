@@ -107,7 +107,7 @@ private slots:
 			QTest::mouseRelease( &p, Qt::LeftButton, {}, pos, 20 );
 		}
 
-		QTest::qWait( 350 );
+		QTest::qWait( 1000 );
 
 		QVERIFY( p.currentWidget() == &w3 );
 
@@ -121,7 +121,7 @@ private slots:
 			QTest::mouseRelease( &p, Qt::LeftButton, {}, pos, 20 );
 		}
 
-		QTest::qWait( 350 );
+		QTest::qWait( 1000 );
 
 		QVERIFY( p.currentIndex() == 1 );
 

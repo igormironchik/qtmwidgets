@@ -63,7 +63,6 @@ ScrollIndicator::ScrollIndicator( const QColor & c, Qt::Orientation o,
 	,	color( c )
 	,	animate( false )
 	,	alpha( 255 )
-	,	shown( false )
 {
 }
 
@@ -94,10 +93,7 @@ ScrollIndicator::paintEvent( QPaintEvent * )
 	{
 		case AbstractScrollArea::ScrollIndicatorAsNeeded :
 			if( !needPaint )
-			{
-				shown = false;
 				break;
-			}
 			[[fallthrough]];
 		case AbstractScrollArea::ScrollIndicatorAlwaysOn :
 			drawIndicator( &p, color );
@@ -113,8 +109,6 @@ ScrollIndicator::drawIndicator( QPainter * p, const QColor & c )
 {
 	if( policy != AbstractScrollArea::ScrollIndicatorAlwaysOff )
 	{
-		shown = true;
-
 		QColor paintColor = c;
 
 		if( animate && policy != AbstractScrollArea::ScrollIndicatorAlwaysOn )
@@ -207,12 +201,6 @@ BlurEffect::drawBlur( QPainter * p, const QColor & c )
 	QColor c1 = c;
 	c1.setAlpha( 255 * realPressure );
 
-	QColor c2 = c;
-	c2.setAlpha( 50 * realPressure );
-
-	QColor c3 = c;
-	c3.setAlpha( 0 );
-
 	const QRect dark(
 		( orientation == Qt::Vertical ? r.x() + r.width() / 2 - 2 : r.x() ),
 		( orientation == Qt::Horizontal ? r.y() + r.height() / 2 - 2 : r.y() ),
@@ -222,20 +210,6 @@ BlurEffect::drawBlur( QPainter * p, const QColor & c )
 	p->setPen( Qt::NoPen );
 	p->setBrush( c1 );
 	p->drawEllipse( dark );
-
-	QLinearGradient g(
-		QPointF( 0.0, 0.0 ),
-		( orientation == Qt::Horizontal ?
-			QPointF( 0.0, 1.0 ) : QPointF( 1.0, 0.0 ) ) );
-	g.setColorAt( 0.0, c3 );
-	g.setColorAt( 0.5, c2 );
-	g.setColorAt( 1.0, c3 );
-	g.setCoordinateMode( QGradient::ObjectBoundingMode );
-
-	p->setBrush( g );
-	p->drawRoundedRect( r,
-		( orientation == Qt::Horizontal ? r.height() / 2 : r.width() / 2 ),
-		( orientation == Qt::Horizontal ? r.height() / 2 : r.width() / 2 ) );
 }
 
 
@@ -455,21 +429,29 @@ AbstractScrollAreaPrivate::scrollContentsBy( int dx, int dy )
 {
 	topLeftCorner -= QPoint( dx, dy );
 
-	makeBlurEffectIfNeeded();
-
 	if( dx != 0 )
 	{
-		horIndicator->shown = true;
 		horIndicator->needPaint = true;
+		horIndicator->alpha = horIndicator->color.alpha();
+		horIndicator->animate = false;
+		vertIndicator->alpha = vertIndicator->color.alpha();
+		vertIndicator->animate = false;
+		animationTimer->stop();
 		horIndicator->raise();
 	}
 
 	if( dy != 0 )
 	{
-		vertIndicator->shown = true;
 		vertIndicator->needPaint = true;
+		vertIndicator->alpha = vertIndicator->color.alpha();
+		vertIndicator->animate = false;
+		horIndicator->alpha = horIndicator->color.alpha();
+		horIndicator->animate = false;
+		animationTimer->stop();
 		vertIndicator->raise();
 	}
+
+	makeBlurEffectIfNeeded();
 
 	calcIndicators();
 
@@ -616,13 +598,13 @@ AbstractScrollAreaPrivate::animateScrollIndicators()
 	vertIndicator->alpha = vertIndicator->color.alpha();
 	animationTimer->start( animationTimeout );
 
-	if( horIndicator->shown )
+	if( horIndicator->needPaint )
 	{
 		horIndicator->animate = true;
 		horIndicator->update();
 	}
 
-	if( vertIndicator->shown )
+	if( vertIndicator->needPaint )
 	{
 		vertIndicator->animate = true;
 		vertIndicator->update();
@@ -637,8 +619,6 @@ AbstractScrollAreaPrivate::stopScrollIndicatorsAnimation()
 	vertIndicator->needPaint = false;
 	horIndicator->animate = false;
 	vertIndicator->animate = false;
-	horIndicator->shown = false;
-	vertIndicator->shown = false;
 	horIndicator->update();
 	vertIndicator->update();
 }
@@ -989,7 +969,7 @@ AbstractScrollArea::mouseReleaseEvent( QMouseEvent * e )
 	{
 		d->leftMouseButtonPressed = false;
 
-		if( ( d->horIndicator->shown || d->vertIndicator->shown ) &&
+		if( ( d->horIndicator->needPaint || d->vertIndicator->needPaint ) &&
 			( d->horIndicator->policy == ScrollIndicatorAsNeeded ||
 				d->vertIndicator->policy == ScrollIndicatorAsNeeded ) )
 					d->animateScrollIndicators();
@@ -1077,13 +1057,13 @@ AbstractScrollArea::_q_animateScrollIndicators()
 
 	if( d->horIndicator->alpha <= 0 )
 		d->stopScrollIndicatorsAnimation();
-	else if( d->horIndicator->shown || d->vertIndicator->shown )
+	else if( d->horIndicator->needPaint || d->vertIndicator->needPaint )
 		d->animationTimer->start( d->animationTimeout );
 
-	if( d->horIndicator->shown )
+	if( d->horIndicator->needPaint )
 		d->horIndicator->update();
 
-	if( d->vertIndicator->shown )
+	if( d->vertIndicator->needPaint )
 		d->vertIndicator->update();
 }
 
@@ -1104,9 +1084,12 @@ AbstractScrollArea::_q_kineticScrollingAboutToStart()
 void
 AbstractScrollArea::_q_kineticScrollingFinished()
 {
-	if( d->horIndicator->policy == ScrollIndicatorAsNeeded ||
-		d->vertIndicator->policy == ScrollIndicatorAsNeeded )
-			d->animateScrollIndicators();
+	if( d->horIndicator->needPaint || d->vertIndicator->needPaint )
+	{
+		if( d->horIndicator->policy == ScrollIndicatorAsNeeded ||
+			d->vertIndicator->policy == ScrollIndicatorAsNeeded )
+				d->animateScrollIndicators();
+	}
 
 	d->animateHiddingBlurEffect();
 }

@@ -141,7 +141,3 @@ QtMWidgets::Slider * volumeSlider =
     new QtMWidgets::Slider(
         Qt::Horizontal, this );
 ```
-
-# Donate
-
-[![](bitcoin-btc-logo-full.png)](https://github.com/igormironchik)

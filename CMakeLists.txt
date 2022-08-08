@@ -3,8 +3,8 @@ cmake_minimum_required( VERSION 2.8.11 )
 
 project( QtMWidgets )
 
-option( BUILD_EXAMPLES "Build examples? Default ON." ON )
-option( BUILD_TESTS "Build tests? Default ON." ON )
+option( QTMWIDGETS_BUILD_EXAMPLES "Build examples? Default ON." ON )
+option( QTMWIDGETS_BUILD_TESTS "Build tests? Default ON." ON )
 
 # Find includes in corresponding build directories
 set( CMAKE_INCLUDE_CURRENT_DIR ON )
@@ -23,11 +23,11 @@ set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib )
 
 add_subdirectory( src )
 
-if( BUILD_EXAMPLES )
+if( QTMWIDGETS_BUILD_EXAMPLES )
 	add_subdirectory( examples )
 endif()
 
-if( BUILD_TESTS )
+if( QTMWIDGETS_BUILD_TESTS )
     enable_testing()
 
     add_subdirectory( tests )

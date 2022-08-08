@@ -62,7 +62,7 @@ jobs:
 
     - name: Build and Test
       run: |
-       cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug .
+       cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DQTMWIDGETS_BUILD_EXAMPLES=OFF .
        make
        export QT_QPA_PLATFORM=offscreen
        ctest --output-on-failure --verbose
@@ -109,7 +109,7 @@ jobs:
 
     - name: Build and Test
       run: |
-       cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Relese .
+       cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Relese -DQTMWIDGETS_BUILD_EXAMPLES=OFF .
        nmake
        ctest --output-on-failure --verbose
 
@@ -144,6 +144,6 @@ jobs:
 
     - name: Build and Test
       run: |
-       cmake -DCMAKE_BUILD_TYPE=Relese .
+       cmake -DCMAKE_BUILD_TYPE=Relese -DQTMWIDGETS_BUILD_EXAMPLES=OFF .
        make
        ctest --output-on-failure --verbose

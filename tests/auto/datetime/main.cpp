@@ -197,7 +197,9 @@ private slots:
 		{
 			QPoint p( m_dtSections.at( 0 ), m_dt->height() / 2 );
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p + m_delta,
+				m_dt->mapToGlobal( p + m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );
@@ -209,7 +211,9 @@ private slots:
 		{
 			QPoint p( m_dtSections.at( 1 ), m_dt->height() / 2 );
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p + m_delta,
+				m_dt->mapToGlobal( p + m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );
@@ -221,7 +225,9 @@ private slots:
 		{
 			QPoint p( m_dtSections.at( 2 ), m_dt->height() / 2 );
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p + m_delta,
+				m_dt->mapToGlobal( p + m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );
@@ -234,7 +240,9 @@ private slots:
 		{
 			QPoint p( m_dtSections.at( 3 ), m_dt->height() / 2 );
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p + m_delta,
+				m_dt->mapToGlobal( p + m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );
@@ -247,7 +255,9 @@ private slots:
 		{
 			QPoint p( m_dtSections.at( 4 ), m_dt->height() / 2 );
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p + m_delta,
+				m_dt->mapToGlobal( p + m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );
@@ -260,7 +270,9 @@ private slots:
 		{
 			QPoint p( m_dtSections.at( 5 ), m_dt->height() / 2 );
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p - m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p - m_delta,
+				m_dt->mapToGlobal( p - m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p - m_delta, 20 );
@@ -287,7 +299,9 @@ private slots:
 		{
 			QPoint p( m_dSections.at( 0 ), m_d->height() / 2 );
 			QTest::mousePress( m_d.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p + m_delta,
+				m_d->mapToGlobal( p + m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_d.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_d.data(), Qt::LeftButton, {}, p + m_delta, 20 );
@@ -300,7 +314,9 @@ private slots:
 		{
 			QPoint p( m_dSections.at( 1 ), m_d->height() / 2 );
 			QTest::mousePress( m_d.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p - m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p - m_delta,
+				m_d->mapToGlobal( p - m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_d.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_d.data(), Qt::LeftButton, {}, p - m_delta, 20 );
@@ -313,7 +329,9 @@ private slots:
 		{
 			QPoint p( m_dSections.at( 2 ), m_d->height() / 2 );
 			QTest::mousePress( m_d.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p + m_delta,
+				m_d->mapToGlobal( p + m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_d.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_d.data(), Qt::LeftButton, {}, p + m_delta, 20 );
@@ -345,7 +363,9 @@ private slots:
 		{
 			QPoint p( m_tSections.at( 0 ), m_t->height() / 2 );
 			QTest::mousePress( m_t.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p + m_delta,
+				m_t->mapToGlobal( p + m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_t.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_t.data(), Qt::LeftButton, {}, p + m_delta, 20 );
@@ -358,7 +378,9 @@ private slots:
 		{
 			QPoint p( m_tSections.at( 1 ), m_t->height() / 2 );
 			QTest::mousePress( m_t.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p + m_delta,
+				m_t->mapToGlobal( p + m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_t.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_t.data(), Qt::LeftButton, {}, p + m_delta, 20 );
@@ -372,7 +394,9 @@ private slots:
 		{
 			QPoint p( m_tSections.at( 0 ), m_t->height() / 2 );
 			QTest::mousePress( m_t.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p + m_delta,
+				m_t->mapToGlobal( p + m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_t.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_t.data(), Qt::LeftButton, {}, p + m_delta, 20 );
@@ -385,7 +409,9 @@ private slots:
 		{
 			QPoint p( m_tSections.at( 0 ), m_t->height() / 2 );
 			QTest::mousePress( m_t.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p + m_delta,
+				m_t->mapToGlobal( p + m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_t.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_t.data(), Qt::LeftButton, {}, p + m_delta, 20 );
@@ -475,7 +501,9 @@ private slots:
 		{
 			QPoint p( m_dtSections.at( 2 ), m_dt->height() / 2 );
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p + m_delta,
+				m_dt->mapToGlobal( p + m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );
@@ -488,7 +516,9 @@ private slots:
 		{
 			QPoint p( m_dtSections.at( 2 ), m_dt->height() / 2 );
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p - m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p - m_delta,
+				m_dt->mapToGlobal( p - m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p - m_delta, 20 );
@@ -501,7 +531,9 @@ private slots:
 		{
 			QPoint p( m_dtSections.at( 2 ), m_dt->height() / 2 );
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p - m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p - m_delta,
+				m_dt->mapToGlobal( p - m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p - m_delta, 20 );
@@ -514,7 +546,9 @@ private slots:
 		{
 			QPoint p( m_dtSections.at( 2 ), m_dt->height() / 2 );
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p - m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p - m_delta,
+				m_dt->mapToGlobal( p - m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p - m_delta, 20 );
@@ -538,7 +572,9 @@ private slots:
 		{
 			QPoint p( m_dtSections.at( 4 ), m_dt->height() / 2 );
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p + m_delta,
+				m_dt->mapToGlobal( p + m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );
@@ -561,7 +597,9 @@ private slots:
 		{
 			QPoint p( m_dtSections.at( 3 ), m_dt->height() / 2 );
 			QTest::mousePress( m_dt.data(), Qt::LeftButton, {}, p, 20 );
-			QMouseEvent me( QEvent::MouseMove, p + m_delta, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, p + m_delta,
+				m_dt->mapToGlobal( p + m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_dt.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_dt.data(), Qt::LeftButton, {}, p + m_delta, 20 );

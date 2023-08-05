@@ -88,6 +88,7 @@ private slots:
 		QTest::mousePress( m_switch.data(), Qt::LeftButton, {},
 			QPoint( w - m_delta.x(), m_delta.y() ), 20 );
 		QMouseEvent me1( QEvent::MouseMove, QPoint( m1, m_delta.y() ),
+			m_switch->mapToGlobal( QPoint( m1, m_delta.y() ) ),
 			Qt::LeftButton, Qt::LeftButton, {} );
 		QApplication::sendEvent( m_switch.data(), &me1 );
 		QTest::mouseRelease( m_switch.data(), Qt::LeftButton, {},
@@ -107,6 +108,7 @@ private slots:
 		QTest::mousePress( m_switch.data(), Qt::LeftButton, {},
 			QPoint( m_delta.x(), m_delta.y() ), 20 );
 		QMouseEvent me2( QEvent::MouseMove, QPoint( m2, m_delta.y() ),
+			m_switch->mapToGlobal( QPoint( m2, m_delta.y() ) ),
 			Qt::LeftButton, Qt::LeftButton, {} );
 		QApplication::sendEvent( m_switch.data(), &me2 );
 		QTest::mouseRelease( m_switch.data(), Qt::LeftButton, {},

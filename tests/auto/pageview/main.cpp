@@ -102,7 +102,8 @@ private slots:
 			QTest::mousePress( &p, Qt::LeftButton, {}, c, 20 );
 			const auto pos = c -
 				QPoint( p.rect().width() - p.rect().width() / 4, 0 );
-			QMouseEvent me( QEvent::MouseMove, pos, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, pos, p.mapToGlobal( pos ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( &p, &me );
 			QTest::mouseRelease( &p, Qt::LeftButton, {}, pos, 20 );
 		}
@@ -116,7 +117,8 @@ private slots:
 			QTest::mousePress( &p, Qt::LeftButton, {}, c, 20 );
 			const auto pos = c +
 				QPoint( p.rect().width() - p.rect().width() / 4, 0 );
-			QMouseEvent me( QEvent::MouseMove, pos, Qt::LeftButton, Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, pos, p.mapToGlobal( pos ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( &p, &me );
 			QTest::mouseRelease( &p, Qt::LeftButton, {}, pos, 20 );
 		}

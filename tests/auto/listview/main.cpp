@@ -211,8 +211,9 @@ private slots:
 		QVERIFY( spy.count() == 1 );
 
 		QTest::mousePress( m_w.data(), Qt::LeftButton, {}, r.center(), 20 );
-		QMouseEvent me( QEvent::MouseMove, r.center() + QPoint( 0, r.height() + s ), Qt::LeftButton,
-			Qt::LeftButton, {} );
+		QMouseEvent me( QEvent::MouseMove, r.center() + QPoint( 0, r.height() + s ),
+			m_w->mapToGlobal( r.center() + QPoint( 0, r.height() + s ) ),
+			Qt::LeftButton, Qt::LeftButton, {} );
 		QApplication::sendEvent( m_w.data(), &me );
 		QTest::qWait( 500 );
 		QTest::mouseRelease( m_w.data(), Qt::LeftButton, {}, r.center(), 20 );
@@ -249,13 +250,15 @@ private slots:
 
 		{
 			QTest::mousePress( m_w.data(), Qt::LeftButton, {}, r.center(), 20 );
-			QMouseEvent me1( QEvent::MouseMove, r.center() + QPoint( 0, r.height() ), Qt::LeftButton,
-				Qt::LeftButton, {} );
+			QMouseEvent me1( QEvent::MouseMove, r.center() + QPoint( 0, r.height() ),
+				m_w->mapToGlobal( r.center() + QPoint( 0, r.height() ) ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_w.data(), &me1 );
 			QTest::qWait( 500 );
 
-			QMouseEvent me2( QEvent::MouseMove, r.center() + QPoint( 0, r.height() * 2 ), Qt::LeftButton,
-				Qt::LeftButton, {} );
+			QMouseEvent me2( QEvent::MouseMove, r.center() + QPoint( 0, r.height() * 2 ),
+				m_w->mapToGlobal( r.center() + QPoint( 0, r.height() * 2 ) ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 
 			QTest::qWait( 100 );
 
@@ -271,13 +274,15 @@ private slots:
 
 		{
 			QTest::mousePress( m_w.data(), Qt::LeftButton, {}, r.center(), 20 );
-			QMouseEvent me1( QEvent::MouseMove, r.center() + QPoint( 25, 0 ), Qt::LeftButton,
-				Qt::LeftButton, {} );
+			QMouseEvent me1( QEvent::MouseMove, r.center() + QPoint( 25, 0 ),
+				m_w->mapToGlobal( r.center() + QPoint( 25, 0 ) ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_w.data(), &me1 );
 			QTest::qWait( 500 );
 
-			QMouseEvent me2( QEvent::MouseMove, r.center() + QPoint( 50, 0 ), Qt::LeftButton,
-				Qt::LeftButton, {} );
+			QMouseEvent me2( QEvent::MouseMove, r.center() + QPoint( 50, 0 ),
+				m_w->mapToGlobal( r.center() + QPoint( 50, 0 ) ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 
 			QTest::qWait( 100 );
 

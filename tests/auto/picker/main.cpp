@@ -116,8 +116,8 @@ private slots:
 		QPoint c( m_picker->width() / 2, m_picker->height() / 2 );
 
 		QTest::mousePress( m_picker.data(), Qt::LeftButton, {}, c );
-		QMouseEvent me( QEvent::MouseMove, c + m_delta, Qt::LeftButton,
-			Qt::LeftButton, {} );
+		QMouseEvent me( QEvent::MouseMove, c + m_delta, m_picker->mapToGlobal( c + m_delta ),
+			Qt::LeftButton, Qt::LeftButton, {} );
 		QApplication::sendEvent( m_picker.data(), &me );
 		QTest::qWait( 500 );
 		QTest::mouseRelease( m_picker.data(), Qt::LeftButton, {}, c + m_delta, 20 );
@@ -132,8 +132,8 @@ private slots:
 		for( int i = 0; i < 8; ++i )
 		{
 			QTest::mousePress( m_picker.data(), Qt::LeftButton, {}, c );
-			QMouseEvent me( QEvent::MouseMove, c + m_delta, Qt::LeftButton,
-				Qt::LeftButton, {} );
+			QMouseEvent me( QEvent::MouseMove, c + m_delta, m_picker->mapToGlobal( c + m_delta ),
+				Qt::LeftButton, Qt::LeftButton, {} );
 			QApplication::sendEvent( m_picker.data(), &me );
 			QTest::qWait( 500 );
 			QTest::mouseRelease( m_picker.data(), Qt::LeftButton, {}, c + m_delta, 20 );
@@ -220,8 +220,8 @@ private slots:
 			&QtMWidgets::Picker::currentIndexChanged ) );
 
 		QTest::mousePress( m_picker.data(), Qt::LeftButton, {}, c );
-		QMouseEvent me( QEvent::MouseMove, c + m_delta, Qt::LeftButton,
-			Qt::LeftButton, {} );
+		QMouseEvent me( QEvent::MouseMove, c + m_delta, m_picker->mapToGlobal( c + m_delta ),
+			Qt::LeftButton, Qt::LeftButton, {} );
 		QApplication::sendEvent( m_picker.data(), &me );
 		QTest::qWait( 500 );
 		QTest::mouseRelease( m_picker.data(), Qt::LeftButton, {}, c + m_delta, 20 );

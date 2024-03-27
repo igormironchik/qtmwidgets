@@ -8,9 +8,9 @@ Below you can see some widgets from this library. But I've decided to not
 provide more examples on this page. This library is in development. Use it
 and enjoy it.
 
-<table style="width: 100%">
+<table>
 <tr>
-<td style="vertical-align:top; width: 50%">
+<td style="vertical-align:top">
 
 ## Picker
 
@@ -48,7 +48,7 @@ picker->setFont( font );
 ```
 
 </td>
-<td style="vertical-align:top; width: 50%">
+<td style="vertical-align:top">
 
 ## DateTimePicker, DatePicker, TimePicker
 
@@ -96,7 +96,7 @@ picker->setFormat(
 </td>
 </tr>
 <tr>
-<td style="vertical-align:top; width: 50%">
+<td style="vertical-align:top">
 
 ## Switch
 
@@ -119,7 +119,7 @@ s->setOffText(
 ```
 
 </td>
-<td style="vertical-align:top; width: 50%">
+<td style="vertical-align:top">
 
 ## AbstractScrollArea, ScrollArea
 
@@ -145,7 +145,7 @@ scrollArea->setWidget( imageLabel );
 </td>
 </tr>
 <tr>
-<td style="vertical-align:top; width: 50%">
+<td style="vertical-align:top">
 
 ## TableView
 
@@ -157,7 +157,7 @@ for settings of the application.
 ![TableView]( doc/img/tableview-v3.png )
 
 </td>
-<td style="vertical-align:top; width: 50%">
+<td style="vertical-align:top">
 
 ## Slider
 

@@ -23,26 +23,21 @@ QComboBox.
 
 ![Picker]( doc/img/picker_v2.png )
 
+<details>
+<summary>Code example</summary>
+
 ```cpp
 QtMWidgets::Picker * picker =
     new QtMWidgets::Picker( this );
 
-picker->addItem(
-  QLatin1String( "English" ) );
-picker->addItem(
-  QLatin1String( "Russian" ) );
-picker->addItem(
-  QLatin1String( "German" ) );
-picker->addItem(
-  QLatin1String( "Spanish" ) );
-picker->addItem(
-  QLatin1String( "Portuguese" ) );
-picker->addItem(
-  QLatin1String( "Belorussian" ) );
-picker->addItem(
-  QLatin1String( "Polish" ) );
-picker->addItem(
-  QLatin1String( "Ukrainian" ) );
+picker->addItem( QLatin1String( "English" ) );
+picker->addItem( QLatin1String( "Russian" ) );
+picker->addItem( QLatin1String( "German" ) );
+picker->addItem( QLatin1String( "Spanish" ) );
+picker->addItem( QLatin1String( "Portuguese" ) );
+picker->addItem( QLatin1String( "Belorussian" ) );
+picker->addItem( QLatin1String( "Polish" ) );
+picker->addItem( QLatin1String( "Ukrainian" ) );
 
 QFont font = picker->font();
 font.setBold( true );
@@ -51,12 +46,17 @@ font.setPointSize( 15 );
 picker->setFont( font );
 ```
 
+</details>
+
 ## DateTimePicker, DatePicker, TimePicker
 
 DateTimePicker, DatePicker and TimePicker are widgets for selecting date &amp; time, date, time. They
 are look similar as correspondence widgets from iOS but have interface as QDateTimeEdit.
 
 ![DateTimePicker]( doc/img/datetimepicker_v2.png )
+
+<details>
+<summary>Code example</summary>
 
 ```cpp
 QtMWidgets::DateTimePicker * picker =
@@ -67,7 +67,12 @@ font.setPointSize( 13 );
 
 picker->setFont( font );
 ```
+</details>
+
 ![DatePicker]( doc/img/datepicker_v2.png )
+
+<details>
+<summary>Code example</summary>
 
 ```cpp
 QtMWidgets::DatePicker * picker =
@@ -79,7 +84,12 @@ font.setPointSize( 13 );
 picker->setFont( font );
 ```
 
+</details>
+
 ![TimePicker]( doc/img/timepicker_v2.png )
+
+<details>
+<summary>Code example</summary>
 
 ```cpp
 QtMWidgets::TimePicker * picker =
@@ -90,15 +100,19 @@ font.setPointSize( 13 );
 
 picker->setFont( font );
 
-picker->setFormat(
-  QLatin1String( "hh mm a" ) );
+picker->setFormat( QLatin1String( "hh mm a" ) );
 ```
+
+</details>
 
 ## Switch
 
 Switch is On/Off button used, for example, in Setting app for options that can be switched.
 
 ![Switch]( doc/img/switch_v2.png )
+
+<details>
+<summary>Code example</summary>
 
 ```cpp
 QtMWidgets::Switch * s =
@@ -108,11 +122,11 @@ QFont f = s->font();
 f.setBold( true );
 s->setFont( f );
 
-s->setOnText(
-  QLatin1String( "ON" ) );
-s->setOffText(
-  QLatin1String( "OFF" ) );
+s->setOnText( QLatin1String( "ON" ) );
+s->setOffText( QLatin1String( "OFF" ) );
 ```
+
+</details>
 
 ## AbstractScrollArea, ScrollArea
 
@@ -121,19 +135,22 @@ doesn't fit the screen area.
 
 ![ScrollArea]( doc/img/scrollarea.png )
 
+<details>
+<summary>Code example</summary>
+
 ```cpp
 QtMWidgets::ScrollArea * scrollArea =
     new QtMWidgets::ScrollArea( this );
 
 QLabel * imageLabel = new QLabel;
 QImage image( ":/flower.jpg" );
-imageLabel->setPixmap(
-  QPixmap::fromImage( image ) );
+imageLabel->setPixmap( QPixmap::fromImage( image ) );
 
-scrollArea->setBackgroundRole(
-  QPalette::Dark );
+scrollArea->setBackgroundRole( QPalette::Dark );
 scrollArea->setWidget( imageLabel );
 ```
+
+</details>
 
 ## TableView
 
@@ -153,8 +170,12 @@ position of the handle in the groove.
 
 ![Slider]( doc/img/slider_v2.png )
 
+<details>
+<summary>Code example</summary>
+
 ```cpp
 QtMWidgets::Slider * volumeSlider =
     new QtMWidgets::Slider(
         Qt::Horizontal, this );
 ```
+</details>

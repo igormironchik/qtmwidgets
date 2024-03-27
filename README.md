@@ -8,9 +8,9 @@ Below you can see some widgets from this library. But I've decided to not
 provide more examples on this page. This library is in development. Use it
 and enjoy it.
 
-<table>
+<table style="width: 100%">
 <tr>
-<td style="vertical-align:top">
+<td style="vertical-align:top; width: 50%">
 
 ## Picker
 
@@ -23,14 +23,22 @@ QComboBox.
 QtMWidgets::Picker * picker =
     new QtMWidgets::Picker( this );
 
-picker->addItem( QLatin1String( "English" ) );
-picker->addItem( QLatin1String( "Russian" ) );
-picker->addItem( QLatin1String( "German" ) );
-picker->addItem( QLatin1String( "Spanish" ) );
-picker->addItem( QLatin1String( "Portuguese" ) );
-picker->addItem( QLatin1String( "Belorussian" ) );
-picker->addItem( QLatin1String( "Polish" ) );
-picker->addItem( QLatin1String( "Ukrainian" ) );
+picker->addItem(
+  QLatin1String( "English" ) );
+picker->addItem(
+  QLatin1String( "Russian" ) );
+picker->addItem(
+  QLatin1String( "German" ) );
+picker->addItem(
+  QLatin1String( "Spanish" ) );
+picker->addItem(
+  QLatin1String( "Portuguese" ) );
+picker->addItem(
+  QLatin1String( "Belorussian" ) );
+picker->addItem(
+  QLatin1String( "Polish" ) );
+picker->addItem(
+  QLatin1String( "Ukrainian" ) );
 
 QFont font = picker->font();
 font.setBold( true );
@@ -40,7 +48,7 @@ picker->setFont( font );
 ```
 
 </td>
-<td style="vertical-align:top">
+<td style="vertical-align:top; width: 50%">
 
 ## DateTimePicker, DatePicker, TimePicker
 
@@ -81,13 +89,14 @@ font.setPointSize( 13 );
 
 picker->setFont( font );
 
-picker->setFormat( QLatin1String( "hh mm a" ) );
+picker->setFormat(
+  QLatin1String( "hh mm a" ) );
 ```
 
 </td>
 </tr>
 <tr>
-<td style="vertical-align:top">
+<td style="vertical-align:top; width: 50%">
 
 ## Switch
 
@@ -103,12 +112,14 @@ QFont f = s->font();
 f.setBold( true );
 s->setFont( f );
 
-s->setOnText( QLatin1String( "ON" ) );
-s->setOffText( QLatin1String( "OFF" ) );
+s->setOnText(
+  QLatin1String( "ON" ) );
+s->setOffText(
+  QLatin1String( "OFF" ) );
 ```
 
 </td>
-<td style="vertical-align:top">
+<td style="vertical-align:top; width: 50%">
 
 ## AbstractScrollArea, ScrollArea
 
@@ -123,16 +134,18 @@ QtMWidgets::ScrollArea * scrollArea =
 
 QLabel * imageLabel = new QLabel;
 QImage image( ":/flower.jpg" );
-imageLabel->setPixmap( QPixmap::fromImage( image ) );
+imageLabel->setPixmap(
+  QPixmap::fromImage( image ) );
 
-scrollArea->setBackgroundRole( QPalette::Dark );
+scrollArea->setBackgroundRole(
+  QPalette::Dark );
 scrollArea->setWidget( imageLabel );
 ```
 
 </td>
 </tr>
 <tr>
-<td style="vertical-align:top">
+<td style="vertical-align:top; width: 50%">
 
 ## TableView
 
@@ -144,7 +157,7 @@ for settings of the application.
 ![TableView]( doc/img/tableview-v3.png )
 
 </td>
-<td style="vertical-align:top">
+<td style="vertical-align:top; width: 50%">
 
 ## Slider
 

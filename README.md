@@ -8,10 +8,6 @@ Below you can see some widgets from this library. But I've decided to not
 provide more examples on this page. This library is in development. Use it
 and enjoy it.
 
-<table>
-<tr>
-<td style="vertical-align:top">
-
 ## Picker
 
 Picker is the list of selectable strings on the cylinder. It looks like iOS Picker but with API like
@@ -46,9 +42,6 @@ font.setPointSize( 15 );
 
 picker->setFont( font );
 ```
-
-</td>
-<td style="vertical-align:top">
 
 ## DateTimePicker, DatePicker, TimePicker
 
@@ -93,11 +86,6 @@ picker->setFormat(
   QLatin1String( "hh mm a" ) );
 ```
 
-</td>
-</tr>
-<tr>
-<td style="vertical-align:top">
-
 ## Switch
 
 Switch is On/Off button used, for example, in Setting app for options that can be switched.
@@ -117,9 +105,6 @@ s->setOnText(
 s->setOffText(
   QLatin1String( "OFF" ) );
 ```
-
-</td>
-<td style="vertical-align:top">
 
 ## AbstractScrollArea, ScrollArea
 
@@ -142,11 +127,6 @@ scrollArea->setBackgroundRole(
 scrollArea->setWidget( imageLabel );
 ```
 
-</td>
-</tr>
-<tr>
-<td style="vertical-align:top">
-
 ## TableView
 
 TableView is a view with sections with rows (cells). It's very similar to UITableView
@@ -155,9 +135,6 @@ from iOS. TableView is widget based view that allows to display sections with ro
 for settings of the application.
 
 ![TableView]( doc/img/tableview-v3.png )
-
-</td>
-<td style="vertical-align:top">
 
 ## Slider
 
@@ -173,6 +150,3 @@ QtMWidgets::Slider * volumeSlider =
     new QtMWidgets::Slider(
         Qt::Horizontal, this );
 ```
-</td>
-</tr>
-</table>

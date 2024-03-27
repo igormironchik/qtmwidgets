@@ -2,6 +2,14 @@
 
 Library with a set of widgets for mobile development.
 
+* [Examples](#examples)
+  * [Picker](#picker)
+  * [DateTimePicker, DatePicker, TimePicker](#datetimepicker-datepicker-timepicker)
+  * [Switch](#switch)
+  * [AbstractScrollArea, ScrollArea](#abstractscrollarea-scrollarea)
+  * [TableView](#tableview)
+  * [Slider](#slider)
+
 # Examples
 
 Below you can see some widgets from this library. But I've decided to not

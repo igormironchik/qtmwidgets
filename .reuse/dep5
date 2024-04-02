@@ -6,3 +6,11 @@ Source: https://github.com/igormironchik/qtmwidgets
 Files: .github/* .gitignore codecov.yml doc/* include/* README.md */*.txt CMakeLists.txt */*.qrc */*.xml */*.pro
 Copyright: 2014-2024 Igor Mironchik <igor.mironchik@gmail.com>
 License: MIT
+
+Files: examples/desktop/toolbar/img/* tests/auto/toolbar/configure.png
+Copyright: 2007 Nuno Pinheiro <nuno@oxygen-icons.org>, 2007 David Vignoni <david@icon-king.com>, 2007 David Miller <miller@oxygen-icons.org>, Johann Ollivier Lapeyre <johann@oxygen-icons.org>, Kenneth Wimer <kwwii@bootsplash.org>, 2007 Riccardo Iaconelli <riccardo@oxygen-icons.org>
+License: LGPL-3.0-or-later
+
+Files: examples/mobile/scrollarea/flower.jpg examples/desktop/scrollarea/flower.jpg
+Copyright: none
+License: CC0-1.0

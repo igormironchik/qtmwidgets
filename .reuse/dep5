@@ -1,0 +1,8 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: qtmwidgets
+Upstream-Contact: Igor Mironchik <igor.mironchik@gmail.com>
+Source: https://github.com/igormironchik/qtmwidgets
+
+Files: .github/* .gitignore codecov.yml doc/* include/* README.md */*.txt CMakeLists.txt */*.qrc */*.xml */*.pro
+Copyright: 2014-2024 Igor Mironchik <igor.mironchik@gmail.com>
+License: MIT

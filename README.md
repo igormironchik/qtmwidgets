@@ -1,4 +1,4 @@
-![build](https://github.com/igormironchik/qtmwidgets/workflows/build/badge.svg)[![codecov](https://codecov.io/gh/igormironchik/qtmwidgets/branch/master/graph/badge.svg?token=X8R9B3WEIY)](https://codecov.io/gh/igormironchik/qtmwidgets)[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 Library with a set of widgets for mobile development.
 
